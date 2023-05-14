@@ -1,11 +1,12 @@
 type SmartVault @entity {
     id: ID!
     name: String!
-    riskTolerance: Int!
+    riskTolerance: Int
     assetGroup: AssetGroup!
     smartVaultCreator: String!
     smartVaultOwner: String!
-    riskProvider: RiskProvider!
+    allocationProvider: String
+    riskProvider: RiskProvider
     createdOn: BigInt!
     smartVaultFees: SmartVaultFees!
     smartVaultStrategies: [SmartVaultStrategy!]!

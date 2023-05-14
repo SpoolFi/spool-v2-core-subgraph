@@ -1,7 +1,8 @@
 import {BigDecimal, Address, BigInt, ethereum, log} from "@graphprotocol/graph-ts";
-import {Token, User} from "../../generated/schema";
+import {SmartVault, SmartVaultFees, Token, User} from "../../generated/schema";
 import {BTokenContract} from "../../generated/AssetGroupRegistry/BTokenContract";
 import {BTokenBytesContract} from "../../generated/AssetGroupRegistry/BTokenBytesContract";
+import {SmartVaultContract} from "../../generated/SmartVaultManager/SmartVaultContract";
 
 export const ZERO_BD = BigDecimal.fromString("0");
 export const ZERO_BI = BigInt.fromI32(0);
@@ -66,6 +67,40 @@ export function createTokenEntity(address: string): Token {
         token.save();
     }
     return token;
+}
+
+export function getSmartVault(smartVaultAddress: string): SmartVault {
+    let smartVault = SmartVault.load(smartVaultAddress);
+
+    if (smartVault == null) {
+        let smartVaultFees = getSmartVaultFees(smartVaultAddress);
+
+        smartVault = new SmartVault(smartVaultAddress);
+        smartVault.name = "";
+        smartVault.assetGroup = "0";
+        smartVault.smartVaultCreator = ZERO_ADDRESS.toHexString();
+        smartVault.smartVaultOwner = ZERO_ADDRESS.toHexString();
+        smartVault.createdOn = ZERO_BI;
+        smartVault.smartVaultFees = smartVaultFees.id;
+        smartVault.smartVaultStrategies = [];
+        smartVault.save();
+    }
+
+    return smartVault;
+}
+
+export function getSmartVaultFees(smartVaultAddress: string): SmartVaultFees {
+    let smartVaultFees = SmartVaultFees.load(smartVaultAddress);
+
+    if (smartVaultFees == null) {
+        smartVaultFees = new SmartVaultFees(smartVaultAddress);
+        smartVaultFees.peformanceFeePercentage = ZERO_BD;
+        smartVaultFees.depositFeePercentage = ZERO_BD;
+        smartVaultFees.managementFeePercentage = ZERO_BD;
+        smartVaultFees.save();
+    }
+
+    return smartVaultFees;
 }
 
 export function getComposedId(

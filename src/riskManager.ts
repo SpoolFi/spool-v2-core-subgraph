@@ -1,7 +1,19 @@
-import { BigInt } from "@graphprotocol/graph-ts";
-import {RiskScoresUpdated} from "../generated/RiskManager/RiskManagerContract";
+import {BigInt} from "@graphprotocol/graph-ts";
+import {
+    RiskScoresUpdated,
+    AllocationProviderSet,
+    RiskProviderSet,
+    RiskToleranceSet,
+} from "../generated/RiskManager/RiskManagerContract";
 import {StrategyRiskScore} from "../generated/schema";
-import {ZERO_BD, ZERO_BI, getComposedId, logEventName, strategyRiskScoreToDecimal} from "./utils/helpers";
+import {
+    ZERO_BD,
+    ZERO_BI,
+    getComposedId,
+    getSmartVault,
+    logEventName,
+    strategyRiskScoreToDecimal,
+} from "./utils/helpers";
 
 export function handleRiskScoresUpdated(event: RiskScoresUpdated): void {
     logEventName("handleRiskScoresUpdated", event);
@@ -18,6 +30,24 @@ export function handleRiskScoresUpdated(event: RiskScoresUpdated): void {
         strategyRiskScore.updatedOn = event.block.timestamp;
         strategyRiskScore.save();
     }
+}
+
+export function handleAllocationProviderSet(event: AllocationProviderSet): void {
+    let smartVault = getSmartVault(event.params.smartVault.toHexString());
+    smartVault.allocationProvider = event.params.allocationProvider.toHexString();
+    smartVault.save();
+}
+
+export function handleRiskProviderSet(event: RiskProviderSet): void {
+    let smartVault = getSmartVault(event.params.smartVault.toHexString());
+    smartVault.riskProvider = event.params.riskProvider.toHexString();
+    smartVault.save();
+}
+
+export function handleRiskToleranceSet(event: RiskToleranceSet): void {
+    let smartVault = getSmartVault(event.params.smartVault.toHexString());
+    smartVault.riskTolerance = event.params.riskTolerance;
+    smartVault.save();
 }
 
 function getStrategyRiskScore(

@@ -46,12 +46,19 @@ dataSources:
         - Token
         - AssetGroup
         - Strategy
+        - SmartVault
       abis:
         - name: RiskManagerContract
           file: ./abis/RiskManager.json
       eventHandlers:
         - event: RiskScoresUpdated(indexed address,address[],uint8[])
           handler: handleRiskScoresUpdated
+        - event: AllocationProviderSet(indexed address,indexed address)
+          handler: handleAllocationProviderSet
+        - event: RiskProviderSet(indexed address,indexed address)
+          handler: handleRiskProviderSet
+        - event: RiskToleranceSet(indexed address,int8)
+          handler: handleRiskToleranceSet
   - kind: ethereum/contract
     name: AssetGroupRegistry
     network: {{ network }}
