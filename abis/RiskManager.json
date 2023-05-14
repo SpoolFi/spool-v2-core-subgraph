@@ -1,0 +1,368 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract ISpoolAccessControl",
+        "name": "accessControl",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IStrategyRegistry",
+        "name": "strategyRegistry_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "ghostStrategy",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "riskScore",
+        "type": "uint8"
+      }
+    ],
+    "name": "CannotSetRiskScoreForGhostStrategy",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ConfigurationAddressZero",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "allocationsSum",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidAllocationSum",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidRiskInputLength",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "riskProvider",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "strategy",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidRiskScores",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "MissingRole",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "value",
+        "type": "uint8"
+      }
+    ],
+    "name": "RiskScoreValueOutOfBounds",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "int8",
+        "name": "value",
+        "type": "int8"
+      }
+    ],
+    "name": "RiskToleranceValueOutOfBounds",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "allocationProvider",
+        "type": "address"
+      }
+    ],
+    "name": "AllocationProviderSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "riskProvider",
+        "type": "address"
+      }
+    ],
+    "name": "RiskProviderSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "riskProvider",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8[]",
+        "name": "riskScores",
+        "type": "uint8[]"
+      }
+    ],
+    "name": "RiskScoresUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "int8",
+        "name": "riskTolerance",
+        "type": "int8"
+      }
+    ],
+    "name": "RiskToleranceSet",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      }
+    ],
+    "name": "calculateAllocation",
+    "outputs": [
+      {
+        "internalType": "uint16a16",
+        "name": "allocations",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      }
+    ],
+    "name": "getAllocationProvider",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      }
+    ],
+    "name": "getRiskProvider",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "riskProvider",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      }
+    ],
+    "name": "getRiskScores",
+    "outputs": [
+      {
+        "internalType": "uint8[]",
+        "name": "",
+        "type": "uint8[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      }
+    ],
+    "name": "getRiskTolerance",
+    "outputs": [
+      {
+        "internalType": "int8",
+        "name": "",
+        "type": "int8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "allocationProvider",
+        "type": "address"
+      }
+    ],
+    "name": "setAllocationProvider",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "riskProvider",
+        "type": "address"
+      }
+    ],
+    "name": "setRiskProvider",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8[]",
+        "name": "riskScores",
+        "type": "uint8[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      }
+    ],
+    "name": "setRiskScores",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "int8",
+        "name": "riskTolerance",
+        "type": "int8"
+      }
+    ],
+    "name": "setRiskTolerance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

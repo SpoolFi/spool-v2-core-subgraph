@@ -1,0 +1,27 @@
+{
+    "name": "spool-v2-subgraph",
+    "version": "1.0.0",
+    "description": "Spool V2 Subgraph",
+    "scripts": {
+        "local:mustache": "mustache src/config/contracts.local.json subgraph.template.yaml > subgraph.yaml",
+        "local:codegen": "npm run local:mustache && graph codegen",
+        "local:build": "npm run local:codegen && graph build",
+        "local:create": "graph create spool/core-v2 --node http://127.0.0.1:8020",
+        "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
+        "staging:mustache": "mustache src/config/contracts.staging.json subgraph.template.yaml > subgraph.yaml",
+        "staging:codegen": "npm run staging:mustache && graph codegen",
+        "staging:build": "npm run staging:codegen && graph build",
+        "staging:create": "graph create spool/core-v2 --node http://18.197.133.88:8020",
+        "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://18.197.133.88:5001 --node http://18.197.133.88:8020 -l 1.0"
+    },
+    "author": "Spool DAO",
+    "license": "MIT",
+    "dependencies": {
+        "@graphprotocol/graph-cli": "^0.48.0",
+        "@graphprotocol/graph-ts": "^0.29.3"
+    },
+    "devDependencies": {
+        "mustache": "^4.2.0",
+        "prettier": "^2.8.8"
+    }
+}

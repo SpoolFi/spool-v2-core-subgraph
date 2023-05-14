@@ -1,0 +1,131 @@
+specVersion: 0.0.4
+description: Spool V2 Core Subgraph
+repository: 
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: StrategyRegistry
+    network: {{ network }}
+    source:
+      address: '{{ strategyRegistry }}'
+      abi: StrategyRegistryContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/strategyRegistry.ts
+      entities:
+        - Token
+        - AssetGroup
+        - Strategy
+      abis:
+        - name: StrategyRegistryContract
+          file: ./abis/StrategyRegistry.json
+        - name: StrategyContract
+          file: ./abis/IStrategy.json
+      eventHandlers:
+        - event: StrategyRegistered(indexed address)
+          handler: handleStrategyRegistered
+        - event: StrategyApyUpdated(indexed address,int256)
+          handler: handleStrategyApyUpdated
+  - kind: ethereum/contract
+    name: RiskManager
+    network: {{ network }}
+    source:
+      address: '{{ riskManager }}'
+      abi: RiskManagerContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/riskManager.ts
+      entities:
+        - Token
+        - AssetGroup
+        - Strategy
+      abis:
+        - name: RiskManagerContract
+          file: ./abis/RiskManager.json
+      eventHandlers:
+        - event: RiskScoresUpdated(indexed address,address[],uint8[])
+          handler: handleRiskScoresUpdated
+  - kind: ethereum/contract
+    name: AssetGroupRegistry
+    network: {{ network }}
+    source:
+      address: '{{ assetGroupRegistry }}'
+      abi: AssetGroupRegistryContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/assetGroupRegistry.ts
+      entities:
+        - AssetGroup
+        - AssetGroupToken
+        - Token
+      abis:
+        - name: AssetGroupRegistryContract
+          file: ./abis/AssetGroupRegistry.json
+        - name: BTokenContract
+          file: ./abis/BToken.json
+        - name: BTokenBytesContract
+          file: ./abis/BTokenBytes32.json
+      eventHandlers:
+        - event: AssetGroupRegistered(indexed uint256)
+          handler: handleAssetGroupRegistered
+  - kind: ethereum/contract
+    name: SpoolAccessControl
+    network: {{ network }}
+    source:
+      address: '{{ spoolAccessControl }}'
+      abi: SpoolAccessControlContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/spoolAccessControl.ts
+      entities:
+        - RiskProvider
+        - Strategy
+        - StrategyRiskScore
+      abis:
+        - name: SpoolAccessControlContract
+          file: ./abis/SpoolAccessControl.json
+      eventHandlers:
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+  - kind: ethereum/contract
+    name: SmartVaultManager
+    network: {{ network }}
+    source:
+      address: '{{ smartVaultManager }}'
+      abi: SmartVaultManagerContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/smartVaultManager.ts
+      entities:
+        - SmartVault
+        - AssetGroup
+        - Strategy
+        - RiskProvider
+        - SmartVaultFees
+        - SmartVaultStrategy
+      abis:
+        - name: SmartVaultManagerContract
+          file: ./abis/SmartVaultManager.json
+        - name: SmartVaultContract
+          file: ./abis/SmartVault.json
+      eventHandlers:
+        - event: SmartVaultRegistered(indexed address,(uint256,address[],uint256,uint16,uint16,uint16))
+          handler: handleSmartVaultRegistered

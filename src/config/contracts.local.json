@@ -1,0 +1,9 @@
+{
+    "network": "mainnet",
+    "startBlock": "17230648",
+    "strategyRegistry": "0xc1EeD9232A0A44c2463ACB83698c162966FBc78d",
+    "spoolAccessControl": "0xC0BF43A4Ca27e0976195E6661b099742f10507e5",
+    "assetGroupRegistry": "0x245e77E56b1514D77910c9303e4b44dDb44B788c",
+    "riskManager": "0x38628490c3043E5D0bbB26d5a0a62fC77342e9d5",
+    "smartVaultManager": "0xde79380FBd39e08150adAA5C6c9dE3146f53029e"
+}

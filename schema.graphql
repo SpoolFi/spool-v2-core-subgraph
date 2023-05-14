@@ -1,0 +1,158 @@
+type SmartVault @entity {
+    id: ID!
+    name: String!
+    riskTolerance: Int!
+    assetGroup: AssetGroup!
+    smartVaultCreator: String!
+    smartVaultOwner: String!
+    riskProvider: RiskProvider!
+    createdOn: BigInt!
+    smartVaultFees: SmartVaultFees!
+    smartVaultStrategies: [SmartVaultStrategy!]!
+    actions: [UserSmartVaultAction!]! @derivedFrom(field: "smartVault")
+    users: [UserSmartVault!]! @derivedFrom(field: "smartVault")
+}
+
+type AssetGroup @entity {
+    id: ID!
+    assetGroupTokens: [AssetGroupToken!] @derivedFrom(field: "assetGroup")
+}
+
+type AssetGroupToken @entity {
+    id: ID! # Set to `${assetGroup.id}-${token.id}`
+    assetGroup: AssetGroup!
+    token: Token!
+}
+
+type SmartVaultStrategy @entity {
+    id: ID! # Set to `${smartVault.id}-${strategy.id}`
+    smartVault: SmartVault!
+    strategy: Strategy!
+    allocation: BigInt!
+}
+
+type SmartVaultFees @entity {
+    id: ID! # Set to smartVault address
+    peformanceFeePercentage: BigDecimal!
+    depositFeePercentage: BigDecimal!
+    managementFeePercentage: BigDecimal!
+}
+
+type User @entity { 
+    id: ID!
+    smartVaults: [UserSmartVault!]! @derivedFrom(field: "user")
+    actions: [UserSmartVaultAction!]! @derivedFrom(field: "user")
+}
+
+type UserSmartVault @entity {
+    id: ID! # Set to `${user.id}-${smartVault.id}`
+    user: User!
+    smartVault: SmartVault!
+    totalDeposit: BigDecimal! # updates right away on the deposit
+    totalWithdraw: BigDecimal! # updates after claim
+    lastGlobalIndexInteracted: Int! # 10
+    lastRedeemGlobalIndex: Int!
+    actions: [UserSmartVaultAction!]! @derivedFrom(field: "userSmartVault")
+}
+
+# DEPOSIT, WITHDAW (maybe withdraw lazy, withdraw fast), CLAIM
+
+type UserSmartVaultAction @entity {
+    id: ID! # Set to `${user.id}-${smartVault.id}-${smartVaultActionId}`
+    userSmartVault: UserSmartVault!
+    user: User!
+    smartVault: SmartVault! # so we can reverse lookup
+    smartVaultActionId: Int!
+    createdOn: BigInt!
+    amount: BigDecimal!
+    globalIndex: Int!
+    actionType: UserSmartVaultActionType!
+}
+
+enum UserSmartVaultActionType {
+    DEPOSIT
+    WITHDRAW
+    WITHDRAW_FAST
+    CLAIM
+}
+
+type Token @entity {
+    id: ID!
+    symbol: String
+    name: String
+    decimals: Int!
+}
+
+type RiskProvider @entity {
+    id: ID!
+    isRemoved: Boolean!
+    addedOn: BigInt!
+    strategyRiskScores: [StrategyRiskScore!]! @derivedFrom(field: "riskProvider")
+}
+
+type StrategyRiskScore @entity { # not available utill risk provider providers a score
+    id: ID! # Set to `${strategy.id}-${riskProvider.id}`
+    strategy: Strategy!
+    riskProvider: RiskProvider!
+    riskScore: BigDecimal!
+    updatedOn: BigInt!
+}
+
+type Strategy @entity {
+    id: ID!
+    name: String!
+    assetGroup: AssetGroup!
+    apy: BigDecimal!
+    index: Int!
+    lastDoHardWorkTime: BigInt!
+    isRemoved: Boolean!
+    addedOn: BigInt!
+    riskScores: [StrategyRiskScore!]! @derivedFrom(field: "strategy")
+    strategyDhws: [StrategyDhw!]! @derivedFrom(field: "strategy")
+}
+
+type StrategyDhw @entity {
+    id: ID! # Set to `${strategy.id}-${strategy.index}`
+    strategy: Strategy!
+    timestamp: BigInt!
+    ssts: BigInt!
+    apy: BigDecimal!
+}
+
+
+#################
+
+
+type SmartVaultRewardToken @entity { # added when smartVault owner or smartVault DAO adds extra incentive
+    id: ID! # Set to `${smartVault.id}-${token.id}`
+    smartVault: SmartVault!
+    token: Token!
+    updatedOn: BigInt!
+    startTime: BigInt!
+    endTime: BigInt!
+    totalAmount: BigDecimal!
+    rewardRate: BigInt!  # rate of reward tokens (including decimals) per second multiplied by accuracy (10**18) multiplier. To get token amount per second divide by (10**18)
+    isRemoved: Boolean!
+    updatesCount: Int!
+    updates: [SmartVaultRewardTokenUpdate!]! @derivedFrom(field: "smartVaultRewardToken")
+}
+
+# ADD, EXTEND REWARD, REMOVE TOKEN
+
+type SmartVaultRewardTokenUpdate @entity {
+    id: ID! # Set to `${SmartVaultRewardToken.id}-${updateId}`
+    smartVaultRewardToken: SmartVaultRewardToken!
+    updateId: Int!
+    createdOn: BigInt!
+    amount: BigDecimal
+    leftoverAmount: BigDecimal
+    endTime: BigInt!
+    updateType: RewardTokenUpdateType!
+}
+
+enum RewardTokenUpdateType {
+    ADD_REWARD
+    EXTEND_REWARD
+    REMOVE_TOKEN
+    END_REWARD
+}
