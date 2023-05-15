@@ -130,3 +130,14 @@ export function percentToDecimal(percent: BigInt): BigDecimal {
 export function percenti32ToDecimal(percent: i32): BigDecimal {
     return percentToDecimal(BigInt.fromI32(percent));
 }
+
+export function getTokenDecimalAmountFromAddress(amount: BigInt, token: string): BigDecimal {
+    return getTokenDecimalAmount(amount, createTokenEntity(token));
+}
+
+export function getTokenDecimalAmount(amount: BigInt, token: Token): BigDecimal {
+    return integerToDecimal(
+        amount,
+        token.decimals
+    );
+}

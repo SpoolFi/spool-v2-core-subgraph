@@ -5,5 +5,6 @@
     "spoolAccessControl": "0xC0BF43A4Ca27e0976195E6661b099742f10507e5",
     "assetGroupRegistry": "0x245e77E56b1514D77910c9303e4b44dDb44B788c",
     "riskManager": "0x38628490c3043E5D0bbB26d5a0a62fC77342e9d5",
-    "smartVaultManager": "0xde79380FBd39e08150adAA5C6c9dE3146f53029e"
+    "smartVaultManager": "0xde79380FBd39e08150adAA5C6c9dE3146f53029e",
+    "rewardManager": "0x04d7478fDF318C3C22cECE62Da9D78ff94807D77"
 }

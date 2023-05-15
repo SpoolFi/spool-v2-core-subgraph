@@ -136,3 +136,30 @@ dataSources:
       eventHandlers:
         - event: SmartVaultRegistered(indexed address,(uint256,address[],uint256,uint16,uint16,uint16))
           handler: handleSmartVaultRegistered
+  - kind: ethereum/contract
+    name: RewardManager
+    network: mainnet
+    source:
+      address: '0x04d7478fDF318C3C22cECE62Da9D78ff94807D77'
+      abi: RewardManagerContract
+      startBlock: 17236369
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/rewardManager.ts
+      entities:
+        - SmartVaultRewardToken
+        - SmartVaultRewardTokenUpdate
+        - SmartVault
+        - Token
+      abis:
+        - name: RewardManagerContract
+          file: ./abis/RewardManager.json
+      eventHandlers:
+        - event: RewardAdded(address,indexed address,uint256,uint256)
+          handler: handleRewardAdded
+        - event: RewardExtended(address,indexed address,uint256,uint256,uint256,uint32)
+          handler: handleRewardExtended
+        - event: RewardRemoved(address,indexed address)
+          handler: handleRewardRemoved
