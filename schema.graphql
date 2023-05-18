@@ -116,6 +116,7 @@ type StrategyDhw @entity {
     id: ID! # Set to `${strategy.id}-${strategy.index}`
     strategy: Strategy!
     timestamp: BigInt!
+    blockNumber: BigInt!
     ssts: BigInt!
     apy: BigDecimal!
 }
