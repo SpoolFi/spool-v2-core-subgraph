@@ -30,6 +30,8 @@ dataSources:
           handler: handleStrategyRegistered
         - event: StrategyApyUpdated(indexed address,int256)
           handler: handleStrategyApyUpdated
+        - event: StrategyDhw(indexed address,uint256,(uint256,uint256[],int256,uint256,uint256))
+          handler: handleStrategyDhw
   - kind: ethereum/contract
     name: RiskManager
     network: {{ network }}
@@ -137,6 +139,27 @@ dataSources:
         - event: SmartVaultRegistered(indexed address,(uint256,address[],uint256,uint16,uint16,uint16))
           handler: handleSmartVaultRegistered
   - kind: ethereum/contract
+    name: DepositManager
+    network: {{ network }}
+    source:
+      address: '{{ depositManager }}'
+      abi: DepositManagerContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/depositManager.ts
+      entities:
+        - User
+        - SmartVaultDepositNFT
+      abis:
+        - name: DepositManagerContract
+          file: ./abis/DepositManager.json
+      eventHandlers:
+        - event: DepositInitiated(indexed address,indexed address,indexed uint256,uint256,uint256[],address,address)
+          handler: handleDepositInitiated
+  - kind: ethereum/contract
     name: RewardManager
     network: {{ network }}
     source:
@@ -156,10 +179,14 @@ dataSources:
       abis:
         - name: RewardManagerContract
           file: ./abis/RewardManager.json
+        - name: BTokenContract
+          file: ./abis/BToken.json
+        - name: BTokenBytesContract
+          file: ./abis/BTokenBytes32.json
       eventHandlers:
-        - event: RewardAdded(address,indexed address,uint256,uint256)
+        - event: RewardAdded(indexed address,indexed address,uint256,uint256,uint256,uint256)
           handler: handleRewardAdded
-        - event: RewardExtended(address,indexed address,uint256,uint256,uint256,uint32)
+        - event: RewardExtended(indexed address,indexed address,uint256,uint256,uint256,uint256,uint256)
           handler: handleRewardExtended
-        - event: RewardRemoved(address,indexed address)
+        - event: RewardRemoved(indexed address,indexed address)
           handler: handleRewardRemoved

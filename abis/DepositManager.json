@@ -1,0 +1,757 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract IStrategyRegistry",
+        "name": "strategyRegistry_",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IUsdPriceFeedManager",
+        "name": "priceFeedManager_",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IGuardManager",
+        "name": "guardManager_",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IActionManager",
+        "name": "actionManager_",
+        "type": "address"
+      },
+      {
+        "internalType": "contract ISpoolAccessControl",
+        "name": "accessControl_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "ConfigurationAddressZero",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "DepositNftNotSyncedYet",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "IncorrectDepositRatio",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidAssetLengths",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "depositNftId",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidDepositNftId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidNftArrayLength",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "MissingRole",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "depositId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "flushIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "assets",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "depositor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "referral",
+        "type": "address"
+      }
+    ],
+    "name": "DepositInitiated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "claimer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "claimedVaultTokens",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "nftIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "nftAmounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "SmartVaultTokensClaimed",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "exchangeRates",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint16a16",
+        "name": "allocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[][]",
+        "name": "strategyRatios",
+        "type": "uint256[][]"
+      }
+    ],
+    "name": "calculateDepositRatio",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "exchangeRates",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint16a16",
+        "name": "allocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[][]",
+        "name": "strategyRatios",
+        "type": "uint256[][]"
+      }
+    ],
+    "name": "calculateFlushFactors",
+    "outputs": [
+      {
+        "internalType": "uint256[][]",
+        "name": "",
+        "type": "uint256[][]"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "deposit",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "exchangeRates",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint16a16",
+        "name": "allocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[][]",
+        "name": "strategyRatios",
+        "type": "uint256[][]"
+      }
+    ],
+    "name": "checkDepositRatio",
+    "outputs": [],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "nftIds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "nftAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address",
+        "name": "executor",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flushIndexToSync",
+        "type": "uint256"
+      }
+    ],
+    "name": "claimSmartVaultTokens",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "smartVault",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "assets",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "address",
+            "name": "receiver",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "referral",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "doFlush",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DepositBag",
+        "name": "bag",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "depositor",
+            "type": "address"
+          },
+          {
+            "internalType": "address[]",
+            "name": "tokens",
+            "type": "address[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "strategies",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint16a16",
+            "name": "allocations",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "flushIndex",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DepositExtras",
+        "name": "bag2",
+        "type": "tuple"
+      }
+    ],
+    "name": "depositAssets",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "deposit",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "exchangeRates",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint16a16",
+            "name": "allocation",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[][]",
+            "name": "strategyRatios",
+            "type": "uint256[][]"
+          }
+        ],
+        "internalType": "struct DepositQueryBag1",
+        "name": "bag",
+        "type": "tuple"
+      }
+    ],
+    "name": "distributeDeposit",
+    "outputs": [
+      {
+        "internalType": "uint256[][]",
+        "name": "",
+        "type": "uint256[][]"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flushIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint16a16",
+        "name": "allocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      }
+    ],
+    "name": "flushSmartVault",
+    "outputs": [
+      {
+        "internalType": "uint16a16",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVaultAddress",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256[]",
+            "name": "assets",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initiated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "flushIndex",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DepositMetadata",
+        "name": "data",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nftShares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mintedSVTs",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      }
+    ],
+    "name": "getClaimedVaultTokensPreview",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint16a16",
+        "name": "allocations",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      }
+    ],
+    "name": "getDepositRatio",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "ratio",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flushIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "assetGroupLength",
+        "type": "uint256"
+      }
+    ],
+    "name": "smartVaultDeposits",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "bag",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "strategies",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint16a16[2]",
+        "name": "dhwIndexes",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "assetGroup",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "managementFeePct",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "depositFeePct",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "performanceFeePct",
+            "type": "uint16"
+          }
+        ],
+        "internalType": "struct SmartVaultFees",
+        "name": "fees",
+        "type": "tuple"
+      }
+    ],
+    "name": "syncDeposits",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mintedSVTs",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dhwTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "feeSVTs",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "sstShares",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct DepositSyncResult",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "smartVault",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256[2]",
+            "name": "bag",
+            "type": "uint256[2]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "strategies",
+            "type": "address[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "assetGroup",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint16a16",
+            "name": "dhwIndexes",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint16a16",
+            "name": "dhwIndexesOld",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "managementFeePct",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "depositFeePct",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "performanceFeePct",
+                "type": "uint16"
+              }
+            ],
+            "internalType": "struct SmartVaultFees",
+            "name": "fees",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SimulateDepositParams",
+        "name": "parameters",
+        "type": "tuple"
+      }
+    ],
+    "name": "syncDepositsSimulate",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mintedSVTs",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dhwTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "feeSVTs",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "sstShares",
+            "type": "uint256[]"
+          }
+        ],
+        "internalType": "struct DepositSyncResult",
+        "name": "result",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

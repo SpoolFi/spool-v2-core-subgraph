@@ -103,6 +103,17 @@ export function getSmartVaultFees(smartVaultAddress: string): SmartVaultFees {
     return smartVaultFees;
 }
 
+export function getUser(userAddress: string): User {
+    let user = User.load(userAddress);
+
+    if (user == null) {
+        user = new User(userAddress);
+        user.save();
+    }
+
+    return user;
+}
+
 export function getComposedId(
     firstId: string,
     secondId: string,

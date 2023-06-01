@@ -2,11 +2,12 @@ import {Address} from "@graphprotocol/graph-ts";
 import {
     StrategyApyUpdated,
     StrategyRegistered,
+    StrategyDhw as StrategyDhwEvent
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
-import {Strategy} from "../generated/schema";
-import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName} from "./utils/helpers";
+import {Strategy, StrategyDhw} from "../generated/schema";
+import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId} from "./utils/helpers";
 
 export function handleStrategyRegistered(event: StrategyRegistered): void {
     logEventName("handleStrategyRegistered", event);
@@ -27,6 +28,17 @@ export function handleStrategyApyUpdated(event: StrategyApyUpdated): void {
     strategy.save();
 }
 
+export function handleStrategyDhw(event: StrategyDhwEvent): void {
+    logEventName("handleStrategyDhw", event);
+
+    let strategyDhw = getStrategyDhw(event.params.strategy.toHexString(), event.params.dhwIndex.toI32());
+
+    strategyDhw.timestamp = event.block.timestamp;
+    strategyDhw.blockNumber = event.block.number;
+    strategyDhw.apy = strategyApyToDecimal(event.params.dhwInfo.yieldPercentage);
+    strategyDhw.ssts = event.params.dhwInfo.totalSstsAtDhw;
+}
+
 function getStrategy(strategyAddress: string): Strategy {
     let strategy = Strategy.load(strategyAddress);
 
@@ -45,4 +57,23 @@ function getStrategy(strategyAddress: string): Strategy {
     }
 
     return strategy;
+}
+
+function getStrategyDhw(strategyAddress: string, strategyDwhIndex: i32): StrategyDhw {
+    let strategyDhwId = getComposedId(strategyAddress, strategyDwhIndex.toString());
+
+    let strategyDhw = StrategyDhw.load(strategyDhwId);
+
+    if (strategyDhw == null) {
+        strategyDhw = new StrategyDhw(strategyDhwId);
+        strategyDhw.strategy = strategyAddress;
+        strategyDhw.index = strategyDwhIndex;
+        strategyDhw.timestamp = ZERO_BI;
+        strategyDhw.blockNumber = ZERO_BI;
+        strategyDhw.apy = ZERO_BD;
+        strategyDhw.ssts = ZERO_BI;
+        strategyDhw.save();
+    }
+
+    return strategyDhw;
 }

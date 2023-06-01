@@ -1,10 +1,7 @@
-import {dataSource} from "@graphprotocol/graph-ts";
-
 import {
     RewardAdded,
     RewardExtended,
     RewardRemoved,
-    RewardManagerContract
 } from "../generated/RewardManager/RewardManagerContract";
 
 import {
@@ -39,8 +36,6 @@ export function handleRewardAdded(event: RewardAdded): void {
         smartVaultRewardToken.updatesCount
     );
 
-    let vaultContract = RewardManagerContract.bind(event.address);
-    let rewardToken = vaultContract.rewardConfiguration(event.params.smartVault, event.params.token);
     let tokenAmountAdded = getTokenDecimalAmountFromAddress(
         event.params.amount,
         smartVaultRewardToken.token
@@ -52,9 +47,9 @@ export function handleRewardAdded(event: RewardAdded): void {
     }
 
     smartVaultRewardToken.updatedOn = event.block.timestamp;
-    smartVaultRewardToken.endTime = rewardToken.value1;
+    smartVaultRewardToken.endTime = event.params.periodFinish;
     smartVaultRewardToken.totalAmount = tokenAmountAdded;
-    smartVaultRewardToken.rewardRate = rewardToken.value2;
+    smartVaultRewardToken.rewardRate = event.params.rewardRate;
     smartVaultRewardToken.isRemoved = false;
     smartVaultRewardToken.updatesCount++;
     smartVaultRewardToken.save();
@@ -63,7 +58,7 @@ export function handleRewardAdded(event: RewardAdded): void {
     smartVaultRewardTokenUpdate.createdOn = event.block.timestamp;
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
     smartVaultRewardTokenUpdate.leftoverAmount = ZERO_BD;
-    smartVaultRewardTokenUpdate.endTime = rewardToken.value1;
+    smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
     smartVaultRewardTokenUpdate.updateType = ADD_REWARD;
 
     smartVaultRewardTokenUpdate.save();
@@ -95,15 +90,11 @@ export function handleRewardExtended(event: RewardExtended): void {
         createTokenEntity(smartVaultRewardToken.token).decimals + 18 // add 18 decimals to token decimals as it includes REWARD_ACCURACY multiplier
     );
 
-    let vaultContract = RewardManagerContract.bind(event.address);
-
-    let rewardToken = vaultContract.rewardConfiguration(event.params.smartVault, event.params.token);
-
     // SmartVaultRewardToken
     smartVaultRewardToken.updatedOn = event.block.timestamp;
     smartVaultRewardToken.endTime = event.params.periodFinish;
     smartVaultRewardToken.totalAmount = smartVaultRewardToken.totalAmount.plus(tokenAmountAdded);
-    smartVaultRewardToken.rewardRate = rewardToken.value2;
+    smartVaultRewardToken.rewardRate = event.params.rewardRate;
     smartVaultRewardToken.updatesCount++;
 
     smartVaultRewardTokenUpdate.save();
@@ -170,6 +161,8 @@ function getSmartVaultRewardToken(smartVaultAddress: string, rewardTokenAddress:
         smartVaultRewardToken.endTime = ZERO_BI;
         smartVaultRewardToken.totalAmount = ZERO_BD;
         smartVaultRewardToken.isRemoved = false;
+        smartVaultRewardToken.rewardRate = ZERO_BI;
+        smartVaultRewardToken.updatesCount = 0;
 
         smartVaultRewardToken.save();
     }

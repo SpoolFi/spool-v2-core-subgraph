@@ -1,10 +1,11 @@
 {
     "network": "mainnet",
-    "startBlock": "17236369",
-    "strategyRegistry": "0xc1EeD9232A0A44c2463ACB83698c162966FBc78d",
-    "spoolAccessControl": "0xC0BF43A4Ca27e0976195E6661b099742f10507e5",
-    "assetGroupRegistry": "0x245e77E56b1514D77910c9303e4b44dDb44B788c",
-    "riskManager": "0x38628490c3043E5D0bbB26d5a0a62fC77342e9d5",
-    "smartVaultManager": "0xde79380FBd39e08150adAA5C6c9dE3146f53029e",
-    "rewardManager": "0x04d7478fDF318C3C22cECE62Da9D78ff94807D77"
+    "startBlock": "17336473",
+    "strategyRegistry": "0x05bB67cB592C1753425192bF8f34b95ca8649f09",
+    "spoolAccessControl": "0x30426D33a78afdb8788597D5BFaBdADc3Be95698",
+    "assetGroupRegistry": "0xC220Ed128102d888af857d137a54b9B7573A41b2",
+    "riskManager": "0xA75E74a5109Ed8221070142D15cEBfFe9642F489",
+    "smartVaultManager": "0x37D31345F164Ab170B19bc35225Abc98Ce30b46A",
+    "rewardManager": "0x746a48E39dC57Ff14B872B8979E20efE5E5100B1",
+    "depositManager": "0x1bEfE2d8417e22Da2E0432560ef9B2aB68Ab75Ad"
 }

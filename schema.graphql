@@ -10,8 +10,7 @@ type SmartVault @entity {
     createdOn: BigInt!
     smartVaultFees: SmartVaultFees!
     smartVaultStrategies: [SmartVaultStrategy!]!
-    actions: [UserSmartVaultAction!]! @derivedFrom(field: "smartVault")
-    users: [UserSmartVault!]! @derivedFrom(field: "smartVault")
+    smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "smartVault")
 }
 
 type AssetGroup @entity {
@@ -39,42 +38,28 @@ type SmartVaultFees @entity {
     managementFeePercentage: BigDecimal!
 }
 
+# type SmartVaultFlush @entity {
+#     id: ID! # Set to `{smartVault.id}-${flushId}`
+#     smartVault: SmartVault!
+#     flushId: BigInt!
+#     indexes: [BigInt!]! # strategy indexes
+# }
+
 type User @entity { 
     id: ID!
-    smartVaults: [UserSmartVault!]! @derivedFrom(field: "user")
-    actions: [UserSmartVaultAction!]! @derivedFrom(field: "user")
+    smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "user")
 }
 
-type UserSmartVault @entity {
-    id: ID! # Set to `${user.id}-${smartVault.id}`
-    user: User!
+type SmartVaultDepositNFT @entity {
+    id: ID! # Set to `{smartVault.id}-${nftId}`
     smartVault: SmartVault!
-    totalDeposit: BigDecimal! # updates right away on the deposit
-    totalWithdraw: BigDecimal! # updates after claim
-    lastGlobalIndexInteracted: Int! # 10
-    lastRedeemGlobalIndex: Int!
-    actions: [UserSmartVaultAction!]! @derivedFrom(field: "userSmartVault")
-}
-
-# DEPOSIT, WITHDAW (maybe withdraw lazy, withdraw fast), CLAIM
-
-type UserSmartVaultAction @entity {
-    id: ID! # Set to `${user.id}-${smartVault.id}-${smartVaultActionId}`
-    userSmartVault: UserSmartVault!
+    nftId: BigInt!
     user: User!
-    smartVault: SmartVault! # so we can reverse lookup
-    smartVaultActionId: Int!
+    shares: BigInt!
+    assets: [BigInt!]!
+    flushIndex: BigInt!
+    isBurned: Boolean!
     createdOn: BigInt!
-    amount: BigDecimal!
-    globalIndex: Int!
-    actionType: UserSmartVaultActionType!
-}
-
-enum UserSmartVaultActionType {
-    DEPOSIT
-    WITHDRAW
-    WITHDRAW_FAST
-    CLAIM
 }
 
 type Token @entity {
@@ -115,6 +100,7 @@ type Strategy @entity {
 type StrategyDhw @entity {
     id: ID! # Set to `${strategy.id}-${strategy.index}`
     strategy: Strategy!
+    index: Int!
     timestamp: BigInt!
     blockNumber: BigInt!
     ssts: BigInt!
