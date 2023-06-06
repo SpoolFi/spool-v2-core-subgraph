@@ -1,7 +1,7 @@
 import {BigInt} from "@graphprotocol/graph-ts";
 
 import {
-    RedeemInitiated
+    RedeemInitiated, WithdrawalClaimed
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
 import {
@@ -30,6 +30,34 @@ export function handleRedeemInitiated(event: RedeemInitiated): void {
     wNFT.svtWithdrawn = event.params.shares;
 
     wNFT.save();
+}
+
+export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
+    logEventName("handleWithdrawalClaimed", event);
+    let smartVaultAddress = event.params.smartVault.toHexString();
+
+    burnNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+}
+
+export function handleFastRedeemInitiated(event: WithdrawalClaimed): void {
+    logEventName("handleFastRedeemInitiated", event);
+    let smartVaultAddress = event.params.smartVault.toHexString();
+
+    burnNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+}
+
+function burnNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
+    for (let i = 0; i < nftIds.length; i++) {
+        let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, nftIds[i]);
+
+        wNFT.shares = wNFT.shares.minus(nftAmounts[i]);
+
+        if (wNFT.shares.isZero()) {
+            wNFT.isBurned = true;
+        }
+
+        wNFT.save();
+    }
 }
 
 function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultWithdrawalNFT {

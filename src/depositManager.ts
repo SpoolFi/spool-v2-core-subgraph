@@ -1,7 +1,7 @@
 import {BigInt} from "@graphprotocol/graph-ts";
 
 import {
-    DepositInitiated
+    DepositInitiated, SmartVaultTokensClaimed
 } from "../generated/DepositManager/DepositManagerContract";
 
 import {
@@ -23,7 +23,6 @@ import {
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
 
-// newly added or endTime was reached and new rewards were added
 export function handleDepositInitiated(event: DepositInitiated): void {
     logEventName("handleDepositInitiated", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
@@ -47,6 +46,23 @@ export function handleDepositInitiated(event: DepositInitiated): void {
     dNFT.assets = assets;
 
     dNFT.save();
+}
+
+export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): void {
+    logEventName("handleSmartVaultTokensClaimed", event);
+    let smartVaultAddress = event.params.smartVault.toHexString();
+
+    for (let i = 0; i < event.params.nftIds.length; i++) {
+        let dNFT = getSmartVaultDepositNFT(smartVaultAddress, event.params.nftIds[i]);
+
+        dNFT.shares = dNFT.shares.minus(event.params.nftAmounts[i]);
+
+        if (dNFT.shares.isZero()) {
+            dNFT.isBurned = true;
+        }
+
+        dNFT.save();
+    }
 }
 
 function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultDepositNFT {

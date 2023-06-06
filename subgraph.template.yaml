@@ -163,6 +163,8 @@ dataSources:
       eventHandlers:
         - event: DepositInitiated(indexed address,indexed address,indexed uint256,uint256,uint256[],address,address)
           handler: handleDepositInitiated
+        - event: SmartVaultTokensClaimed(indexed address,indexed address,uint256,uint256[],uint256[])
+          handler: handleSmartVaultTokensClaimed
   - kind: ethereum/contract
     name: WithdrawalManager
     network: {{ network }}
@@ -185,6 +187,10 @@ dataSources:
       eventHandlers:
         - event: RedeemInitiated(indexed address,indexed address,indexed uint256,uint256,uint256,address)
           handler: handleRedeemInitiated
+        - event: FastRedeemInitiated(indexed address,indexed address,uint256,uint256[],uint256[],uint256[])
+          handler: handleFastRedeemInitiated
+        - event: WithdrawalClaimed(indexed address,indexed address,uint256,uint256[],uint256[],uint256[])
+          handler: handleWithdrawalClaimed
   - kind: ethereum/contract
     name: RewardManager
     network: {{ network }}
