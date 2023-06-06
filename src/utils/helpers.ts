@@ -12,6 +12,8 @@ export const ZERO_ADDRESS = Address.fromString("0x000000000000000000000000000000
 export const APY_DECIMALS = 12;
 export const RISK_SCORE_DECIMALS = 1;
 export const PERCENTAGE_DECIMALS = 2;
+export const NFT_INITIAL_SHARES = BigInt.fromI32(1000000);
+const MASK_16_BIT = BigInt.fromU32(65_535);
 
 export function logEventName(name: string, event: ethereum.Event): void {
     log.info("{}: tx={} block={}", [
@@ -78,6 +80,8 @@ export function getSmartVault(smartVaultAddress: string): SmartVault {
         smartVault = new SmartVault(smartVaultAddress);
         smartVault.name = "";
         smartVault.assetGroup = "0";
+        smartVault.lastRebalanceTime = ZERO_BI;
+        smartVault.rebalanceCount = ZERO_BI;
         smartVault.smartVaultCreator = ZERO_ADDRESS.toHexString();
         smartVault.smartVaultOwner = ZERO_ADDRESS.toHexString();
         smartVault.createdOn = ZERO_BI;
@@ -151,4 +155,18 @@ export function getTokenDecimalAmount(amount: BigInt, token: Token): BigDecimal 
         amount,
         token.decimals
     );
+}
+
+export function getArrayFromUint16a16(uint16a16: BigInt, arrayLength: i32): i32[] {
+    let values: i32[] = [];
+
+    for (let i = 0; i < arrayLength; i++) {
+        let value = uint16a16.bitAnd(MASK_16_BIT);
+
+        values[i] = value.toI32();
+
+        uint16a16 = uint16a16.rightShift(16);
+    }
+
+    return values;
 }

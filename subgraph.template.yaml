@@ -130,6 +130,7 @@ dataSources:
         - RiskProvider
         - SmartVaultFees
         - SmartVaultStrategy
+        - SmartVaultFlush
       abis:
         - name: SmartVaultManagerContract
           file: ./abis/SmartVaultManager.json
@@ -138,6 +139,8 @@ dataSources:
       eventHandlers:
         - event: SmartVaultRegistered(indexed address,(uint256,address[],uint256,uint16,uint16,uint16))
           handler: handleSmartVaultRegistered
+        - event: SmartVaultFlushed(indexed address,uint256)
+          handler: handleSmartVaultFlushed
   - kind: ethereum/contract
     name: DepositManager
     network: {{ network }}
@@ -153,12 +156,35 @@ dataSources:
       entities:
         - User
         - SmartVaultDepositNFT
+        - SmartVaultFlush
       abis:
         - name: DepositManagerContract
           file: ./abis/DepositManager.json
       eventHandlers:
         - event: DepositInitiated(indexed address,indexed address,indexed uint256,uint256,uint256[],address,address)
           handler: handleDepositInitiated
+  - kind: ethereum/contract
+    name: WithdrawalManager
+    network: {{ network }}
+    source:
+      address: '{{ withdrawalManager }}'
+      abi: WithdrawalManagerContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/withdrawalManager.ts
+      entities:
+        - User
+        - SmartVaultWithdrawalNFT
+        - SmartVaultFlush
+      abis:
+        - name: WithdrawalManagerContract
+          file: ./abis/WithdrawalManager.json
+      eventHandlers:
+        - event: RedeemInitiated(indexed address,indexed address,indexed uint256,uint256,uint256,address)
+          handler: handleRedeemInitiated
   - kind: ethereum/contract
     name: RewardManager
     network: {{ network }}

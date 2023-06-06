@@ -1,18 +1,18 @@
-import {Address, BigInt} from "@graphprotocol/graph-ts";
-import {SmartVaultRegistered} from "../generated/SmartVaultManager/SmartVaultManagerContract";
+import {BigInt} from "@graphprotocol/graph-ts";
+import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultRegistered} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
-import {SmartVault, SmartVaultFees, SmartVaultStrategy} from "../generated/schema";
+import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
 import {
-    ZERO_BD,
     ZERO_BI,
     logEventName,
-    ZERO_ADDRESS,
     getComposedId,
     percenti32ToDecimal,
     getSmartVaultFees,
     getSmartVault,
+    getArrayFromUint16a16,
 } from "./utils/helpers";
+import { getStrategyDHW } from "./strategyRegistry";
 
 export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     logEventName("handleSmartVaultRegistered", event);
@@ -58,6 +58,50 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
         event.params.registrationForm.managementFeePct
     );
     smartVaultFees.save();
+}
+
+export function handleSmartVaultFlushed(event: SmartVaultFlushed): void {
+    logEventName("handleSmartVaultFlushed", event);
+
+    let smartVaultFlush = getSmartVaultFlush(event.params.smartVault.toHexString(), event.params.flushIndex);
+    smartVaultFlush.isExecuted = true;
+
+    // get strategy DHWs
+    let smartVault = getSmartVault(event.params.smartVault.toHexString());
+    const smartVaultStrategies = smartVault.smartVaultStrategies;
+    let smartVaultManagerContract = SmartVaultManagerContract.bind(event.address);
+    let uint16a16Indexes = smartVaultManagerContract.dhwIndexes(event.params.smartVault, event.params.flushIndex);
+    let flushIndexes: i32[] = getArrayFromUint16a16(uint16a16Indexes, smartVaultStrategies.length);
+
+    let flushStrategyDhws: string[] = [];
+    for (let i = 0; i < smartVaultStrategies.length; i++) {
+        let strategyDHW = getStrategyDHW(SmartVaultStrategy.load(smartVaultStrategies[i])!.strategy, flushIndexes[i]);
+
+        flushStrategyDhws.push(strategyDHW.id);
+    }
+
+    smartVaultFlush.strategyDHWs = flushStrategyDhws;
+    smartVaultFlush.timestamp = event.block.timestamp;
+
+    smartVaultFlush.save();
+}
+
+export function getSmartVaultFlush(
+    smartVaultAddress: string,
+    flushId: BigInt
+): SmartVaultFlush {
+    let smartVaultFlushId = getComposedId(smartVaultAddress, flushId.toString());
+    let smartVaultFlush = SmartVaultFlush.load(smartVaultFlushId);
+
+    if (smartVaultFlush == null) {
+        smartVaultFlush = new SmartVaultFlush(smartVaultFlushId);
+        smartVaultFlush.smartVault = smartVaultAddress;
+        smartVaultFlush.flushId = flushId;
+        smartVaultFlush.isExecuted = false;
+        smartVaultFlush.save();
+    }
+
+    return smartVaultFlush;
 }
 
 function getSmartVaultStrategy(

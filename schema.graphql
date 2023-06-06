@@ -3,6 +3,8 @@ type SmartVault @entity {
     name: String!
     riskTolerance: Int
     assetGroup: AssetGroup!
+    lastRebalanceTime: BigInt!
+    rebalanceCount: BigInt!
     smartVaultCreator: String!
     smartVaultOwner: String!
     allocationProvider: String
@@ -15,7 +17,7 @@ type SmartVault @entity {
 
 type AssetGroup @entity {
     id: ID!
-    assetGroupTokens: [AssetGroupToken!] @derivedFrom(field: "assetGroup")
+    assetGroupTokens: [AssetGroupToken!]!
 }
 
 type AssetGroupToken @entity {
@@ -38,16 +40,19 @@ type SmartVaultFees @entity {
     managementFeePercentage: BigDecimal!
 }
 
-# type SmartVaultFlush @entity {
-#     id: ID! # Set to `{smartVault.id}-${flushId}`
-#     smartVault: SmartVault!
-#     flushId: BigInt!
-#     indexes: [BigInt!]! # strategy indexes
-# }
+type SmartVaultFlush @entity {
+    id: ID! # Set to `{smartVault.id}-${flushId}`
+    smartVault: SmartVault!
+    flushId: BigInt!
+    isExecuted: Boolean!
+    timestamp: BigInt
+    strategyDHWs: [StrategyDHW!] # strategy index do hard works
+}
 
 type User @entity { 
     id: ID!
     smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "user")
+    SmartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "user")
 }
 
 type SmartVaultDepositNFT @entity {
@@ -56,8 +61,20 @@ type SmartVaultDepositNFT @entity {
     nftId: BigInt!
     user: User!
     shares: BigInt!
-    assets: [BigInt!]!
-    flushIndex: BigInt!
+    assets: [BigDecimal!]!
+    smartVaultFlush: SmartVaultFlush!
+    isBurned: Boolean!
+    createdOn: BigInt!
+}
+
+type SmartVaultWithdrawalNFT @entity {
+    id: ID! # Set to `{smartVault.id}-${nftId}`
+    smartVault: SmartVault!
+    nftId: BigInt!
+    user: User!
+    shares: BigInt!
+    svtWithdrawn: BigInt!
+    smartVaultFlush: SmartVaultFlush!
     isBurned: Boolean!
     createdOn: BigInt!
 }
@@ -94,17 +111,18 @@ type Strategy @entity {
     isRemoved: Boolean!
     addedOn: BigInt!
     riskScores: [StrategyRiskScore!]! @derivedFrom(field: "strategy")
-    strategyDhws: [StrategyDhw!]! @derivedFrom(field: "strategy")
+    strategyDHWs: [StrategyDHW!]! @derivedFrom(field: "strategy")
 }
 
-type StrategyDhw @entity {
+type StrategyDHW @entity {
     id: ID! # Set to `${strategy.id}-${strategy.index}`
     strategy: Strategy!
-    index: Int!
-    timestamp: BigInt!
-    blockNumber: BigInt!
-    ssts: BigInt!
-    apy: BigDecimal!
+    strategyDHWIndex: Int!
+    isExecuted: Boolean!
+    timestamp: BigInt
+    blockNumber: BigInt
+    ssts: BigInt
+    apy: BigDecimal
 }
 
 

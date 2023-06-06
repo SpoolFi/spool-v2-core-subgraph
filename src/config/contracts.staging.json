@@ -7,5 +7,6 @@
     "riskManager": "0xA75E74a5109Ed8221070142D15cEBfFe9642F489",
     "smartVaultManager": "0x37D31345F164Ab170B19bc35225Abc98Ce30b46A",
     "rewardManager": "0x746a48E39dC57Ff14B872B8979E20efE5E5100B1",
-    "depositManager": "0x1bEfE2d8417e22Da2E0432560ef9B2aB68Ab75Ad"
+    "depositManager": "0x1bEfE2d8417e22Da2E0432560ef9B2aB68Ab75Ad",
+    "withdrawalManager": "0xc075BC0f734EFE6ceD866324fc2A9DBe1065CBB1"
 }

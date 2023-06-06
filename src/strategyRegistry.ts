@@ -6,7 +6,7 @@ import {
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
-import {Strategy, StrategyDhw} from "../generated/schema";
+import {Strategy, StrategyDHW} from "../generated/schema";
 import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId} from "./utils/helpers";
 
 export function handleStrategyRegistered(event: StrategyRegistered): void {
@@ -31,12 +31,14 @@ export function handleStrategyApyUpdated(event: StrategyApyUpdated): void {
 export function handleStrategyDhw(event: StrategyDhwEvent): void {
     logEventName("handleStrategyDhw", event);
 
-    let strategyDhw = getStrategyDhw(event.params.strategy.toHexString(), event.params.dhwIndex.toI32());
+    let strategyDhw = getStrategyDHW(event.params.strategy.toHexString(), event.params.dhwIndex.toI32());
 
+    strategyDhw.isExecuted = true;
     strategyDhw.timestamp = event.block.timestamp;
     strategyDhw.blockNumber = event.block.number;
     strategyDhw.apy = strategyApyToDecimal(event.params.dhwInfo.yieldPercentage);
     strategyDhw.ssts = event.params.dhwInfo.totalSstsAtDhw;
+    strategyDhw.save();
 }
 
 function getStrategy(strategyAddress: string): Strategy {
@@ -59,19 +61,18 @@ function getStrategy(strategyAddress: string): Strategy {
     return strategy;
 }
 
-function getStrategyDhw(strategyAddress: string, strategyDwhIndex: i32): StrategyDhw {
-    let strategyDhwId = getComposedId(strategyAddress, strategyDwhIndex.toString());
-
-    let strategyDhw = StrategyDhw.load(strategyDhwId);
+export function getStrategyDHW(
+    strategyAddress: string,
+    strategyindex: i32
+): StrategyDHW {
+    let strategyDhwId = getComposedId(strategyAddress, strategyindex.toString());
+    let strategyDhw = StrategyDHW.load(strategyDhwId);
 
     if (strategyDhw == null) {
-        strategyDhw = new StrategyDhw(strategyDhwId);
+        strategyDhw = new StrategyDHW(strategyDhwId);
         strategyDhw.strategy = strategyAddress;
-        strategyDhw.index = strategyDwhIndex;
-        strategyDhw.timestamp = ZERO_BI;
-        strategyDhw.blockNumber = ZERO_BI;
-        strategyDhw.apy = ZERO_BD;
-        strategyDhw.ssts = ZERO_BI;
+        strategyDhw.strategyDHWIndex = strategyindex;
+        strategyDhw.isExecuted = false;
         strategyDhw.save();
     }
 

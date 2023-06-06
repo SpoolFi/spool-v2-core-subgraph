@@ -14,10 +14,16 @@ export function handleAssetGroupRegistered(event: AssetGroupRegistered): void {
     let assetGroupRegistry = AssetGroupRegistryContract.bind(event.address);
     let tokens = assetGroupRegistry.listAssetGroup(event.params.assetGroupId);
 
+    let assetGroupTokens = assetGroup.assetGroupTokens;
     for (let i = 0; i < tokens.length; i++) {
         let token = createTokenEntity(tokens[i].toHexString());
-        getAssetGroupToken(assetGroup.id, token.id);
+        let assetGroupToken = getAssetGroupToken(assetGroup.id, token.id);
+
+        assetGroupTokens.push(assetGroupToken.id);
     }
+
+    assetGroup.assetGroupTokens = assetGroupTokens;
+    assetGroup.save();
 }
 
 function getAssetGroup(assetGroupId: BigInt): AssetGroup {
@@ -25,6 +31,7 @@ function getAssetGroup(assetGroupId: BigInt): AssetGroup {
 
     if (assetGroup == null) {
         assetGroup = new AssetGroup(assetGroupId.toString());
+        assetGroup.assetGroupTokens = [];
         assetGroup.save();
     }
 
