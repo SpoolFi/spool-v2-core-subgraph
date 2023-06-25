@@ -73,6 +73,11 @@
   },
   {
     "inputs": [],
+    "name": "GhostVault",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidArrayLength",
     "type": "error"
   },
@@ -417,6 +422,25 @@
         "internalType": "address",
         "name": "smartVault",
         "type": "address"
+      }
+    ],
+    "name": "depositRatio",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
       },
       {
         "internalType": "uint256",
@@ -508,7 +532,36 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "currentBalance",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVaultAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nftId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUserSVTfromNFT",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "nftSvts",
         "type": "uint256"
       }
     ],
@@ -542,11 +595,6 @@
                 "type": "address"
               },
               {
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
-              },
-              {
                 "internalType": "bytes",
                 "name": "swapCallData",
                 "type": "bytes"
@@ -578,6 +626,19 @@
       }
     ],
     "name": "reallocate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      }
+    ],
+    "name": "recoverPendingDeposits",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -806,6 +867,40 @@
     "name": "removeStrategyFromVaults",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "smartVault",
+        "type": "address"
+      }
+    ],
+    "name": "simulateSync",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "oldTotalSVTs",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

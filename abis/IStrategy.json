@@ -29,6 +29,32 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "BeforeDepositCheckSlippages",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "ssts",
+        "type": "uint256"
+      }
+    ],
+    "name": "BeforeRedeemalCheckSlippages",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "mintedShares",
         "type": "uint256"
@@ -270,7 +296,7 @@
     ],
     "name": "beforeDepositCheck",
     "outputs": [],
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -288,7 +314,7 @@
     ],
     "name": "beforeRedeemalCheck",
     "outputs": [],
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -344,11 +370,6 @@
             "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "amountIn",
-            "type": "uint256"
-          },
-          {
             "internalType": "bytes",
             "name": "swapCallData",
             "type": "bytes"
@@ -387,11 +408,6 @@
                 "type": "address"
               },
               {
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
-              },
-              {
                 "internalType": "bytes",
                 "name": "swapCallData",
                 "type": "bytes"
@@ -412,11 +428,6 @@
                 "internalType": "address",
                 "name": "token",
                 "type": "address"
-              },
-              {
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
               },
               {
                 "internalType": "bytes",

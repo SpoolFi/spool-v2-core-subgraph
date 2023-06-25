@@ -8,9 +8,9 @@ dataSources:
     name: StrategyRegistry
     network: mainnet
     source:
-      address: '0x05bB67cB592C1753425192bF8f34b95ca8649f09'
+      address: '0x79C42a0742733f61F110EaBAB2836397714AbBA1'
       abi: StrategyRegistryContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -36,9 +36,9 @@ dataSources:
     name: RiskManager
     network: mainnet
     source:
-      address: '0xA75E74a5109Ed8221070142D15cEBfFe9642F489'
+      address: '0x2Eb2BBAAF8D16E8BA07BD40D141a7E25C6dD9945'
       abi: RiskManagerContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -65,9 +65,9 @@ dataSources:
     name: AssetGroupRegistry
     network: mainnet
     source:
-      address: '0xC220Ed128102d888af857d137a54b9B7573A41b2'
+      address: '0xE831a22E1b09D2F25dae664BAe2EA45F8e257dd0'
       abi: AssetGroupRegistryContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -91,9 +91,9 @@ dataSources:
     name: SpoolAccessControl
     network: mainnet
     source:
-      address: '0x30426D33a78afdb8788597D5BFaBdADc3Be95698'
+      address: '0xEe54514745B056F07040CaCF801f59031D801431'
       abi: SpoolAccessControlContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -115,9 +115,9 @@ dataSources:
     name: SmartVaultManager
     network: mainnet
     source:
-      address: '0x37D31345F164Ab170B19bc35225Abc98Ce30b46A'
+      address: '0x8e1f69CfFd8DaD657bF18B91D75BcD26CD6F43AC'
       abi: SmartVaultManagerContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -145,9 +145,9 @@ dataSources:
     name: DepositManager
     network: mainnet
     source:
-      address: '0x1bEfE2d8417e22Da2E0432560ef9B2aB68Ab75Ad'
+      address: '0x8FCAC40e1302273Cac387696EBdaFf39FDfa172A'
       abi: DepositManagerContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -169,9 +169,9 @@ dataSources:
     name: WithdrawalManager
     network: mainnet
     source:
-      address: '0xc075BC0f734EFE6ceD866324fc2A9DBe1065CBB1'
+      address: '0x5C15f56Ee55531f011c6025B205c1750EA469f75'
       abi: WithdrawalManagerContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -195,9 +195,9 @@ dataSources:
     name: RewardManager
     network: mainnet
     source:
-      address: '0x746a48E39dC57Ff14B872B8979E20efE5E5100B1'
+      address: '0x4060eF0D5a7F0633c5927F7E05041dd7Fcd95f42'
       abi: RewardManagerContract
-      startBlock: 17336473
+      startBlock: 17549894
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

@@ -138,6 +138,19 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "string",
+        "name": "baseUri",
+        "type": "string"
+      }
+    ],
+    "name": "BaseURIChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "uint8",
         "name": "version",
         "type": "uint8"
@@ -616,6 +629,16 @@
         "type": "string"
       },
       {
+        "internalType": "string",
+        "name": "svtSymbol",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "baseURI_",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
         "name": "assetGroupId_",
         "type": "uint256"
@@ -907,6 +930,19 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "uri_",
+        "type": "string"
+      }
+    ],
+    "name": "setBaseURI",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -1040,7 +1076,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "tokenId",
         "type": "uint256"
       }
     ],

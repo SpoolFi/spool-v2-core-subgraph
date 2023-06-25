@@ -21,6 +21,16 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "NoReentrantRole",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrantCall",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -271,6 +281,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "checkNonReentrant",
+    "outputs": [],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -404,6 +421,20 @@
   {
     "inputs": [],
     "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nonReentrantAfter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nonReentrantBefore",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
