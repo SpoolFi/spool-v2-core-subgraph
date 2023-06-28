@@ -2,12 +2,16 @@ import {
     RewardAdded,
     RewardExtended,
     RewardRemoved,
+    RewardsClaimed,
 } from "../generated/RewardManager/RewardManagerContract";
 
 import {
     SmartVault,
     SmartVaultRewardToken,
     SmartVaultRewardTokenUpdate,
+    UserSmartVault,
+    UserSmartVaultRewardToken,
+    UserSmartVaultRewardTokenCycle,
 } from "../generated/schema";
 
 import {
@@ -127,6 +131,30 @@ export function handleRewardRemoved(event: RewardRemoved): void {
     smartVaultRewardToken.save();
 }
 
+export function handleRewardsClaimed(event: RewardsClaimed): void {
+    logEventName("handleRewardsClaimed", event);
+
+    let smartVaultAddress = event.params.smartVault.toHexString();
+    let userAddress = event.params.user.toHexString();
+    let rewardTokenAddress = event.params.token.toHexString();
+    let cycle = event.params.cycle.toI32();
+    let claimed = getTokenDecimalAmountFromAddress(event.params.amount, rewardTokenAddress);
+
+    getUserSmartVault(userAddress, smartVaultAddress);
+
+    let smartVaultRewardToken = getSmartVaultRewardToken(smartVaultAddress, rewardTokenAddress);
+    let userSmartVaultRewardToken = getUserSmartVaultRewardToken(userAddress, smartVaultAddress, rewardTokenAddress);
+    let userSmartVaultRewardTokenCycle = getUserSmartVaultRewardTokenCycle(userSmartVaultRewardToken.id, cycle);
+
+    smartVaultRewardToken.claimed = smartVaultRewardToken.claimed.plus(claimed);
+    userSmartVaultRewardToken.claimed = userSmartVaultRewardToken.claimed.plus(claimed);
+    userSmartVaultRewardTokenCycle.claimed = claimed;
+
+    smartVaultRewardToken.save();
+    userSmartVaultRewardToken.save();
+    userSmartVaultRewardTokenCycle.save();
+}
+
 function getSmartVaultRewardTokenUpdate(
     smartVaultAddress: string,
     tokenAddress: string,
@@ -170,6 +198,56 @@ function getSmartVaultRewardToken(smartVaultAddress: string, rewardTokenAddress:
     return smartVaultRewardToken;
 }
 
+
 export function getSmartVaultByAddress(address: string): SmartVault {
     return SmartVault.load(address)!;
+}
+
+
+function getUserSmartVault(userAddress: string, smartVaultAddress: string): UserSmartVault {
+    const id = getComposedId(userAddress, smartVaultAddress);
+    let userSmartVault = UserSmartVault.load(id);
+
+    if (userSmartVault == null) {
+        userSmartVault = new UserSmartVault(id);
+        userSmartVault.user = userAddress;
+        userSmartVault.smartVault = smartVaultAddress;
+        
+        userSmartVault.save();
+    }
+
+    return userSmartVault;
+}
+
+function getUserSmartVaultRewardToken(userAddress: string, smartVaultAddress: string, rewardTokenAddress: string): UserSmartVaultRewardToken {
+    const id = getComposedId(userAddress, smartVaultAddress, rewardTokenAddress);
+    let userSmartVaultReward = UserSmartVaultRewardToken.load(id);
+
+    if (userSmartVaultReward == null) {
+        userSmartVaultReward = new UserSmartVaultRewardToken(id);
+        userSmartVaultReward.userSmartVault = getComposedId(userAddress, smartVaultAddress);
+        userSmartVaultReward.smartVaultRewardToken = rewardTokenAddress;
+        userSmartVaultReward.claimed = ZERO_BD;
+
+        userSmartVaultReward.save();
+    }
+
+    return userSmartVaultReward;
+}
+
+
+function getUserSmartVaultRewardTokenCycle(userSmartVaultRewardTokenId: string, cycle: i32): UserSmartVaultRewardTokenCycle {
+    const id = getComposedId(userSmartVaultRewardTokenId, cycle.toString());
+    let userSmartVaultRewardTokenCycle = UserSmartVaultRewardTokenCycle.load(id);
+
+    if (userSmartVaultRewardTokenCycle == null) {
+        userSmartVaultRewardTokenCycle = new UserSmartVaultRewardTokenCycle(id);
+        userSmartVaultRewardTokenCycle.userSmartVaultRewardToken = userSmartVaultRewardTokenId;
+        userSmartVaultRewardTokenCycle.cycle = cycle;
+        userSmartVaultRewardTokenCycle.claimed = ZERO_BD;
+
+        userSmartVaultRewardTokenCycle.save();
+    }
+
+    return userSmartVaultRewardTokenCycle;
 }

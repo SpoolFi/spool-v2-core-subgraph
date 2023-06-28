@@ -55,6 +55,7 @@ type User @entity {
     id: ID!
     smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "user")
     SmartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "user")
+    userSmartVaults: [UserSmartVault!]! @derivedFrom(field: "user")
 }
 
 type SmartVaultDepositNFT @entity {
@@ -139,6 +140,7 @@ type SmartVaultRewardToken @entity { # added when smartVault owner or smartVault
     startTime: BigInt!
     endTime: BigInt!
     totalAmount: BigDecimal!
+    claimed: BigDecimal!
     rewardRate: BigInt!  # rate of reward tokens (including decimals) per second multiplied by accuracy (10**18) multiplier. To get token amount per second divide by (10**18)
     isRemoved: Boolean!
     updatesCount: Int!
@@ -163,4 +165,29 @@ enum RewardTokenUpdateType {
     EXTEND_REWARD
     REMOVE_TOKEN
     END_REWARD
+}
+
+
+################# User updates
+
+type UserSmartVault @entity {
+    id: ID! # set to `${user.id}-${smartVault.id}`
+    user: User!
+    smartVault: SmartVault!
+    userSmartVaultRewardTokens: [UserSmartVaultRewardToken!]! @derivedFrom(field: "userSmartVault")
+}
+
+type UserSmartVaultRewardToken @entity {
+    id: ID! # set to `${user.id}-${smartVaultRewardToken.id}`
+    userSmartVault: UserSmartVault!
+    smartVaultRewardToken: SmartVaultRewardToken!
+    claimed: BigDecimal!
+    UserSmartVaultRewardTokenCycles: [UserSmartVaultRewardTokenCycle!]! @derivedFrom(field: "userSmartVaultRewardToken")
+}
+
+type UserSmartVaultRewardTokenCycle @entity {
+    id: ID! # set to `${UserSmartVaultRewardToken.id}-${cycle}`
+    userSmartVaultRewardToken: UserSmartVaultRewardToken!
+    cycle: Int!
+    claimed: BigDecimal!
 }

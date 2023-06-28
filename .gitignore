@@ -3,3 +3,4 @@ build
 generated
 .idea
 data
+subgraph.yaml

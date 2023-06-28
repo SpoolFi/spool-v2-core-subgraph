@@ -208,6 +208,9 @@ dataSources:
         - SmartVaultRewardTokenUpdate
         - SmartVault
         - Token
+        - UserSmartVault
+        - UserSmartVaultRewardToken
+        - UserSmartVaultRewardTokenCycle
       abis:
         - name: RewardManagerContract
           file: ./abis/RewardManager.json
@@ -222,3 +225,5 @@ dataSources:
           handler: handleRewardExtended
         - event: RewardRemoved(indexed address,indexed address)
           handler: handleRewardRemoved
+        - event: RewardsClaimed(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleRewardsClaimed
