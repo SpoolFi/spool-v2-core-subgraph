@@ -182,7 +182,7 @@ type UserSmartVaultRewardToken @entity {
     userSmartVault: UserSmartVault!
     smartVaultRewardToken: SmartVaultRewardToken!
     claimed: BigDecimal!
-    UserSmartVaultRewardTokenCycles: [UserSmartVaultRewardTokenCycle!]! @derivedFrom(field: "userSmartVaultRewardToken")
+    userSmartVaultRewardTokenCycles: [UserSmartVaultRewardTokenCycle!]! @derivedFrom(field: "userSmartVaultRewardToken")
 }
 
 type UserSmartVaultRewardTokenCycle @entity {

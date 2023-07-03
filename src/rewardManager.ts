@@ -22,6 +22,8 @@ import {
     ZERO_BD,
     ZERO_BI,
     integerToDecimal,
+    getUser,
+    getSmartVault,
 } from "./utils/helpers";
 
 const ADD_REWARD = "ADD_REWARD";
@@ -191,6 +193,7 @@ function getSmartVaultRewardToken(smartVaultAddress: string, rewardTokenAddress:
         smartVaultRewardToken.isRemoved = false;
         smartVaultRewardToken.rewardRate = ZERO_BI;
         smartVaultRewardToken.updatesCount = 0;
+        smartVaultRewardToken.claimed = ZERO_BD;
 
         smartVaultRewardToken.save();
     }
@@ -210,8 +213,8 @@ function getUserSmartVault(userAddress: string, smartVaultAddress: string): User
 
     if (userSmartVault == null) {
         userSmartVault = new UserSmartVault(id);
-        userSmartVault.user = userAddress;
-        userSmartVault.smartVault = smartVaultAddress;
+        userSmartVault.user = getUser(userAddress).id;
+        userSmartVault.smartVault = getSmartVault(smartVaultAddress).id;
         
         userSmartVault.save();
     }
@@ -226,7 +229,7 @@ function getUserSmartVaultRewardToken(userAddress: string, smartVaultAddress: st
     if (userSmartVaultReward == null) {
         userSmartVaultReward = new UserSmartVaultRewardToken(id);
         userSmartVaultReward.userSmartVault = getComposedId(userAddress, smartVaultAddress);
-        userSmartVaultReward.smartVaultRewardToken = rewardTokenAddress;
+        userSmartVaultReward.smartVaultRewardToken = getSmartVaultRewardToken(smartVaultAddress, rewardTokenAddress).id;
         userSmartVaultReward.claimed = ZERO_BD;
 
         userSmartVaultReward.save();
