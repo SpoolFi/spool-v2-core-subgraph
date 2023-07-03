@@ -62,6 +62,7 @@ export function handleRewardAdded(event: RewardAdded): void {
 
     // SmartVaultRewardTokenUpdate
     smartVaultRewardTokenUpdate.createdOn = event.block.timestamp;
+    smartVaultRewardTokenUpdate.blockNumber = event.block.number;
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
     smartVaultRewardTokenUpdate.leftoverAmount = ZERO_BD;
     smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
@@ -88,6 +89,7 @@ export function handleRewardExtended(event: RewardExtended): void {
 
     // SmartVaultRewardTokenUpdate
     smartVaultRewardTokenUpdate.createdOn = event.block.timestamp;
+    smartVaultRewardTokenUpdate.blockNumber = event.block.number;
     smartVaultRewardTokenUpdate.updateType = EXTEND_REWARD;
     smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
@@ -126,6 +128,7 @@ export function handleRewardRemoved(event: RewardRemoved): void {
         smartVaultRewardToken.updatesCount
     );
     smartVaultRewardTokenUpdate.createdOn = event.block.timestamp;
+    smartVaultRewardTokenUpdate.blockNumber = event.block.number;
     smartVaultRewardTokenUpdate.endTime = event.block.timestamp;
     smartVaultRewardTokenUpdate.updateType = REMOVE_TOKEN;
 

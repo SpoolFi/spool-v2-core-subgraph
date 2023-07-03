@@ -11,8 +11,8 @@
         "staging:mustache": "mustache src/config/contracts.staging.json subgraph.template.yaml > subgraph.yaml",
         "staging:codegen": "npm run staging:mustache && graph codegen",
         "staging:build": "npm run staging:codegen && graph build",
-        "staging:create": "graph create spool/core-v2 --node http://18.197.133.88:8020",
-        "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://18.197.133.88:5001 --node http://18.197.133.88:8020 -l 1.0"
+        "staging:create": "graph create spool/core-v2 --node http://3.120.126.253:8020",
+        "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://3.120.126.253:5001 --node http://3.120.126.253:8020 -l 1.0"
     },
     "author": "Spool DAO",
     "license": "MIT",

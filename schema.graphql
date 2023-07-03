@@ -48,6 +48,7 @@ type SmartVaultFlush @entity {
     flushId: BigInt!
     isExecuted: Boolean!
     timestamp: BigInt
+    blockNumber: BigInt
     strategyDHWs: [StrategyDHW!] # strategy index do hard works
 }
 
@@ -154,6 +155,7 @@ type SmartVaultRewardTokenUpdate @entity {
     smartVaultRewardToken: SmartVaultRewardToken!
     updateId: Int!
     createdOn: BigInt!
+    blockNumber: BigInt
     amount: BigDecimal
     leftoverAmount: BigDecimal
     endTime: BigInt!

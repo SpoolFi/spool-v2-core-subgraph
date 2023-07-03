@@ -82,6 +82,7 @@ export function handleSmartVaultFlushed(event: SmartVaultFlushed): void {
 
     smartVaultFlush.strategyDHWs = flushStrategyDhws;
     smartVaultFlush.timestamp = event.block.timestamp;
+    smartVaultFlush.blockNumber = event.block.number;
 
     smartVaultFlush.save();
 }
