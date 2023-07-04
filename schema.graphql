@@ -159,6 +159,7 @@ type SmartVaultRewardTokenUpdate @entity {
     amount: BigDecimal
     leftoverAmount: BigDecimal
     endTime: BigInt!
+    rewardRate: BigInt!  # rate of reward tokens (including decimals) per second multiplied by accuracy (10**18) multiplier. To get token amount per second divide by (10**18)
     updateType: RewardTokenUpdateType!
 }
 

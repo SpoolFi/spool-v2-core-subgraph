@@ -66,6 +66,7 @@ export function handleRewardAdded(event: RewardAdded): void {
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
     smartVaultRewardTokenUpdate.leftoverAmount = ZERO_BD;
     smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
+    smartVaultRewardTokenUpdate.rewardRate = event.params.rewardRate;
     smartVaultRewardTokenUpdate.updateType = ADD_REWARD;
 
     smartVaultRewardTokenUpdate.save();
@@ -93,6 +94,7 @@ export function handleRewardExtended(event: RewardExtended): void {
     smartVaultRewardTokenUpdate.updateType = EXTEND_REWARD;
     smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
+    smartVaultRewardTokenUpdate.rewardRate = event.params.rewardRate;
     smartVaultRewardTokenUpdate.leftoverAmount = integerToDecimal(
         event.params.leftover,
         createTokenEntity(smartVaultRewardToken.token).decimals + 18 // add 18 decimals to token decimals as it includes REWARD_ACCURACY multiplier
@@ -130,6 +132,7 @@ export function handleRewardRemoved(event: RewardRemoved): void {
     smartVaultRewardTokenUpdate.createdOn = event.block.timestamp;
     smartVaultRewardTokenUpdate.blockNumber = event.block.number;
     smartVaultRewardTokenUpdate.endTime = event.block.timestamp;
+    smartVaultRewardTokenUpdate.rewardRate = ZERO_BI;
     smartVaultRewardTokenUpdate.updateType = REMOVE_TOKEN;
 
     smartVaultRewardTokenUpdate.save();
