@@ -85,6 +85,7 @@ export function getSmartVault(smartVaultAddress: string): SmartVault {
         smartVault.smartVaultCreator = ZERO_ADDRESS.toHexString();
         smartVault.smartVaultOwner = ZERO_ADDRESS.toHexString();
         smartVault.createdOn = ZERO_BI;
+        smartVault.svtTotalSupply = ZERO_BD;
         smartVault.smartVaultFees = smartVaultFees.id;
         smartVault.smartVaultStrategies = [];
         smartVault.save();

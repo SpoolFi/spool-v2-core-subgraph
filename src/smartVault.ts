@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import {TransferBatch, TransferSingle} from "../generated/SmartVaultManager/SmartVaultContract";
+import {Transfer, TransferBatch, TransferSingle} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import { SmartVault } from "../generated/schema";
 import {
@@ -10,6 +10,38 @@ import {
 } from "./utils/helpers";
 import {getSmartVaultDepositNFT} from "./depositManager";
 import {getSmartVaultWithdrawalNFT} from "./withdrawalManager";
+import {getUserSmartVault} from "./rewardManager";
+
+
+export function handleTransfer(event: Transfer): void {
+    logEventName("handleTransfer", event);
+
+    let smartVault = getSmartVault( event.address.toHexString() );
+
+    let to = event.params.to.toHexString();
+    let from = event.params.from.toHexString();
+    let amount = event.params.value.toBigDecimal();
+
+    // tokens minted
+    if(from == ZERO_ADDRESS.toHexString()){
+        smartVault.svtTotalSupply = smartVault.svtTotalSupply.plus(amount);
+    } else {
+        let fromUser = getUserSmartVault(from, smartVault.id);
+        fromUser.svtBalance = fromUser.svtBalance.minus(amount);
+        fromUser.save();
+    }
+
+    // tokens burned
+    if(to == ZERO_ADDRESS.toHexString()){
+        smartVault.svtTotalSupply = smartVault.svtTotalSupply.minus(amount);
+    } else {
+        let toUser = getUserSmartVault(to, smartVault.id);
+        toUser.svtBalance = toUser.svtBalance.plus(amount);
+        toUser.save();
+    }
+
+    smartVault.save();
+}
 
 export function handleTransferSingle(event: TransferSingle): void {
     logEventName("handleTransferSingle", event);

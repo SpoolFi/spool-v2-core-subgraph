@@ -236,7 +236,7 @@ templates:
       abi: SmartVaultContract
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       file: ./src/smartVault.ts
       entities:
@@ -249,3 +249,5 @@ templates:
           handler: handleTransferSingle
         - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
           handler: handleTransferBatch
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
