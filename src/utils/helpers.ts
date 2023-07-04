@@ -2,7 +2,6 @@ import {BigDecimal, Address, BigInt, ethereum, log} from "@graphprotocol/graph-t
 import {SmartVault, SmartVaultFees, Token, User} from "../../generated/schema";
 import {BTokenContract} from "../../generated/AssetGroupRegistry/BTokenContract";
 import {BTokenBytesContract} from "../../generated/AssetGroupRegistry/BTokenBytesContract";
-import {SmartVaultContract} from "../../generated/SmartVaultManager/SmartVaultContract";
 
 export const ZERO_BD = BigDecimal.fromString("0");
 export const ZERO_BI = BigInt.fromI32(0);
@@ -14,6 +13,7 @@ export const RISK_SCORE_DECIMALS = 1;
 export const PERCENTAGE_DECIMALS = 2;
 export const NFT_INITIAL_SHARES = BigInt.fromI32(1000000);
 const MASK_16_BIT = BigInt.fromU32(65_535);
+export const MAXIMAL_DEPOSIT_ID = BigInt.fromString("57896044618658097711785492504343953926634992332820282019728792003956564819967");
 
 export function logEventName(name: string, event: ethereum.Event): void {
     log.info("{}: tx={} block={}", [

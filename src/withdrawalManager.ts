@@ -60,7 +60,7 @@ function burnNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigIn
     }
 }
 
-function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultWithdrawalNFT {
+export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultWithdrawalNFT {
     let smartVaultDepositNFTId = getComposedId(smartVaultAddress, nftId.toString());
     let wNFT = SmartVaultWithdrawalNFT.load(smartVaultDepositNFTId);
 

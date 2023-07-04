@@ -227,3 +227,25 @@ dataSources:
           handler: handleRewardRemoved
         - event: RewardsClaimed(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleRewardsClaimed
+
+templates:
+  - name: SmartVault
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: SmartVaultContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      file: ./src/smartVault.ts
+      entities:
+        - SmartVault
+      abis:
+        - name: SmartVaultContract
+          file: ./abis/SmartVault.json
+      eventHandlers:
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch

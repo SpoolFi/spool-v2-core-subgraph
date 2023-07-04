@@ -65,7 +65,7 @@ export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): v
     }
 }
 
-function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultDepositNFT {
+export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultDepositNFT {
     let smartVaultDepositNFTId = getComposedId(smartVaultAddress, nftId.toString());
     let dNFT = SmartVaultDepositNFT.load(smartVaultDepositNFTId);
 
