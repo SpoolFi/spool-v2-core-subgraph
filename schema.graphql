@@ -50,6 +50,8 @@ type SmartVaultFlush @entity {
     timestamp: BigInt
     blockNumber: BigInt
     strategyDHWs: [StrategyDHW!] # strategy index do hard works
+    SmartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "smartVaultFlush")
+    SmartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "smartVaultFlush")
 }
 
 type User @entity { 
