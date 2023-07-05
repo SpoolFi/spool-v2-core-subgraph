@@ -1,4 +1,5 @@
-import {BigInt} from "@graphprotocol/graph-ts";
+import {BigInt, crypto, ByteArray } from "@graphprotocol/graph-ts";
+
 import {
     AssetGroupRegistered,
     AssetGroupRegistryContract,

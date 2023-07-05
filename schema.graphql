@@ -12,10 +12,12 @@ type SmartVault @entity {
     createdOn: BigInt!
     svtTotalSupply: BigDecimal!
     smartVaultFees: SmartVaultFees!
+    guardsInitialized: Boolean!
     smartVaultStrategies: [SmartVaultStrategy!]!
     smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "smartVault")
     smartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "smartVault")
     smartVaultFlushes: [SmartVaultFlush!]! @derivedFrom(field: "smartVault")
+    guards: [SmartVaultToGuard!]! @derivedFrom(field: "smartVault")
 }
 
 type AssetGroup @entity {
@@ -198,3 +200,48 @@ type UserSmartVaultRewardTokenCycle @entity {
     cycle: Int!
     claimed: BigDecimal!
 }
+
+
+################# Guards
+
+
+type Guard @entity {
+    id: ID! # Set to hash of all data
+    contractAddress: String!
+    methodSignature: String!
+    expectedValue: BigInt!
+    requestType: RequestType!
+    operator: Int!
+    parameters: [GuardToParameter!]! @derivedFrom(field: "guard")
+    vaults: [SmartVaultToGuard!]! @derivedFrom(field: "guard")
+}
+
+type Parameter @entity {
+    id: ID! # Set to ${parameterType.id}-value
+    parameterType: ParameterType!
+    value: String!
+}
+
+type ParameterType @entity {
+    id: ID! # Set to index of parameter type
+    type: String!
+}
+
+type RequestType @entity {
+    id: ID! # Set to index of request type
+    type: String!
+    guards: [Guard!]! @derivedFrom(field: "requestType")
+}
+
+type GuardToParameter @entity {
+    id: ID! # Set to ${guard.id}-${parameter.id}
+    guard: Guard!
+    parameter: Parameter!
+}
+
+type SmartVaultToGuard @entity {
+    id: ID! # Set to ${smartVault.id}-${guard.id}
+    smartVault: SmartVault!
+    guard: Guard!
+}
+

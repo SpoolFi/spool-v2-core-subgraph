@@ -227,6 +227,26 @@ dataSources:
           handler: handleRewardRemoved
         - event: RewardsClaimed(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleRewardsClaimed
+  - kind: ethereum/contract
+    name: GuardManager
+    network: {{ network }}
+    source:
+      address: '{{ rewardManager }}'
+      abi: GuardManagerContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/guardManager.ts
+      entities:
+        - SmartVault
+      abis:
+        - name: GuardManagerContract
+          file: ./abis/GuardManager.json
+      eventHandlers:
+        - event: GuardsInitialized(indexed address,(address,string,uint256,uint8[],bytes[],bytes2)[][],uint8[])
+          handler: handleGuardsInitialized
 
 templates:
   - name: SmartVault

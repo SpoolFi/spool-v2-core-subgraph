@@ -6,7 +6,7 @@
         "chain-local:mustache": "mustache src/config/contracts.local.json subgraph.template.yaml > subgraph.yaml",
         "chain-local:codegen": "npm run chain-local:mustache && graph codegen",
         "chain-local:build": "npm run chain-local:codegen && graph build",
-        "chain-tenderly:mustache": "mustache src/config/contracts.staging-new.json subgraph.template.yaml > subgraph.yaml",
+        "chain-tenderly:mustache": "mustache src/config/contracts.staging.json subgraph.template.yaml > subgraph.yaml",
         "chain-tenderly:codegen": "npm run chain-tenderly:mustache && graph codegen",
         "chain-tenderly:build": "npm run chain-tenderly:codegen && graph build",
         "local:create": "graph create spool/core-v2 --node http://127.0.0.1:8020",

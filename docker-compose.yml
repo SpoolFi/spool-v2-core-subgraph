@@ -19,7 +19,7 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'mainnet:https://rpc.vnet.tenderly.co/devnet/spool-v2-staging/d5385da7-afd8-4163-8d0f-892ff7b9b0d8'
+      ethereum: 'mainnet:https://rpc.vnet.tenderly.co/devnet/spool-v2-staging/49fb320d-3965-4711-b03a-685b35eb328f'
       GRAPH_LOG: info
       ETHEREUM_POLLING_INTERVAL: 2000
   ipfs:
