@@ -8,5 +8,6 @@
     "smartVaultManager": "0x8e1f69CfFd8DaD657bF18B91D75BcD26CD6F43AC",
     "rewardManager": "0x4060eF0D5a7F0633c5927F7E05041dd7Fcd95f42",
     "depositManager": "0x8FCAC40e1302273Cac387696EBdaFf39FDfa172A",
-    "withdrawalManager": "0x5C15f56Ee55531f011c6025B205c1750EA469f75"
+    "withdrawalManager": "0x5C15f56Ee55531f011c6025B205c1750EA469f75",
+    "guardManager": "0x2572e04Caf46ba8692Bd6B4CBDc46DAA3cA9647E"
 }

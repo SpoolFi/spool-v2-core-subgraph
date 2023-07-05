@@ -13,6 +13,7 @@ import {
     getArrayFromUint16a16,
 } from "./utils/helpers";
 import { getStrategyDHW } from "./strategyRegistry";
+import {SmartVault} from "../generated/templates";
 
 export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     logEventName("handleSmartVaultRegistered", event);
@@ -58,6 +59,9 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
         event.params.registrationForm.managementFeePct
     );
     smartVaultFees.save();
+
+    // create smart vault template
+    SmartVault.create(event.params.smartVault);
 }
 
 export function handleSmartVaultFlushed(event: SmartVaultFlushed): void {

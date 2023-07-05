@@ -231,7 +231,7 @@ dataSources:
     name: GuardManager
     network: {{ network }}
     source:
-      address: '{{ rewardManager }}'
+      address: '{{ guardManager }}'
       abi: GuardManagerContract
       startBlock: {{ startBlock }}
     mapping:

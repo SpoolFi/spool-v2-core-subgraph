@@ -17,6 +17,7 @@ type SmartVault @entity {
     smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "smartVault")
     smartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "smartVault")
     smartVaultFlushes: [SmartVaultFlush!]! @derivedFrom(field: "smartVault")
+    smartVaultRewardTokens: [SmartVaultRewardToken!]! @derivedFrom(field: "smartVault")
     guards: [SmartVaultToGuard!]! @derivedFrom(field: "smartVault")
 }
 
