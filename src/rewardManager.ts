@@ -213,7 +213,7 @@ export function getSmartVaultByAddress(address: string): SmartVault {
 }
 
 
-function getUserSmartVault(userAddress: string, smartVaultAddress: string): UserSmartVault {
+export function getUserSmartVault(userAddress: string, smartVaultAddress: string): UserSmartVault {
     const id = getComposedId(userAddress, smartVaultAddress);
     let userSmartVault = UserSmartVault.load(id);
 
@@ -221,6 +221,7 @@ function getUserSmartVault(userAddress: string, smartVaultAddress: string): User
         userSmartVault = new UserSmartVault(id);
         userSmartVault.user = getUser(userAddress).id;
         userSmartVault.smartVault = getSmartVault(smartVaultAddress).id;
+        userSmartVault.svtBalance = ZERO_BD;
         
         userSmartVault.save();
     }
