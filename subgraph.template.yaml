@@ -141,6 +141,8 @@ dataSources:
           handler: handleSmartVaultRegistered
         - event: SmartVaultFlushed(indexed address,uint256)
           handler: handleSmartVaultFlushed
+        - event: SmartVaultReallocated(indexed address,uint256)
+          handler: handleSmartVaultReallocated
   - kind: ethereum/contract
     name: DepositManager
     network: {{ network }}

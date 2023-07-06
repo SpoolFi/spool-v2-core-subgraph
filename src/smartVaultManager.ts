@@ -1,5 +1,5 @@
 import {BigInt} from "@graphprotocol/graph-ts";
-import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultRegistered} from "../generated/SmartVaultManager/SmartVaultManagerContract";
+import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
@@ -89,6 +89,24 @@ export function handleSmartVaultFlushed(event: SmartVaultFlushed): void {
     smartVaultFlush.blockNumber = event.block.number;
 
     smartVaultFlush.save();
+}
+
+export function handleSmartVaultReallocated(event: SmartVaultReallocated): void {
+    logEventName("handleSmartVaultReallocated", event);
+    
+    let smartVaultAddress = event.params.smartVault.toHexString();
+    let newAllocations = event.params.newAllocations;
+
+    let smartVault = getSmartVault(smartVaultAddress);
+    let smartVaultStrategies = smartVault.smartVaultStrategies;
+
+    let allocationMask = BigInt.fromI32(2 ** 16 - 1);
+    for (let i = 0; i < smartVaultStrategies.length; i++) {
+        let smartVaultStrategy = SmartVaultStrategy.load(smartVaultStrategies[i])!;
+        let newAllocation = newAllocations.rightShift(u8(i * 16)).bitAnd(allocationMask);
+        smartVaultStrategy.allocation = newAllocation;
+        smartVaultStrategy.save();
+    }
 }
 
 export function getSmartVaultFlush(
