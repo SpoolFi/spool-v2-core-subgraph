@@ -119,6 +119,7 @@ type Strategy @entity {
     index: Int!
     lastDoHardWorkTime: BigInt!
     isRemoved: Boolean!
+    isGhost: Boolean!
     addedOn: BigInt!
     riskScores: [StrategyRiskScore!]! @derivedFrom(field: "strategy")
     strategyDHWs: [StrategyDHW!]! @derivedFrom(field: "strategy")

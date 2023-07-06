@@ -4,3 +4,4 @@ generated
 .idea
 data
 subgraph.yaml
+src/utils/helpers.ts

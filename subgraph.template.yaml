@@ -28,6 +28,8 @@ dataSources:
       eventHandlers:
         - event: StrategyRegistered(indexed address)
           handler: handleStrategyRegistered
+        - event: StrategyRemoved(indexed address)
+          handler: handleStrategyRemoved
         - event: StrategyApyUpdated(indexed address,int256)
           handler: handleStrategyApyUpdated
         - event: StrategyDhw(indexed address,uint256,(uint256,uint256[],int256,uint256,uint256))
@@ -143,6 +145,8 @@ dataSources:
           handler: handleSmartVaultFlushed
         - event: SmartVaultReallocated(indexed address,uint256)
           handler: handleSmartVaultReallocated
+        - event: StrategyRemovedFromVaults(indexed address,address[])
+          handler: handleStrategyRemovedFromVaults
   - kind: ethereum/contract
     name: DepositManager
     network: {{ network }}

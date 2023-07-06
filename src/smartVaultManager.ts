@@ -1,5 +1,5 @@
 import {BigInt} from "@graphprotocol/graph-ts";
-import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered} from "../generated/SmartVaultManager/SmartVaultManagerContract";
+import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVaults} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
@@ -11,8 +11,9 @@ import {
     getSmartVaultFees,
     getSmartVault,
     getArrayFromUint16a16,
+    GHOST_STRATEGY_ADDRESS,
 } from "./utils/helpers";
-import { getStrategyDHW } from "./strategyRegistry";
+import { getGhostStrategy, getStrategy, getStrategyDHW } from "./strategyRegistry";
 import {SmartVault} from "../generated/templates";
 
 export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
@@ -106,6 +107,28 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
         let newAllocation = newAllocations.rightShift(u8(i * 16)).bitAnd(allocationMask);
         smartVaultStrategy.allocation = newAllocation;
         smartVaultStrategy.save();
+    }
+}
+
+export function handleStrategyRemovedFromVaults(event: StrategyRemovedFromVaults): void {
+    logEventName("handleStrategyRemovedFromVaults", event);
+
+    let strategy = event.params.strategy.toHexString();
+    let vaults = event.params.vaults;
+
+    let ghostStrategy = getGhostStrategy();
+
+    for (let i = 0; i < vaults.length; i++) {
+
+        let smartVault = getSmartVault(vaults[i].toHexString());
+        let smartVaultGhostStrategy = getSmartVaultStrategy(smartVault.id, ghostStrategy.id);
+
+        let index = smartVault.smartVaultStrategies.indexOf(getComposedId(smartVault.id, strategy));
+
+        smartVault.smartVaultStrategies[index] = smartVaultGhostStrategy.id;
+
+        smartVault.save();
+
     }
 }
 

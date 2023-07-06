@@ -2,12 +2,13 @@ import {Address} from "@graphprotocol/graph-ts";
 import {
     StrategyApyUpdated,
     StrategyRegistered,
-    StrategyDhw as StrategyDhwEvent
+    StrategyDhw as StrategyDhwEvent,
+    StrategyRemoved
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
 import {Strategy, StrategyDHW} from "../generated/schema";
-import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId} from "./utils/helpers";
+import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS} from "./utils/helpers";
 
 export function handleStrategyRegistered(event: StrategyRegistered): void {
     logEventName("handleStrategyRegistered", event);
@@ -16,6 +17,15 @@ export function handleStrategyRegistered(event: StrategyRegistered): void {
 
     strategy.lastDoHardWorkTime = event.block.number;
     strategy.addedOn = event.block.number;
+    strategy.save();
+}
+
+export function handleStrategyRemoved(event: StrategyRemoved): void {
+    logEventName("handleStrategyRemoved", event);
+
+    let strategy = getStrategy(event.params.strategy.toHexString());
+
+    strategy.isRemoved = true;
     strategy.save();
 }
 
@@ -41,7 +51,7 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     strategyDhw.save();
 }
 
-function getStrategy(strategyAddress: string): Strategy {
+export function getStrategy(strategyAddress: string): Strategy {
     let strategy = Strategy.load(strategyAddress);
 
     if (strategy == null) {
@@ -54,6 +64,30 @@ function getStrategy(strategyAddress: string): Strategy {
         strategy.index = 1;
         strategy.lastDoHardWorkTime = ZERO_BI;
         strategy.isRemoved = false;
+        strategy.isGhost = false;
+        strategy.addedOn = ZERO_BI;
+        strategy.save();
+    }
+
+    return strategy;
+}
+
+
+export function getGhostStrategy(): Strategy {
+    let strategyAddress = GHOST_STRATEGY_ADDRESS.toHexString();
+    let strategy = Strategy.load(strategyAddress);
+
+    if (strategy == null) {
+        let strategyContract = StrategyContract.bind(Address.fromString(strategyAddress));
+
+        strategy = new Strategy(strategyAddress);
+        strategy.name = strategyContract.strategyName();
+        strategy.assetGroup = strategyContract.assetGroupId().toString();
+        strategy.apy = ZERO_BD;
+        strategy.index = 1;
+        strategy.lastDoHardWorkTime = ZERO_BI;
+        strategy.isRemoved = false;
+        strategy.isGhost = true;
         strategy.addedOn = ZERO_BI;
         strategy.save();
     }
