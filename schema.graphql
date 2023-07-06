@@ -211,8 +211,8 @@ type Guard @entity {
     contractAddress: String!
     methodSignature: String!
     expectedValue: BigInt!
-    requestType: RequestType!
     operator: Int!
+    requestType: RequestType!
     parameters: [GuardToParameter!]! @derivedFrom(field: "guard")
     vaults: [SmartVaultToGuard!]! @derivedFrom(field: "guard")
 }
