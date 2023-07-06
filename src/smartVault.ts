@@ -6,6 +6,7 @@ import {
     MAXIMAL_DEPOSIT_ID,
     ZERO_ADDRESS,
     getSmartVault,
+    getUser,
     logEventName,
 } from "./utils/helpers";
 import {getSmartVaultDepositNFT} from "./depositManager";
@@ -67,14 +68,15 @@ export function handleTransferBatch(event: TransferBatch): void {
 
 function _updateNFT(smartVault: SmartVault, to: string, id: BigInt): void {
     let isBurned = (to == ZERO_ADDRESS.toHexString()) ? true : false;
+    let user = getUser(to).id;
     if(id <= MAXIMAL_DEPOSIT_ID){
         let smartVaultDepositNFT = getSmartVaultDepositNFT(smartVault.id, id);
-        smartVaultDepositNFT.user = to;
+        smartVaultDepositNFT.user = user;
         smartVaultDepositNFT.isBurned = isBurned;
         smartVaultDepositNFT.save();
     } else {
         let smartVaultWithdrawalNFT = getSmartVaultWithdrawalNFT(smartVault.id, id);
-        smartVaultWithdrawalNFT.user = to;
+        smartVaultWithdrawalNFT.user = user;
         smartVaultWithdrawalNFT.isBurned = isBurned;
         smartVaultWithdrawalNFT.save();
     }
