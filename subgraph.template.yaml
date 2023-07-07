@@ -114,6 +114,26 @@ dataSources:
         - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
           handler: handleRoleRevoked
   - kind: ethereum/contract
+    name: SmartVaultFactory
+    network: {{ network }}
+    source:
+      address: '{{ smartVaultFactory }}'
+      abi: SmartVaultFactoryContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/smartVaultFactory.ts
+      entities:
+        - SmartVault
+      abis:
+        - name: SmartVaultFactoryContract
+          file: ./abis/SmartVaultFactory.json
+      eventHandlers:
+        - event: SmartVaultDeployed(indexed address,indexed address)
+          handler: handleSmartVaultDeployed
+  - kind: ethereum/contract
     name: SmartVaultManager
     network: {{ network }}
     source:

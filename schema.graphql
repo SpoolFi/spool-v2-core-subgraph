@@ -5,7 +5,6 @@ type SmartVault @entity {
     assetGroup: AssetGroup!
     lastRebalanceTime: BigInt!
     rebalanceCount: BigInt!
-    smartVaultCreator: String!
     smartVaultOwner: String!
     allocationProvider: String
     riskProvider: RiskProvider
