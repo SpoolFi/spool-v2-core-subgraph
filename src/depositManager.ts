@@ -28,7 +28,9 @@ export function handleDepositInitiated(event: DepositInitiated): void {
     let smartVaultAddress = event.params.smartVault.toHexString();
 
     let dNFT = getSmartVaultDepositNFT(smartVaultAddress, event.params.depositId);
-    dNFT.user = getUser(event.params.receiver.toHexString()).id;
+    let user = getUser(event.params.receiver.toHexString());
+    dNFT.user = user.id;
+    dNFT.owner = user.id;
     dNFT.smartVaultFlush = getSmartVaultFlush(smartVaultAddress, event.params.flushIndex).id;
     dNFT.createdOn = event.block.timestamp;
 
@@ -74,10 +76,12 @@ export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt
         dNFT.smartVault = smartVaultAddress;
         dNFT.nftId = nftId;
         dNFT.user = ZERO_ADDRESS.toHexString();
+        dNFT.owner = ZERO_ADDRESS.toHexString();
         dNFT.shares = NFT_INITIAL_SHARES;
         dNFT.assets = [];
         dNFT.smartVaultFlush = "";
         dNFT.isBurned = false;
+        dNFT.transferCount = 0;
         dNFT.createdOn = ZERO_BI;
 
         dNFT.save();

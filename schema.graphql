@@ -61,7 +61,9 @@ type SmartVaultFlush @entity {
 type User @entity { 
     id: ID!
     smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "user")
-    SmartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "user")
+    SmartVaultDepositNFTsOwned: [SmartVaultDepositNFT!]! @derivedFrom(field: "owner")
+    smartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "user")
+    SmartVaultWithdrawalNFTsOwned: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "owner")
     userSmartVaults: [UserSmartVault!]! @derivedFrom(field: "user")
 }
 
@@ -70,11 +72,14 @@ type SmartVaultDepositNFT @entity {
     smartVault: SmartVault!
     nftId: BigInt!
     user: User!
+    owner: User!
     shares: BigInt!
     assets: [BigDecimal!]!
     smartVaultFlush: SmartVaultFlush!
     isBurned: Boolean!
     createdOn: BigInt!
+    transferCount: Int!
+    transfers: [SmartVaultDepositNFTTransfer!]! @derivedFrom(field: "dNFT")
 }
 
 type SmartVaultWithdrawalNFT @entity {
@@ -82,11 +87,32 @@ type SmartVaultWithdrawalNFT @entity {
     smartVault: SmartVault!
     nftId: BigInt!
     user: User!
+    owner: User!
     shares: BigInt!
     svtWithdrawn: BigInt!
     smartVaultFlush: SmartVaultFlush!
     isBurned: Boolean!
     createdOn: BigInt!
+    transferCount: Int!
+    transfers: [SmartVaultWithdrawalNFTTransfer!]! @derivedFrom(field: "wNFT")
+}
+
+type SmartVaultDepositNFTTransfer @entity {
+    id: ID! # Set to nft.id-transferId
+    dNFT: SmartVaultDepositNFT!
+    transferId: Int!
+    from: User!
+    to: User!
+    timestamp: Int!
+}
+
+type SmartVaultWithdrawalNFTTransfer @entity {
+    id: ID! # Set to nft.id-transferId
+    wNFT: SmartVaultWithdrawalNFT!
+    transferId: Int!
+    from: User!
+    to: User!
+    timestamp: Int!
 }
 
 type Token @entity {

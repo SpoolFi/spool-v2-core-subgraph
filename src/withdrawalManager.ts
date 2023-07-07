@@ -24,7 +24,9 @@ export function handleRedeemInitiated(event: RedeemInitiated): void {
     let smartVaultAddress = event.params.smartVault.toHexString();
 
     let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, event.params.redeemId);
-    wNFT.user = getUser(event.params.receiver.toHexString()).id;
+    let user = getUser(event.params.receiver.toHexString());
+    wNFT.user = user.id;
+    wNFT.owner = user.id;
     wNFT.smartVaultFlush = getSmartVaultFlush(smartVaultAddress, event.params.flushIndex).id;
     wNFT.createdOn = event.block.timestamp;
     wNFT.svtWithdrawn = event.params.shares;
@@ -69,10 +71,12 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
         wNFT.smartVault = smartVaultAddress;
         wNFT.nftId = nftId;
         wNFT.user = ZERO_ADDRESS.toHexString();
+        wNFT.owner = ZERO_ADDRESS.toHexString();
         wNFT.shares = NFT_INITIAL_SHARES;
         wNFT.svtWithdrawn = ZERO_BI;
         wNFT.smartVaultFlush = "";
         wNFT.isBurned = false;
+        wNFT.transferCount = 0;
         wNFT.createdOn = ZERO_BI;
 
         wNFT.save();
