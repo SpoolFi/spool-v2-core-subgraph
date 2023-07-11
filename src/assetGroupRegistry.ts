@@ -10,7 +10,7 @@ import {createTokenEntity, getComposedId, logEventName} from "./utils/helpers";
 export function handleAssetGroupRegistered(event: AssetGroupRegistered): void {
     logEventName("handleAssetGroupRegistered", event);
 
-    let assetGroup = getAssetGroup(event.params.assetGroupId);
+    let assetGroup = getAssetGroup(event.params.assetGroupId.toHexString());
 
     let assetGroupRegistry = AssetGroupRegistryContract.bind(event.address);
     let tokens = assetGroupRegistry.listAssetGroup(event.params.assetGroupId);
@@ -27,11 +27,11 @@ export function handleAssetGroupRegistered(event: AssetGroupRegistered): void {
     assetGroup.save();
 }
 
-function getAssetGroup(assetGroupId: BigInt): AssetGroup {
-    let assetGroup = AssetGroup.load(assetGroupId.toString());
+export function getAssetGroup(assetGroupId: string): AssetGroup {
+    let assetGroup = AssetGroup.load(assetGroupId);
 
     if (assetGroup == null) {
-        assetGroup = new AssetGroup(assetGroupId.toString());
+        assetGroup = new AssetGroup(assetGroupId);
         assetGroup.assetGroupTokens = [];
         assetGroup.save();
     }
@@ -39,7 +39,7 @@ function getAssetGroup(assetGroupId: BigInt): AssetGroup {
     return assetGroup;
 }
 
-function getAssetGroupToken(assetGroupId: string, tokenAddress: string): AssetGroupToken {
+export function getAssetGroupToken(assetGroupId: string, tokenAddress: string): AssetGroupToken {
     let assetGroupTokenId = getComposedId(assetGroupId, tokenAddress);
     let assetGroupToken = AssetGroupToken.load(assetGroupTokenId);
 
@@ -47,6 +47,17 @@ function getAssetGroupToken(assetGroupId: string, tokenAddress: string): AssetGr
         assetGroupToken = new AssetGroupToken(assetGroupTokenId);
         assetGroupToken.assetGroup = assetGroupId;
         assetGroupToken.token = tokenAddress;
+        assetGroupToken.save();
+    }
+
+    return assetGroupToken;
+}
+
+export function getAssetGroupTokenById(assetGroupTokenId: string): AssetGroupToken {
+    let assetGroupToken = AssetGroupToken.load(assetGroupTokenId);
+
+    if (assetGroupToken == null) {
+        assetGroupToken = new AssetGroupToken(assetGroupTokenId);
         assetGroupToken.save();
     }
 

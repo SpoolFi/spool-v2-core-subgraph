@@ -3,12 +3,16 @@ import {
     StrategyApyUpdated,
     StrategyRegistered,
     StrategyDhw as StrategyDhwEvent,
-    StrategyRemoved
+    StrategyRemoved,
+    EcosystemFeeReceiverSet,
+    TreasuryFeeReceiverSet,
+    StrategySharesRedeemed
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
-import {Strategy, StrategyDHW} from "../generated/schema";
-import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS} from "./utils/helpers";
+import {SSTRedemptionAsset, Strategy, StrategyDHW, StrategyRegistry, Token, User} from "../generated/schema";
+import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS, ZERO_ADDRESS, getUser, createTokenEntity} from "./utils/helpers";
+import {getAssetGroup, getAssetGroupTokenById} from "./assetGroupRegistry";
 
 export function handleStrategyRegistered(event: StrategyRegistered): void {
     logEventName("handleStrategyRegistered", event);
@@ -49,6 +53,46 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     strategyDhw.apy = strategyApyToDecimal(event.params.dhwInfo.yieldPercentage);
     strategyDhw.ssts = event.params.dhwInfo.totalSstsAtDhw;
     strategyDhw.save();
+}
+
+export function handleEcosystemFeeReceiverSet(event: EcosystemFeeReceiverSet): void {
+    logEventName("handleEcosystemFeeReceiverSet", event);
+
+    let strategyRegistry = getStrategyRegistry( event.address.toHexString());
+
+    strategyRegistry.ecosystemFeeReceiver = getUser( event.params.ecosystemFeeReceiver.toHexString() ).id;
+
+    strategyRegistry.save();
+}
+
+export function handleTreasuryFeeReceiverSet(event: TreasuryFeeReceiverSet): void {
+    logEventName("handleTreasuryFeeReceiverSet", event);
+
+    let strategyRegistry = getStrategyRegistry( event.address.toHexString());
+
+    strategyRegistry.treasuryFeeReceiver = getUser( event.params.treasuryFeeReceiver.toHexString() ).id;
+
+    strategyRegistry.save();
+}
+
+export function handleStrategySharesRedeemed(event: StrategySharesRedeemed): void {
+    logEventName("handleStrategySharesRedeemed", event);
+
+    let owner = getUser(event.params.owner.toHexString());
+    let strategy = getStrategy(event.params.strategy.toHexString());
+    let assetGroup = getAssetGroup(strategy.assetGroup);
+    let assetAmounts = event.params.assetsWithdrawn;
+    let assetGroupTokens = assetGroup.assetGroupTokens;
+
+    for(let i = 0; i < assetGroupTokens.length; i++) {
+        let assetGroupToken = getAssetGroupTokenById(assetGroupTokens[i]);
+        let asset = createTokenEntity(assetGroupToken.token);
+
+        let sstRedemptionAsset = getSSTRedemptionAsset(owner, asset);
+
+        sstRedemptionAsset.claimed = assetAmounts[i].toBigDecimal();
+        sstRedemptionAsset.save();
+    }
 }
 
 export function getStrategy(strategyAddress: string): Strategy {
@@ -111,4 +155,34 @@ export function getStrategyDHW(
     }
 
     return strategyDhw;
+}
+
+export function getStrategyRegistry(strategyRegistryAddress: string): StrategyRegistry {
+    let strategyRegistry = StrategyRegistry.load(strategyRegistryAddress);
+
+    if (strategyRegistry == null) {
+        strategyRegistry = new StrategyRegistry(strategyRegistryAddress);
+        strategyRegistry.ecosystemFeeReceiver = ZERO_ADDRESS.toHexString();
+        strategyRegistry.treasuryFeeReceiver = ZERO_ADDRESS.toHexString();
+        strategyRegistry.save();
+    }
+
+    return strategyRegistry;
+
+}
+
+export function getSSTRedemptionAsset(user: User, asset: Token): SSTRedemptionAsset {
+    let sstRedemptionAssetId = getComposedId(user.id, asset.id);
+    let sstRedemptionAsset = SSTRedemptionAsset.load(sstRedemptionAssetId);
+
+    if (sstRedemptionAsset == null) {
+        sstRedemptionAsset = new SSTRedemptionAsset(sstRedemptionAssetId);
+        sstRedemptionAsset.user = user.id;
+        sstRedemptionAsset.asset = asset.id;
+        sstRedemptionAsset.claimed = ZERO_BD;
+        sstRedemptionAsset.save();
+    }
+
+    return sstRedemptionAsset;
+        
 }

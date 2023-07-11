@@ -45,6 +45,19 @@ type SmartVaultFees @entity {
     managementFeePercentage: BigDecimal!
 }
 
+type StrategyRegistry @entity {
+    id: ID! # set to strategyRegistry address
+    ecosystemFeeReceiver: User!
+    treasuryFeeReceiver: User!
+}
+
+type SSTRedemptionAsset @entity {
+    id: ID! # set to user-asset
+    user: User!
+    asset: Token!
+    claimed: BigDecimal!
+}
+
 type SmartVaultFlush @entity {
     id: ID! # Set to `{smartVault.id}-${flushId}`
     smartVault: SmartVault!
@@ -64,6 +77,7 @@ type User @entity {
     smartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "user")
     SmartVaultWithdrawalNFTsOwned: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "owner")
     userSmartVaults: [UserSmartVault!]! @derivedFrom(field: "user")
+    redeemedAssets: [SSTRedemptionAsset!]! @derivedFrom(field: "user")
 }
 
 type SmartVaultDepositNFT @entity {

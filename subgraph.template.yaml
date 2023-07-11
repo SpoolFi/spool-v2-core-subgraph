@@ -34,6 +34,12 @@ dataSources:
           handler: handleStrategyApyUpdated
         - event: StrategyDhw(indexed address,uint256,(uint256,uint256[],int256,uint256,uint256))
           handler: handleStrategyDhw
+        - event: EcosystemFeeReceiverSet(indexed address)
+          handler: handleEcosystemFeeReceiverSet
+        - event: TreasuryFeeReceiverSet(indexed address)
+          handler: handleTreasuryFeeReceiverSet
+        - event: StrategySharesRedeemed(indexed address,indexed address,indexed address,uint256,uint256[])
+          handler: handleStrategySharesRedeemed
   - kind: ethereum/contract
     name: RiskManager
     network: {{ network }}
