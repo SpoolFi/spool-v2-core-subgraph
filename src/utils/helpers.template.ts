@@ -15,6 +15,7 @@ export const NFT_INITIAL_SHARES = BigInt.fromI32(1000000);
 const MASK_16_BIT = BigInt.fromU32(65_535);
 export const MAXIMAL_DEPOSIT_ID = BigInt.fromString("57896044618658097711785492504343953926634992332820282019728792003956564819967");
 export const GHOST_STRATEGY_ADDRESS = Address.fromString('{{ ghostStrategy }}');
+export const STRATEGY_REGISTRY_ADDRESS = Address.fromString('{{ strategyRegistry }}');
 
 export function logEventName(name: string, event: ethereum.Event): void {
     log.info("{}: tx={} block={}", [

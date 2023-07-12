@@ -5,7 +5,10 @@ import {
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
 import {
+    SmartVault,
+    SmartVaultFlush,
     SmartVaultWithdrawalNFT,
+    WithdrawnVaultShares,
 } from "../generated/schema";
 
 import {
@@ -15,23 +18,32 @@ import {
     ZERO_ADDRESS,
     getUser,
     NFT_INITIAL_SHARES,
+    getSmartVault,
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
     logEventName("handleRedeemInitiated", event);
-    let smartVaultAddress = event.params.smartVault.toHexString();
 
-    let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, event.params.redeemId);
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
+    let wNFT = getSmartVaultWithdrawalNFT(smartVault.id, event.params.redeemId);
+    let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
+    let withdrawnVaultShares = getWithdrawnVaultShares(smartVault, smartVaultFlush);
     let user = getUser(event.params.receiver.toHexString());
+
+    let shares = event.params.shares;
+
     wNFT.user = user.id;
     wNFT.owner = user.id;
-    wNFT.smartVaultFlush = getSmartVaultFlush(smartVaultAddress, event.params.flushIndex).id;
+    wNFT.smartVaultFlush = smartVaultFlush.id;
     wNFT.createdOn = event.block.timestamp;
-    wNFT.svtWithdrawn = event.params.shares;
+    wNFT.svtWithdrawn = shares;
+
+    withdrawnVaultShares.shares = withdrawnVaultShares.shares.plus(shares);
 
     wNFT.save();
+    withdrawnVaultShares.save();
 }
 
 export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
@@ -84,3 +96,27 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
 
     return wNFT;
 }
+
+
+export function getWithdrawnVaultShares(smartVault: SmartVault, smartVaultFlush: SmartVaultFlush): WithdrawnVaultShares {
+    let withdrawnVaultSharesId = getComposedId(smartVault.id, smartVaultFlush.id);
+    let withdrawnVaultShares = WithdrawnVaultShares.load(withdrawnVaultSharesId);
+
+    if (withdrawnVaultShares == null) {
+        withdrawnVaultShares = new WithdrawnVaultShares(withdrawnVaultSharesId);
+        withdrawnVaultShares.smartVault = smartVault.id;
+        withdrawnVaultShares.smartVaultFlush = smartVaultFlush.id;
+        withdrawnVaultShares.shares = ZERO_BI;
+
+        withdrawnVaultShares.save();
+    }
+
+    return withdrawnVaultShares;
+}
+
+
+
+
+
+
+

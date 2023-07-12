@@ -55,6 +55,8 @@ type SmartVaultFlush @entity {
     strategyDHWs: [StrategyDHW!] # strategy index do hard works
     SmartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "smartVaultFlush")
     SmartVaultWithdrawalNFTs: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "smartVaultFlush")
+    withdrawnVaultShares: [WithdrawnVaultShares!]! @derivedFrom(field: "smartVaultFlush")
+    vaultDeposits: [VaultDeposits!]! @derivedFrom(field: "smartVaultFlush")
 }
 
 type User @entity { 
@@ -94,6 +96,21 @@ type SmartVaultWithdrawalNFT @entity {
     createdOn: BigInt!
     transferCount: Int!
     transfers: [SmartVaultWithdrawalNFTTransfer!]! @derivedFrom(field: "wNFT")
+}
+
+type WithdrawnVaultShares @entity {
+id: ID! # Set to `{smartVault.id}-${flushIndex}`
+    smartVault: SmartVault!
+    smartVaultFlush: SmartVaultFlush!
+    shares: BigInt!
+}
+
+type VaultDeposits @entity {
+    id: ID! # Set to `{smartVault.id}-${flushIndex}-${token.id}`
+    smartVault: SmartVault!
+    smartVaultFlush: SmartVaultFlush!
+    token: Token!
+    amount: BigDecimal!
 }
 
 type SmartVaultDepositNFTTransfer @entity {
@@ -159,8 +176,16 @@ type StrategyDHW @entity {
     blockNumber: BigInt
     ssts: BigInt
     apy: BigDecimal
+    sharesRedeemed: BigInt!
+    assetsDeposited: [StrategyDHWAssetDeposit!]! @derivedFrom(field: "strategyDHW")
 }
 
+type StrategyDHWAssetDeposit @entity {
+    id: ID! # Set to `${strategyDHW.id}-${asset.id}`
+    strategyDHW: StrategyDHW!
+    asset: Token!
+    amount: BigInt!
+}
 
 #################
 

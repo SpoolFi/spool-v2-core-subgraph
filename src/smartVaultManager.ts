@@ -1,20 +1,13 @@
-import {BigInt} from "@graphprotocol/graph-ts";
+import {Address, BigInt} from "@graphprotocol/graph-ts";
 import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVaults} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
-import {
-    ZERO_BI,
-    logEventName,
-    getComposedId,
-    percenti32ToDecimal,
-    getSmartVaultFees,
-    getSmartVault,
-    getArrayFromUint16a16,
-    GHOST_STRATEGY_ADDRESS,
-} from "./utils/helpers";
-import { getGhostStrategy, getStrategy, getStrategyDHW } from "./strategyRegistry";
+import { getGhostStrategy, getStrategy, getStrategyDHW, getStrategyDHWAssetDeposit } from "./strategyRegistry";
 import {SmartVault} from "../generated/templates";
+import {StrategyRegistryContract} from "../generated/StrategyRegistry/StrategyRegistryContract";
+import {getAssetGroup, getAssetGroupToken, getAssetGroupTokenById} from "./assetGroupRegistry";
+import {STRATEGY_REGISTRY_ADDRESS, ZERO_BI, createTokenEntity, getArrayFromUint16a16, getComposedId, getSmartVault, getSmartVaultFees, logEventName, percenti32ToDecimal} from "./utils/helpers";
 
 export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     logEventName("handleSmartVaultRegistered", event);
@@ -90,6 +83,39 @@ export function handleSmartVaultFlushed(event: SmartVaultFlushed): void {
     smartVaultFlush.blockNumber = event.block.number;
 
     smartVaultFlush.save();
+
+    // add deposits for next DHW index
+    // call "currentIndex" with strat addresses for current dhw indexes; returns list
+    let strategyRegistry = StrategyRegistryContract.bind(STRATEGY_REGISTRY_ADDRESS);
+    let strategies : Address[] = [];
+    for(let i = 0; i < smartVaultStrategies.length; i++) {
+        strategies.push(Address.fromString(SmartVaultStrategy.load(smartVaultStrategies[i])!.strategy));
+    }
+
+    let currentIndexes = strategyRegistry.currentIndex(strategies);
+
+    // call "depositedAssets" with each strat address and index to get deposited assets
+    // call "sharesRedeemed" with each strat address and index to get shares redeemed (withdraw amount)
+    for(let i = 0; i < strategies.length; i++) {
+        let strategy = getStrategy(strategies[i].toHexString());
+        let strategyDHW = getStrategyDHW(strategy.id, currentIndexes[i].toI32());
+        let assetGroup = getAssetGroup(strategy.assetGroup);
+
+        let depositedAssets = strategyRegistry.depositedAssets(strategies[i], currentIndexes[i]);
+        let sharesRedeemed = strategyRegistry.sharesRedeemed(strategies[i], currentIndexes[i]);
+
+        for(let j = 0; j < assetGroup.assetGroupTokens.length; j++) {
+            let assetGroupToken = getAssetGroupTokenById(assetGroup.assetGroupTokens[j]);
+            let asset = createTokenEntity(assetGroupToken.token);
+            let strategyDHWAssetDeposit = getStrategyDHWAssetDeposit(strategyDHW, asset);
+
+            strategyDHWAssetDeposit.amount = strategyDHWAssetDeposit.amount.plus(depositedAssets[j]);
+            strategyDHWAssetDeposit.save();
+        }
+
+        strategyDHW.sharesRedeemed = strategyDHW.sharesRedeemed.plus(sharesRedeemed);
+        strategyDHW.save();
+    }
 }
 
 export function handleSmartVaultReallocated(event: SmartVaultReallocated): void {

@@ -7,7 +7,13 @@ import {
 import {
     AssetGroup,
     AssetGroupToken,
+    SmartVault,
     SmartVaultDepositNFT,
+    SmartVaultFlush,
+    Strategy,
+    Token,
+    VaultDeposits,
+    WithdrawnVaultShares,
 } from "../generated/schema";
 
 import {
@@ -20,30 +26,39 @@ import {
     createTokenEntity,
     getTokenDecimalAmountFromAddress,
     NFT_INITIAL_SHARES,
+    ZERO_BD,
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
+import {getAssetGroupToken} from "./assetGroupRegistry";
 
 export function handleDepositInitiated(event: DepositInitiated): void {
     logEventName("handleDepositInitiated", event);
-    let smartVaultAddress = event.params.smartVault.toHexString();
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
 
-    let dNFT = getSmartVaultDepositNFT(smartVaultAddress, event.params.depositId);
+    let dNFT = getSmartVaultDepositNFT(smartVault.id, event.params.depositId);
+    let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
     let user = getUser(event.params.receiver.toHexString());
+
     dNFT.user = user.id;
     dNFT.owner = user.id;
-    dNFT.smartVaultFlush = getSmartVaultFlush(smartVaultAddress, event.params.flushIndex).id;
+    dNFT.smartVaultFlush = smartVaultFlush.id;
     dNFT.createdOn = event.block.timestamp;
 
-    const assetGroup = AssetGroup.load(getSmartVault(smartVaultAddress).assetGroup)!;
+    const assetGroup = AssetGroup.load(smartVault.assetGroup)!;
+
 
     let assets = dNFT.assets;
     for (let i = 0; i < assetGroup.assetGroupTokens.length; i++) {
         // second part of the id is the token address
-        let tokenAddress = assetGroup.assetGroupTokens[i].split("-")[1];
+        let token = createTokenEntity(assetGroup.assetGroupTokens[i].split("-")[1]);
 
-        let amount = getTokenDecimalAmountFromAddress(event.params.assets[i], tokenAddress);
+        let amount = getTokenDecimalAmountFromAddress(event.params.assets[i], token.id);
 
         assets.push(amount);
+
+        let vaultDeposits = getVaultDeposits(smartVault, smartVaultFlush, token);
+        vaultDeposits.amount = vaultDeposits.amount.plus(amount);
+        vaultDeposits.save();
     }
     dNFT.assets = assets;
 
@@ -89,3 +104,25 @@ export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt
 
     return dNFT;
 }
+
+
+
+export function getVaultDeposits(smartVault: SmartVault, smartVaultFlush: SmartVaultFlush, token: Token): VaultDeposits {
+    let vaultDepositsId = getComposedId(smartVault.id, smartVaultFlush.id, token.id);
+    let vaultDeposits = VaultDeposits.load(vaultDepositsId);
+
+    if (vaultDeposits == null) {
+        vaultDeposits = new VaultDeposits(vaultDepositsId);
+        vaultDeposits.smartVault = smartVault.id;
+        vaultDeposits.smartVaultFlush = smartVaultFlush.id;
+        vaultDeposits.token = token.id;
+        vaultDeposits.amount = ZERO_BD;
+
+        vaultDeposits.save();
+    }
+
+    return vaultDeposits;
+
+}
+
+

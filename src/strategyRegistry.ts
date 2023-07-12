@@ -7,7 +7,7 @@ import {
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
-import {Strategy, StrategyDHW} from "../generated/schema";
+import {Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token} from "../generated/schema";
 import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS} from "./utils/helpers";
 
 export function handleStrategyRegistered(event: StrategyRegistered): void {
@@ -107,8 +107,33 @@ export function getStrategyDHW(
         strategyDhw.strategy = strategyAddress;
         strategyDhw.strategyDHWIndex = strategyindex;
         strategyDhw.isExecuted = false;
+        strategyDhw.sharesRedeemed = ZERO_BI;
         strategyDhw.save();
     }
 
     return strategyDhw;
 }
+
+
+
+export function getStrategyDHWAssetDeposit(
+    strategyDHW: StrategyDHW,
+    asset: Token
+): StrategyDHWAssetDeposit {
+
+    let strategyDhwAssetDepositId = getComposedId(strategyDHW.id, asset.id);
+    let strategyDhwAssetDeposit = StrategyDHWAssetDeposit.load(strategyDhwAssetDepositId);
+
+    if (strategyDhwAssetDeposit == null) {
+        strategyDhwAssetDeposit = new StrategyDHWAssetDeposit(strategyDhwAssetDepositId);
+        strategyDhwAssetDeposit.strategyDHW = strategyDHW.id;
+        strategyDhwAssetDeposit.asset = asset.id;
+        strategyDhwAssetDeposit.amount = ZERO_BI;
+        strategyDhwAssetDeposit.save();
+    }
+
+    return strategyDhwAssetDeposit;
+}
+
+
+
