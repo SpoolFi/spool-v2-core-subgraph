@@ -10,7 +10,7 @@ import {createTokenEntity, getComposedId, logEventName} from "./utils/helpers";
 export function handleAssetGroupRegistered(event: AssetGroupRegistered): void {
     logEventName("handleAssetGroupRegistered", event);
 
-    let assetGroup = getAssetGroup(event.params.assetGroupId.toString());
+    let assetGroup = getAssetGroup(event.params.assetGroupId.toHexString());
 
     let assetGroupRegistry = AssetGroupRegistryContract.bind(event.address);
     let tokens = assetGroupRegistry.listAssetGroup(event.params.assetGroupId);
@@ -52,8 +52,6 @@ export function getAssetGroupToken(assetGroupId: string, tokenAddress: string): 
 
     return assetGroupToken;
 }
-
-
 export function getAssetGroupTokenById(assetGroupTokenId: string): AssetGroupToken {
     let assetGroupToken = AssetGroupToken.load(assetGroupTokenId);
 
