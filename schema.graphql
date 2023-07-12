@@ -79,6 +79,7 @@ type SmartVaultDepositNFT @entity {
     smartVaultFlush: SmartVaultFlush!
     isBurned: Boolean!
     createdOn: BigInt!
+    blockNumber: Int!
     transferCount: Int!
     transfers: [SmartVaultDepositNFTTransfer!]! @derivedFrom(field: "dNFT")
 }
@@ -94,6 +95,7 @@ type SmartVaultWithdrawalNFT @entity {
     smartVaultFlush: SmartVaultFlush!
     isBurned: Boolean!
     createdOn: BigInt!
+    blockNumber: Int!
     transferCount: Int!
     transfers: [SmartVaultWithdrawalNFTTransfer!]! @derivedFrom(field: "wNFT")
 }

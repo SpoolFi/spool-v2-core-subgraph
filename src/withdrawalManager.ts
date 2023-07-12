@@ -39,6 +39,7 @@ export function handleRedeemInitiated(event: RedeemInitiated): void {
     wNFT.smartVaultFlush = smartVaultFlush.id;
     wNFT.createdOn = event.block.timestamp;
     wNFT.svtWithdrawn = shares;
+    wNFT.blockNumber = event.block.number.toI32();
 
     withdrawnVaultShares.shares = withdrawnVaultShares.shares.plus(shares);
 
@@ -90,6 +91,7 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
         wNFT.isBurned = false;
         wNFT.transferCount = 0;
         wNFT.createdOn = ZERO_BI;
+        wNFT.blockNumber = 0;
 
         wNFT.save();
     }
