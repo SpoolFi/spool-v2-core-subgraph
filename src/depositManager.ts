@@ -33,6 +33,7 @@ export function handleDepositInitiated(event: DepositInitiated): void {
     dNFT.owner = user.id;
     dNFT.smartVaultFlush = getSmartVaultFlush(smartVaultAddress, event.params.flushIndex).id;
     dNFT.createdOn = event.block.timestamp;
+    dNFT.blockNumber = event.block.number.toI32();
 
     const assetGroup = AssetGroup.load(getSmartVault(smartVaultAddress).assetGroup)!;
 
@@ -83,6 +84,7 @@ export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt
         dNFT.isBurned = false;
         dNFT.transferCount = 0;
         dNFT.createdOn = ZERO_BI;
+        dNFT.blockNumber = 0;
 
         dNFT.save();
     }
