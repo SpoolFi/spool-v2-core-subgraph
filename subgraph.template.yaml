@@ -261,6 +261,10 @@ dataSources:
           handler: handleRewardRemoved
         - event: RewardsClaimed(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleRewardsClaimed
+        - event:  PoolRootAdded(indexed uint256,bytes32)
+          handler: handlePoolRootAdded
+        - event: PoolRootUpdated(indexed uint256,bytes32,bytes32)
+          handler: handlePoolRootUpdated
   - kind: ethereum/contract
     name: GuardManager
     network: {{ network }}

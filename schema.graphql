@@ -265,8 +265,16 @@ type UserSmartVaultRewardToken @entity {
 type UserSmartVaultRewardTokenCycle @entity {
     id: ID! # set to `${UserSmartVaultRewardToken.id}-${cycle}`
     userSmartVaultRewardToken: UserSmartVaultRewardToken!
-    cycle: Int!
+    cycle: Cycle!
     claimed: BigDecimal!
+}
+
+type Cycle @entity {
+    id: ID!
+    cycleCount: Int!
+    previousRoots: [String!]!
+    root: String!
+    userTokens: [UserSmartVaultRewardTokenCycle!]! @derivedFrom(field: "cycle")
 }
 
 
