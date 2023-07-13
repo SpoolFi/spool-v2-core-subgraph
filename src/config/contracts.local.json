@@ -1,6 +1,7 @@
 {
     "network": "mainnet",
     "startBlock": "17549894",
+    "url": "http://host.docker.internal:8545",
     "strategyRegistry": "0x79C42a0742733f61F110EaBAB2836397714AbBA1",
     "spoolAccessControl": "0xEe54514745B056F07040CaCF801f59031D801431",
     "assetGroupRegistry": "0xE831a22E1b09D2F25dae664BAe2EA45F8e257dd0",

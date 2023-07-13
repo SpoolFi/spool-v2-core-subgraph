@@ -1,6 +1,7 @@
 {
     "network": "mainnet",
     "startBlock": "17668723",
+    "url": "https://rpc.vnet.tenderly.co/devnet/spool-v2-staging/d13c6f4f-05b8-4f2a-a845-d132bdaffe72",
     "strategyRegistry": "0x075FbeB3802AfdCDe6DDEB1d807E4805ed719eca",
     "spoolAccessControl": "0x34E59e53Bd4f1A60ca8b6c21572509027571341d",
     "assetGroupRegistry": "0x376698f160E16978f2Cc0339ff72887923E5F3a1",
