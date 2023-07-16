@@ -43,7 +43,7 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     smartVault.save();
 
     let smartVaultFees = getSmartVaultFees(event.params.smartVault.toHexString());
-    smartVaultFees.peformanceFeePercentage = percenti32ToDecimal(
+    smartVaultFees.performanceFeePercentage = percenti32ToDecimal(
         event.params.registrationForm.performanceFeePct
     );
     smartVaultFees.depositFeePercentage = percenti32ToDecimal(

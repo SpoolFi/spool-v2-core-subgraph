@@ -40,7 +40,7 @@ type SmartVaultStrategy @entity {
 
 type SmartVaultFees @entity {
     id: ID! # Set to smartVault address
-    peformanceFeePercentage: BigDecimal!
+    performanceFeePercentage: BigDecimal!
     depositFeePercentage: BigDecimal!
     managementFeePercentage: BigDecimal!
 }
