@@ -1,10 +1,11 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import {Transfer, TransferBatch, TransferSingle} from "../generated/SmartVaultManager/SmartVaultContract";
 
-import { SmartVault, SmartVaultDepositNFTTransfer, SmartVaultDepositNFT, SmartVaultWithdrawalNFT, SmartVaultWithdrawalNFTTransfer } from "../generated/schema";
+import { SmartVault, SmartVaultDepositNFTTransfer, SmartVaultDepositNFT, SmartVaultWithdrawalNFT, SmartVaultWithdrawalNFTTransfer, SVTTransfer, Transaction } from "../generated/schema";
 import {
     MAXIMAL_DEPOSIT_ID,
     ZERO_ADDRESS,
+    ZERO_BD,
     getSmartVault,
     getUser,
     logEventName,
@@ -42,6 +43,21 @@ export function handleTransfer(event: Transfer): void {
     }
 
     smartVault.save();
+
+    let transaction = getTransaction( event.transaction.hash.toHexString() );
+    let svtTransfer =  getSVTTransfer(transaction, transaction.transferCount);
+
+    transaction.transferCount = transaction.transferCount + 1;
+    
+    svtTransfer.smartVault = smartVault.id;
+    svtTransfer.from = from;
+    svtTransfer.to = to;
+    svtTransfer.amount = amount;
+    svtTransfer.timestamp = event.block.timestamp.toI32();
+    svtTransfer.blockNumber = event.block.number.toI32();
+    
+    transaction.save();
+    svtTransfer.save();
 }
 
 export function handleTransferSingle(event: TransferSingle): void {
@@ -162,4 +178,43 @@ export function getSmartVaultWithdrawalNFTTransfer(wNFT: SmartVaultWithdrawalNFT
     }
 
     return smartVaultWithdrawalNFTTransfer;
+}
+
+
+export function getTransaction(transactionId: string): Transaction {
+
+    let smartVaultTransaction = Transaction.load(transactionId);
+
+    if (smartVaultTransaction == null) {
+        smartVaultTransaction = new Transaction(transactionId);
+
+        smartVaultTransaction.transferCount = 0;
+
+        smartVaultTransaction.save();
+    }
+
+    return smartVaultTransaction;
+}
+
+export function getSVTTransfer(transaction: Transaction, index: i32): SVTTransfer {
+
+    let id = transaction.id + "-" + index.toString();
+    let smartVaultTransfer = SVTTransfer.load(id);
+
+    if (smartVaultTransfer == null) {
+        smartVaultTransfer = new SVTTransfer(id);
+
+        smartVaultTransfer.transaction = transaction.id;
+        smartVaultTransfer.index = index;
+        smartVaultTransfer.smartVault = "";
+        smartVaultTransfer.from = ZERO_ADDRESS.toHexString();
+        smartVaultTransfer.to = ZERO_ADDRESS.toHexString();
+        smartVaultTransfer.amount = ZERO_BD;
+        smartVaultTransfer.timestamp = 0;
+        smartVaultTransfer.blockNumber = 0;
+
+        smartVaultTransfer.save();
+    }
+
+    return smartVaultTransfer;
 }

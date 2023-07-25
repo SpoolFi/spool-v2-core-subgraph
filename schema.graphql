@@ -80,6 +80,8 @@ type User @entity {
     SmartVaultWithdrawalNFTsOwned: [SmartVaultWithdrawalNFT!]! @derivedFrom(field: "owner")
     userSmartVaults: [UserSmartVault!]! @derivedFrom(field: "user")
     redeemedAssets: [SSTRedemptionAsset!]! @derivedFrom(field: "user")
+    svtSentTransfers: [SVTTransfer!]! @derivedFrom(field: "from")
+    svtReceivedTransfers: [SVTTransfer!]! @derivedFrom(field: "to")
 }
 
 type SmartVaultDepositNFT @entity {
@@ -127,6 +129,24 @@ type VaultDeposits @entity {
     smartVaultFlush: SmartVaultFlush!
     token: Token!
     amount: BigDecimal!
+}
+
+type Transaction @entity {
+    id: ID! # set to txHash
+    transferCount: Int!
+    svtTransfers: [SVTTransfer!]! @derivedFrom(field: "transaction")
+}
+
+type SVTTransfer @entity {
+    id: ID! # Set to transaction.id-index
+    transaction: Transaction!
+    index: Int!
+    smartVault: SmartVault!
+    from: User!
+    to: User!
+    amount: BigDecimal!
+    timestamp: Int!
+    blockNumber: Int!
 }
 
 type SmartVaultDepositNFTTransfer @entity {

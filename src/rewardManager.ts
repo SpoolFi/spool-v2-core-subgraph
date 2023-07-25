@@ -38,6 +38,8 @@ export function handleRewardAdded(event: RewardAdded): void {
     logEventName("handleRewardAdded", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
 
+    let periodFinish = event.block.timestamp.plus(event.params.duration);
+
     let smartVaultRewardToken = getSmartVaultRewardToken(smartVaultAddress, event.params.token.toHexString());
     let smartVaultRewardTokenUpdate = getSmartVaultRewardTokenUpdate(
         smartVaultAddress,
@@ -56,7 +58,7 @@ export function handleRewardAdded(event: RewardAdded): void {
     }
 
     smartVaultRewardToken.updatedOn = event.block.timestamp;
-    smartVaultRewardToken.endTime = event.params.periodFinish;
+    smartVaultRewardToken.endTime = periodFinish;
     smartVaultRewardToken.totalAmount = tokenAmountAdded;
     smartVaultRewardToken.rewardRate = event.params.rewardRate;
     smartVaultRewardToken.isRemoved = false;
@@ -68,7 +70,7 @@ export function handleRewardAdded(event: RewardAdded): void {
     smartVaultRewardTokenUpdate.blockNumber = event.block.number;
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
     smartVaultRewardTokenUpdate.leftoverAmount = ZERO_BD;
-    smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
+    smartVaultRewardTokenUpdate.endTime = periodFinish;
     smartVaultRewardTokenUpdate.rewardRate = event.params.rewardRate;
     smartVaultRewardTokenUpdate.updateType = ADD_REWARD;
 
