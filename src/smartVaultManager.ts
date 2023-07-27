@@ -19,7 +19,7 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     smartVault.name = smartVaultContract.vaultName();
 
     smartVault.assetGroup = event.params.registrationForm.assetGroupId.toString();
-    smartVault.createdOn = event.block.number;
+    smartVault.createdOn = event.block.timestamp;
 
     let strategiesArray = smartVault.smartVaultStrategies;
 
@@ -125,6 +125,10 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
     let newAllocations = event.params.newAllocations;
 
     let smartVault = getSmartVault(smartVaultAddress);
+    smartVault.lastRebalanceTime = event.block.timestamp;
+    smartVault.rebalanceCount = smartVault.rebalanceCount + 1;
+    smartVault.save();
+
     let smartVaultStrategies = smartVault.smartVaultStrategies;
 
     let allocationMask = BigInt.fromI32(2 ** 16 - 1);
@@ -134,6 +138,7 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
         smartVaultStrategy.allocation = newAllocation;
         smartVaultStrategy.save();
     }
+
 }
 
 export function handleStrategyRemovedFromVaults(event: StrategyRemovedFromVaults): void {

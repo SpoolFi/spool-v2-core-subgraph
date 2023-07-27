@@ -83,7 +83,7 @@ export function getSmartVault(smartVaultAddress: string): SmartVault {
         smartVault.name = "";
         smartVault.assetGroup = "0";
         smartVault.lastRebalanceTime = ZERO_BI;
-        smartVault.rebalanceCount = ZERO_BI;
+        smartVault.rebalanceCount = 0;
         smartVault.smartVaultOwner = ZERO_ADDRESS.toHexString();
         smartVault.createdOn = ZERO_BI;
         smartVault.svtTotalSupply = ZERO_BD;
