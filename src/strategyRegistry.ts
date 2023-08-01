@@ -54,6 +54,12 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     strategyDhw.apy = strategyApyToDecimal(event.params.dhwInfo.yieldPercentage);
     strategyDhw.ssts = event.params.dhwInfo.totalSstsAtDhw;
     strategyDhw.save();
+
+    let strategy = getStrategy(event.params.strategy.toHexString());
+    strategy.lastDoHardWorkTime = event.block.number;
+    strategy.lastDoHardWorkIndex = event.params.dhwIndex.toI32();
+    strategy.save();
+
 }
 
 export function handleEcosystemFeeReceiverSet(event: EcosystemFeeReceiverSet): void {
@@ -108,6 +114,7 @@ export function getStrategy(strategyAddress: string): Strategy {
         strategy.apy = ZERO_BD;
         strategy.index = 1;
         strategy.lastDoHardWorkTime = ZERO_BI;
+        strategy.lastDoHardWorkIndex = 0;
         strategy.isRemoved = false;
         strategy.isGhost = false;
         strategy.addedOn = ZERO_BI;
@@ -131,6 +138,7 @@ export function getGhostStrategy(): Strategy {
         strategy.apy = ZERO_BD;
         strategy.index = 1;
         strategy.lastDoHardWorkTime = ZERO_BI;
+        strategy.lastDoHardWorkIndex = 0;
         strategy.isRemoved = false;
         strategy.isGhost = true;
         strategy.addedOn = ZERO_BI;
@@ -153,6 +161,7 @@ export function getStrategyDHW(
         strategyDhw.strategyDHWIndex = strategyindex;
         strategyDhw.isExecuted = false;
         strategyDhw.sharesRedeemed = ZERO_BI;
+        strategyDhw.fastRedeemCount = 0;
         strategyDhw.save();
     }
 

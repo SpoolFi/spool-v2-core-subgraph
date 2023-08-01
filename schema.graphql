@@ -196,6 +196,7 @@ type Strategy @entity {
     apy: BigDecimal!
     index: Int!
     lastDoHardWorkTime: BigInt!
+    lastDoHardWorkIndex: Int!
     isRemoved: Boolean!
     isGhost: Boolean!
     addedOn: BigInt!
@@ -213,7 +214,16 @@ type StrategyDHW @entity {
     ssts: BigInt
     apy: BigDecimal
     sharesRedeemed: BigInt!
+    fastRedeemCount: Int!
     assetsDeposited: [StrategyDHWAssetDeposit!]! @derivedFrom(field: "strategyDHW")
+    fastRedeems: [FastRedeem!]! @derivedFrom(field: "strategyDHW")
+}
+
+type FastRedeem @entity {
+    id: ID! # set to ${strategyDHW.id}-count
+    strategyDHW: StrategyDHW!
+    count: Int!
+    blockNumber: Int!
 }
 
 type StrategyDHWAssetDeposit @entity {

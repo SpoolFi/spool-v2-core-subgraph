@@ -181,7 +181,7 @@ export function getSmartVaultFlush(
     return smartVaultFlush;
 }
 
-function getSmartVaultStrategy(
+export function getSmartVaultStrategy(
     smartVaultAddress: string,
     strategyAddress: string
 ): SmartVaultStrategy {

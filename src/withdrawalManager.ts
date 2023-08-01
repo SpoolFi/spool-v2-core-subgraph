@@ -5,9 +5,12 @@ import {
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
 import {
+    FastRedeem,
     SmartVault,
     SmartVaultFlush,
+    SmartVaultStrategy,
     SmartVaultWithdrawalNFT,
+    StrategyDHW,
     WithdrawnVaultShares,
 } from "../generated/schema";
 
@@ -20,7 +23,8 @@ import {
     NFT_INITIAL_SHARES,
     getSmartVault,
 } from "./utils/helpers";
-import { getSmartVaultFlush } from "./smartVaultManager";
+import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
+import {getStrategy, getStrategyDHW} from "./strategyRegistry";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
@@ -59,6 +63,21 @@ export function handleFastRedeemInitiated(event: WithdrawalClaimed): void {
     let smartVaultAddress = event.params.smartVault.toHexString();
 
     burnNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    let smartVault = getSmartVault(smartVaultAddress);
+    let smartVaultStrategies = smartVault.smartVaultStrategies;
+
+    for (let i = 0; i < smartVaultStrategies.length; i++) {
+       let smartVaultStrategy = SmartVaultStrategy.load(smartVaultStrategies[i])!;
+       let strategy = getStrategy(smartVaultStrategy.strategy);
+
+       let strategyDHW = getStrategyDHW(strategy.id, strategy.lastDoHardWorkIndex);
+       strategyDHW.fastRedeemCount = strategyDHW.fastRedeemCount + 1;
+       strategyDHW.save();
+
+       let fastRedeem = getFastRedeem(strategyDHW);
+       fastRedeem.blockNumber = event.block.number.toI32();
+       fastRedeem.save();
+    }
 }
 
 function burnNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
@@ -114,6 +133,22 @@ export function getWithdrawnVaultShares(smartVault: SmartVault, smartVaultFlush:
     }
 
     return withdrawnVaultShares;
+}
+
+function getFastRedeem(strategyDHW: StrategyDHW): FastRedeem {
+    let fastRedeemId = getComposedId(strategyDHW.id, strategyDHW.fastRedeemCount.toString());
+    let fastRedeem = FastRedeem.load(fastRedeemId);
+
+    if (fastRedeem == null) {
+        fastRedeem = new FastRedeem(fastRedeemId);
+        fastRedeem.strategyDHW = strategyDHW.id;
+        fastRedeem.count = strategyDHW.fastRedeemCount;
+        fastRedeem.blockNumber = 0;
+
+        fastRedeem.save();
+    }
+
+    return fastRedeem;
 }
 
 
