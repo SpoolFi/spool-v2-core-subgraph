@@ -19,7 +19,11 @@
         "testing:codegen": "NETWORK=devnet-11 npm run mustache && graph codegen",
         "testing:build": "npm run testing:codegen && graph build",
         "testing:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
-        "testing:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0"
+        "testing:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
+
+        "mainnet:codegen": "NETWORK=mainnet npm run mustache && graph codegen",
+        "mainnet:build": "npm run testing:codegen && graph build",
+        "mainnet:deploy": "eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2 --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA"
     },
     "author": "Spool DAO",
     "license": "MIT",
