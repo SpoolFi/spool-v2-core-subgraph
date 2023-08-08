@@ -173,8 +173,8 @@ dataSources:
           handler: handleSmartVaultFlushed
         - event: SmartVaultReallocated(indexed address,uint256)
           handler: handleSmartVaultReallocated
-        - event: StrategyRemovedFromVaults(indexed address,address[])
-          handler: handleStrategyRemovedFromVaults
+        - event: StrategyRemovedFromVault(indexed address,indexed address)
+          handler: handleStrategyRemovedFromVault
   - kind: ethereum/contract
     name: DepositManager
     network: {{ network }}
@@ -283,7 +283,7 @@ dataSources:
         - name: GuardManagerContract
           file: ./abis/GuardManager.json
       eventHandlers:
-        - event: GuardsInitialized(indexed address,(address,string,uint256,uint8[],bytes[],bytes2)[][],uint8[])
+        - event: GuardsInitialized(indexed address,(string,address,bytes2,uint256,uint8[],bytes[])[][],uint8[])
           handler: handleGuardsInitialized
 
 templates:

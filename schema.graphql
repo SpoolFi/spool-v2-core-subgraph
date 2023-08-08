@@ -36,6 +36,7 @@ type SmartVaultStrategy @entity {
     smartVault: SmartVault!
     strategy: Strategy!
     allocation: BigInt!
+    isRemoved: Boolean!
 }
 
 type SmartVaultFees @entity {

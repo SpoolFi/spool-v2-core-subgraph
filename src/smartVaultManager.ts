@@ -1,5 +1,5 @@
 import {Address, BigInt} from "@graphprotocol/graph-ts";
-import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVaults} from "../generated/SmartVaultManager/SmartVaultManagerContract";
+import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVault} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
@@ -141,26 +141,26 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
 
 }
 
-export function handleStrategyRemovedFromVaults(event: StrategyRemovedFromVaults): void {
-    logEventName("handleStrategyRemovedFromVaults", event);
+export function handleStrategyRemovedFromVault(event: StrategyRemovedFromVault): void {
+    logEventName("handleStrategyRemovedFromVault", event);
 
     let strategy = event.params.strategy.toHexString();
-    let vaults = event.params.vaults;
+    let vault = event.params.vault;
 
     let ghostStrategy = getGhostStrategy();
 
-    for (let i = 0; i < vaults.length; i++) {
+    let smartVault = getSmartVault(vault.toHexString());
+    let smartVaultGhostStrategy = getSmartVaultStrategy(smartVault.id, ghostStrategy.id);
+    let smartVaultStrategy = getSmartVaultStrategy(smartVault.id, strategy);
 
-        let smartVault = getSmartVault(vaults[i].toHexString());
-        let smartVaultGhostStrategy = getSmartVaultStrategy(smartVault.id, ghostStrategy.id);
+    let index = smartVault.smartVaultStrategies.indexOf(smartVaultStrategy.id);
+    smartVault.smartVaultStrategies[index] = smartVaultGhostStrategy.id;
 
-        let index = smartVault.smartVaultStrategies.indexOf(getComposedId(smartVault.id, strategy));
+    smartVault.save();
 
-        smartVault.smartVaultStrategies[index] = smartVaultGhostStrategy.id;
-
-        smartVault.save();
-
-    }
+    smartVaultStrategy.isRemoved = true;
+    smartVaultStrategy.allocation = BigInt.fromI32(0);
+    smartVaultStrategy.save();
 }
 
 export function getSmartVaultFlush(
@@ -193,6 +193,7 @@ export function getSmartVaultStrategy(
         smartVaultStrategy.smartVault = smartVaultAddress;
         smartVaultStrategy.strategy = strategyAddress;
         smartVaultStrategy.allocation = ZERO_BI;
+        smartVaultStrategy.isRemoved = false;
         smartVaultStrategy.save();
     }
 
