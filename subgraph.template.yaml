@@ -166,6 +166,8 @@ dataSources:
           file: ./abis/SmartVault.json
         - name: StrategyRegistryContract
           file: ./abis/StrategyRegistry.json
+        - name: StrategyContract
+          file: ./abis/IStrategy.json
       eventHandlers:
         - event: SmartVaultRegistered(indexed address,(uint256,address[],uint256,uint16,uint16,uint16))
           handler: handleSmartVaultRegistered
