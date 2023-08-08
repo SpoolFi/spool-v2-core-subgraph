@@ -3,9 +3,12 @@ import {
     RewardExtended,
     RewardRemoved,
     RewardsClaimed,
+    PoolRootAdded,
+    PoolRootUpdated,
 } from "../generated/RewardManager/RewardManagerContract";
 
 import {
+    Cycle,
     SmartVault,
     SmartVaultRewardToken,
     SmartVaultRewardTokenUpdate,
@@ -35,6 +38,8 @@ export function handleRewardAdded(event: RewardAdded): void {
     logEventName("handleRewardAdded", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
 
+    let periodFinish = event.block.timestamp.plus(event.params.duration);
+
     let smartVaultRewardToken = getSmartVaultRewardToken(smartVaultAddress, event.params.token.toHexString());
     let smartVaultRewardTokenUpdate = getSmartVaultRewardTokenUpdate(
         smartVaultAddress,
@@ -53,7 +58,7 @@ export function handleRewardAdded(event: RewardAdded): void {
     }
 
     smartVaultRewardToken.updatedOn = event.block.timestamp;
-    smartVaultRewardToken.endTime = event.params.periodFinish;
+    smartVaultRewardToken.endTime = periodFinish;
     smartVaultRewardToken.totalAmount = tokenAmountAdded;
     smartVaultRewardToken.rewardRate = event.params.rewardRate;
     smartVaultRewardToken.isRemoved = false;
@@ -65,7 +70,7 @@ export function handleRewardAdded(event: RewardAdded): void {
     smartVaultRewardTokenUpdate.blockNumber = event.block.number;
     smartVaultRewardTokenUpdate.amount = tokenAmountAdded;
     smartVaultRewardTokenUpdate.leftoverAmount = ZERO_BD;
-    smartVaultRewardTokenUpdate.endTime = event.params.periodFinish;
+    smartVaultRewardTokenUpdate.endTime = periodFinish;
     smartVaultRewardTokenUpdate.rewardRate = event.params.rewardRate;
     smartVaultRewardTokenUpdate.updateType = ADD_REWARD;
 
@@ -145,13 +150,14 @@ export function handleRewardsClaimed(event: RewardsClaimed): void {
     let smartVaultAddress = event.params.smartVault.toHexString();
     let userAddress = event.params.user.toHexString();
     let rewardTokenAddress = event.params.token.toHexString();
-    let cycle = event.params.cycle.toI32();
+    let cycleId = event.params.cycle.toI32();
     let claimed = getTokenDecimalAmountFromAddress(event.params.amount, rewardTokenAddress);
 
     getUserSmartVault(userAddress, smartVaultAddress);
 
     let smartVaultRewardToken = getSmartVaultRewardToken(smartVaultAddress, rewardTokenAddress);
     let userSmartVaultRewardToken = getUserSmartVaultRewardToken(userAddress, smartVaultAddress, rewardTokenAddress);
+    let cycle = getCycle(cycleId);
     let userSmartVaultRewardTokenCycle = getUserSmartVaultRewardTokenCycle(userSmartVaultRewardToken.id, cycle);
 
     smartVaultRewardToken.claimed = smartVaultRewardToken.claimed.plus(claimed);
@@ -161,6 +167,27 @@ export function handleRewardsClaimed(event: RewardsClaimed): void {
     smartVaultRewardToken.save();
     userSmartVaultRewardToken.save();
     userSmartVaultRewardTokenCycle.save();
+}
+
+export function handlePoolRootAdded(event: PoolRootAdded): void {
+    logEventName("handlePoolRootAdded", event);
+
+    let cycle = getCycle(event.params.cycle.toI32());
+
+    cycle.root = event.params.root.toHexString();
+
+    cycle.save();
+}
+
+export function handlePoolRootUpdated(event: PoolRootUpdated): void {
+    logEventName("handlePoolRootUpdated", event);
+
+    let cycle = getCycle(event.params.cycle.toI32());
+
+    cycle.root = event.params.newRoot.toHexString();
+    cycle.previousRoots.push(event.params.previousRoot.toHexString());
+
+    cycle.save();
 }
 
 function getSmartVaultRewardTokenUpdate(
@@ -246,14 +273,14 @@ function getUserSmartVaultRewardToken(userAddress: string, smartVaultAddress: st
 }
 
 
-function getUserSmartVaultRewardTokenCycle(userSmartVaultRewardTokenId: string, cycle: i32): UserSmartVaultRewardTokenCycle {
-    const id = getComposedId(userSmartVaultRewardTokenId, cycle.toString());
+function getUserSmartVaultRewardTokenCycle(userSmartVaultRewardTokenId: string, cycle: Cycle): UserSmartVaultRewardTokenCycle {
+    const id = getComposedId(userSmartVaultRewardTokenId, cycle.id.toString());
     let userSmartVaultRewardTokenCycle = UserSmartVaultRewardTokenCycle.load(id);
 
     if (userSmartVaultRewardTokenCycle == null) {
         userSmartVaultRewardTokenCycle = new UserSmartVaultRewardTokenCycle(id);
         userSmartVaultRewardTokenCycle.userSmartVaultRewardToken = userSmartVaultRewardTokenId;
-        userSmartVaultRewardTokenCycle.cycle = cycle;
+        userSmartVaultRewardTokenCycle.cycle = cycle.id;
         userSmartVaultRewardTokenCycle.claimed = ZERO_BD;
 
         userSmartVaultRewardTokenCycle.save();
@@ -261,3 +288,25 @@ function getUserSmartVaultRewardTokenCycle(userSmartVaultRewardTokenId: string, 
 
     return userSmartVaultRewardTokenCycle;
 }
+
+function getCycle(cycleId: i32): Cycle {
+    let cycle = Cycle.load(cycleId.toString());
+
+    if (cycle == null) {
+        cycle = new Cycle(cycleId.toString());
+        cycle.previousRoots = [];
+        cycle.root = "";
+
+        cycle.save();
+    }
+
+    return cycle;
+}
+
+
+
+
+
+
+
+

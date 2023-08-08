@@ -28,10 +28,18 @@ dataSources:
       eventHandlers:
         - event: StrategyRegistered(indexed address)
           handler: handleStrategyRegistered
+        - event: StrategyRemoved(indexed address)
+          handler: handleStrategyRemoved
         - event: StrategyApyUpdated(indexed address,int256)
           handler: handleStrategyApyUpdated
         - event: StrategyDhw(indexed address,uint256,(uint256,uint256[],int256,uint256,uint256))
           handler: handleStrategyDhw
+        - event: EcosystemFeeReceiverSet(indexed address)
+          handler: handleEcosystemFeeReceiverSet
+        - event: TreasuryFeeReceiverSet(indexed address)
+          handler: handleTreasuryFeeReceiverSet
+        - event: StrategySharesRedeemed(indexed address,indexed address,indexed address,uint256,uint256[])
+          handler: handleStrategySharesRedeemed
   - kind: ethereum/contract
     name: RiskManager
     network: {{ network }}
@@ -112,6 +120,26 @@ dataSources:
         - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
           handler: handleRoleRevoked
   - kind: ethereum/contract
+    name: SmartVaultFactory
+    network: {{ network }}
+    source:
+      address: '{{ smartVaultFactory }}'
+      abi: SmartVaultFactoryContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/smartVaultFactory.ts
+      entities:
+        - SmartVault
+      abis:
+        - name: SmartVaultFactoryContract
+          file: ./abis/SmartVaultFactory.json
+      eventHandlers:
+        - event: SmartVaultDeployed(indexed address,indexed address)
+          handler: handleSmartVaultDeployed
+  - kind: ethereum/contract
     name: SmartVaultManager
     network: {{ network }}
     source:
@@ -136,6 +164,8 @@ dataSources:
           file: ./abis/SmartVaultManager.json
         - name: SmartVaultContract
           file: ./abis/SmartVault.json
+        - name: StrategyRegistryContract
+          file: ./abis/StrategyRegistry.json
       eventHandlers:
         - event: SmartVaultRegistered(indexed address,(uint256,address[],uint256,uint16,uint16,uint16))
           handler: handleSmartVaultRegistered
@@ -143,6 +173,8 @@ dataSources:
           handler: handleSmartVaultFlushed
         - event: SmartVaultReallocated(indexed address,uint256)
           handler: handleSmartVaultReallocated
+        - event: StrategyRemovedFromVault(indexed address,indexed address)
+          handler: handleStrategyRemovedFromVault
   - kind: ethereum/contract
     name: DepositManager
     network: {{ network }}
@@ -229,6 +261,10 @@ dataSources:
           handler: handleRewardRemoved
         - event: RewardsClaimed(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleRewardsClaimed
+        - event:  PoolRootAdded(indexed uint256,bytes32)
+          handler: handlePoolRootAdded
+        - event: PoolRootUpdated(indexed uint256,bytes32,bytes32)
+          handler: handlePoolRootUpdated
   - kind: ethereum/contract
     name: GuardManager
     network: {{ network }}
@@ -247,7 +283,7 @@ dataSources:
         - name: GuardManagerContract
           file: ./abis/GuardManager.json
       eventHandlers:
-        - event: GuardsInitialized(indexed address,(address,string,uint256,uint8[],bytes[],bytes2)[][],uint8[])
+        - event: GuardsInitialized(indexed address,(string,address,bytes2,uint256,uint8[],bytes[])[][],uint8[])
           handler: handleGuardsInitialized
 
 templates:

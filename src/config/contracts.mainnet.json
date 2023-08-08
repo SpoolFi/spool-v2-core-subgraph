@@ -1,0 +1,16 @@
+{
+    "network": "mainnet",
+    "startBlock": "17837406",
+    "url": "",
+    "strategyRegistry": "0x2d66DFf7205A743c4c1Ea1058998F87D19234058",
+    "spoolAccessControl": "0x3E95575c3D6D91eF2f7DD139B1A799eDf6A8d88b",
+    "assetGroupRegistry": "0xa70C97c4BE25B8fEDaD6C328492e9334dEa8dbE3",
+    "riskManager": "0xC5E4efCe816451aBC8eBc55610189929E6E22Efb",
+    "smartVaultManager": "0x5F63195445F9949Ff2F88C48E3566E4dc156C5D7",
+    "rewardManager": "0xB5C661a0a0de2db5106C1Be305836B273be23b25",
+    "depositManager": "0x183Ec6f0Bc6127c5d7cB963bd696a67EF535B30D",
+    "withdrawalManager": "0x97664abaf98255A391Ee762afBD9eCC811EF515f",
+    "guardManager": "0x72ac19650982F729bAd79dcc0a3E78ad0073348E",
+    "ghostStrategy": "0x003C20DA1F801C1eDcF74458b44F95E0B6C25642",
+    "smartVaultFactory": "0x38F747fba5A75Df1b511680c275Ff1d9237aC20B"
+}

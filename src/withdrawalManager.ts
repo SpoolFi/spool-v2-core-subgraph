@@ -5,7 +5,13 @@ import {
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
 import {
+    FastRedeem,
+    SmartVault,
+    SmartVaultFlush,
+    SmartVaultStrategy,
     SmartVaultWithdrawalNFT,
+    StrategyDHW,
+    WithdrawnVaultShares,
 } from "../generated/schema";
 
 import {
@@ -15,21 +21,34 @@ import {
     ZERO_ADDRESS,
     getUser,
     NFT_INITIAL_SHARES,
+    getSmartVault,
 } from "./utils/helpers";
-import { getSmartVaultFlush } from "./smartVaultManager";
+import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
+import {getStrategy, getStrategyDHW} from "./strategyRegistry";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
     logEventName("handleRedeemInitiated", event);
-    let smartVaultAddress = event.params.smartVault.toHexString();
 
-    let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, event.params.redeemId);
-    wNFT.user = getUser(event.params.receiver.toHexString()).id;
-    wNFT.smartVaultFlush = getSmartVaultFlush(smartVaultAddress, event.params.flushIndex).id;
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
+    let wNFT = getSmartVaultWithdrawalNFT(smartVault.id, event.params.redeemId);
+    let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
+    let withdrawnVaultShares = getWithdrawnVaultShares(smartVault, smartVaultFlush);
+    let user = getUser(event.params.receiver.toHexString());
+
+    let shares = event.params.shares;
+
+    wNFT.user = user.id;
+    wNFT.owner = user.id;
+    wNFT.smartVaultFlush = smartVaultFlush.id;
     wNFT.createdOn = event.block.timestamp;
-    wNFT.svtWithdrawn = event.params.shares;
+    wNFT.svtWithdrawn = shares;
+    wNFT.blockNumber = event.block.number.toI32();
+
+    withdrawnVaultShares.shares = withdrawnVaultShares.shares.plus(shares);
 
     wNFT.save();
+    withdrawnVaultShares.save();
 }
 
 export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
@@ -44,6 +63,21 @@ export function handleFastRedeemInitiated(event: WithdrawalClaimed): void {
     let smartVaultAddress = event.params.smartVault.toHexString();
 
     burnNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    let smartVault = getSmartVault(smartVaultAddress);
+    let smartVaultStrategies = smartVault.smartVaultStrategies;
+
+    for (let i = 0; i < smartVaultStrategies.length; i++) {
+       let smartVaultStrategy = SmartVaultStrategy.load(smartVaultStrategies[i])!;
+       let strategy = getStrategy(smartVaultStrategy.strategy);
+
+       let strategyDHW = getStrategyDHW(strategy.id, strategy.lastDoHardWorkIndex);
+       strategyDHW.fastRedeemCount = strategyDHW.fastRedeemCount + 1;
+       strategyDHW.save();
+
+       let fastRedeem = getFastRedeem(strategyDHW);
+       fastRedeem.blockNumber = event.block.number.toI32();
+       fastRedeem.save();
+    }
 }
 
 function burnNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
@@ -69,14 +103,57 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
         wNFT.smartVault = smartVaultAddress;
         wNFT.nftId = nftId;
         wNFT.user = ZERO_ADDRESS.toHexString();
+        wNFT.owner = ZERO_ADDRESS.toHexString();
         wNFT.shares = NFT_INITIAL_SHARES;
         wNFT.svtWithdrawn = ZERO_BI;
         wNFT.smartVaultFlush = "";
         wNFT.isBurned = false;
+        wNFT.transferCount = 0;
         wNFT.createdOn = ZERO_BI;
+        wNFT.blockNumber = 0;
 
         wNFT.save();
     }
 
     return wNFT;
 }
+
+
+export function getWithdrawnVaultShares(smartVault: SmartVault, smartVaultFlush: SmartVaultFlush): WithdrawnVaultShares {
+    let withdrawnVaultSharesId = getComposedId(smartVault.id, smartVaultFlush.id);
+    let withdrawnVaultShares = WithdrawnVaultShares.load(withdrawnVaultSharesId);
+
+    if (withdrawnVaultShares == null) {
+        withdrawnVaultShares = new WithdrawnVaultShares(withdrawnVaultSharesId);
+        withdrawnVaultShares.smartVault = smartVault.id;
+        withdrawnVaultShares.smartVaultFlush = smartVaultFlush.id;
+        withdrawnVaultShares.shares = ZERO_BI;
+
+        withdrawnVaultShares.save();
+    }
+
+    return withdrawnVaultShares;
+}
+
+function getFastRedeem(strategyDHW: StrategyDHW): FastRedeem {
+    let fastRedeemId = getComposedId(strategyDHW.id, strategyDHW.fastRedeemCount.toString());
+    let fastRedeem = FastRedeem.load(fastRedeemId);
+
+    if (fastRedeem == null) {
+        fastRedeem = new FastRedeem(fastRedeemId);
+        fastRedeem.strategyDHW = strategyDHW.id;
+        fastRedeem.count = strategyDHW.fastRedeemCount;
+        fastRedeem.blockNumber = 0;
+
+        fastRedeem.save();
+    }
+
+    return fastRedeem;
+}
+
+
+
+
+
+
+

@@ -4,3 +4,6 @@ generated
 .idea
 data
 subgraph.yaml
+docker-compose.yml
+src/utils/helpers.ts
+.env

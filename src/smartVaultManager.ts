@@ -1,19 +1,13 @@
-import {BigInt} from "@graphprotocol/graph-ts";
-import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered} from "../generated/SmartVaultManager/SmartVaultManagerContract";
+import {Address, BigInt} from "@graphprotocol/graph-ts";
+import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVault} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
-import {
-    ZERO_BI,
-    logEventName,
-    getComposedId,
-    percenti32ToDecimal,
-    getSmartVaultFees,
-    getSmartVault,
-    getArrayFromUint16a16,
-} from "./utils/helpers";
-import { getStrategyDHW } from "./strategyRegistry";
+import { getGhostStrategy, getStrategy, getStrategyDHW, getStrategyDHWAssetDeposit } from "./strategyRegistry";
 import {SmartVault} from "../generated/templates";
+import {StrategyRegistryContract} from "../generated/StrategyRegistry/StrategyRegistryContract";
+import {getAssetGroup, getAssetGroupToken, getAssetGroupTokenById} from "./assetGroupRegistry";
+import {STRATEGY_REGISTRY_ADDRESS, ZERO_BI, createTokenEntity, getArrayFromUint16a16, getComposedId, getSmartVault, getSmartVaultFees, logEventName, percenti32ToDecimal} from "./utils/helpers";
 
 export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     logEventName("handleSmartVaultRegistered", event);
@@ -25,7 +19,7 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     smartVault.name = smartVaultContract.vaultName();
 
     smartVault.assetGroup = event.params.registrationForm.assetGroupId.toString();
-    smartVault.createdOn = event.block.number;
+    smartVault.createdOn = event.block.timestamp;
 
     let strategiesArray = smartVault.smartVaultStrategies;
 
@@ -49,7 +43,7 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     smartVault.save();
 
     let smartVaultFees = getSmartVaultFees(event.params.smartVault.toHexString());
-    smartVaultFees.peformanceFeePercentage = percenti32ToDecimal(
+    smartVaultFees.performanceFeePercentage = percenti32ToDecimal(
         event.params.registrationForm.performanceFeePct
     );
     smartVaultFees.depositFeePercentage = percenti32ToDecimal(
@@ -89,6 +83,39 @@ export function handleSmartVaultFlushed(event: SmartVaultFlushed): void {
     smartVaultFlush.blockNumber = event.block.number;
 
     smartVaultFlush.save();
+
+    // add deposits for next DHW index
+    // call "currentIndex" with strat addresses for current dhw indexes; returns list
+    let strategyRegistry = StrategyRegistryContract.bind(STRATEGY_REGISTRY_ADDRESS);
+    let strategies : Address[] = [];
+    for(let i = 0; i < smartVaultStrategies.length; i++) {
+        strategies.push(Address.fromString(SmartVaultStrategy.load(smartVaultStrategies[i])!.strategy));
+    }
+
+    let currentIndexes = strategyRegistry.currentIndex(strategies);
+
+    // call "depositedAssets" with each strat address and index to get deposited assets
+    // call "sharesRedeemed" with each strat address and index to get shares redeemed (withdraw amount)
+    for(let i = 0; i < strategies.length; i++) {
+        let strategy = getStrategy(strategies[i].toHexString());
+        let strategyDHW = getStrategyDHW(strategy.id, currentIndexes[i].toI32());
+        let assetGroup = getAssetGroup(strategy.assetGroup);
+
+        let depositedAssets = strategyRegistry.depositedAssets(strategies[i], currentIndexes[i]);
+        let sharesRedeemed = strategyRegistry.sharesRedeemed(strategies[i], currentIndexes[i]);
+
+        for(let j = 0; j < assetGroup.assetGroupTokens.length; j++) {
+            let assetGroupToken = getAssetGroupTokenById(assetGroup.assetGroupTokens[j]);
+            let asset = createTokenEntity(assetGroupToken.token);
+            let strategyDHWAssetDeposit = getStrategyDHWAssetDeposit(strategyDHW, asset);
+
+            strategyDHWAssetDeposit.amount = strategyDHWAssetDeposit.amount.plus(depositedAssets[j]);
+            strategyDHWAssetDeposit.save();
+        }
+
+        strategyDHW.sharesRedeemed = strategyDHW.sharesRedeemed.plus(sharesRedeemed);
+        strategyDHW.save();
+    }
 }
 
 export function handleSmartVaultReallocated(event: SmartVaultReallocated): void {
@@ -98,6 +125,10 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
     let newAllocations = event.params.newAllocations;
 
     let smartVault = getSmartVault(smartVaultAddress);
+    smartVault.lastRebalanceTime = event.block.timestamp;
+    smartVault.rebalanceCount = smartVault.rebalanceCount + 1;
+    smartVault.save();
+
     let smartVaultStrategies = smartVault.smartVaultStrategies;
 
     let allocationMask = BigInt.fromI32(2 ** 16 - 1);
@@ -107,6 +138,29 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
         smartVaultStrategy.allocation = newAllocation;
         smartVaultStrategy.save();
     }
+
+}
+
+export function handleStrategyRemovedFromVault(event: StrategyRemovedFromVault): void {
+    logEventName("handleStrategyRemovedFromVault", event);
+
+    let strategy = event.params.strategy.toHexString();
+    let vault = event.params.vault;
+
+    let ghostStrategy = getGhostStrategy();
+
+    let smartVault = getSmartVault(vault.toHexString());
+    let smartVaultGhostStrategy = getSmartVaultStrategy(smartVault.id, ghostStrategy.id);
+    let smartVaultStrategy = getSmartVaultStrategy(smartVault.id, strategy);
+
+    let index = smartVault.smartVaultStrategies.indexOf(smartVaultStrategy.id);
+    smartVault.smartVaultStrategies[index] = smartVaultGhostStrategy.id;
+
+    smartVault.save();
+
+    smartVaultStrategy.isRemoved = true;
+    smartVaultStrategy.allocation = BigInt.fromI32(0);
+    smartVaultStrategy.save();
 }
 
 export function getSmartVaultFlush(
@@ -127,7 +181,7 @@ export function getSmartVaultFlush(
     return smartVaultFlush;
 }
 
-function getSmartVaultStrategy(
+export function getSmartVaultStrategy(
     smartVaultAddress: string,
     strategyAddress: string
 ): SmartVaultStrategy {
@@ -139,6 +193,7 @@ function getSmartVaultStrategy(
         smartVaultStrategy.smartVault = smartVaultAddress;
         smartVaultStrategy.strategy = strategyAddress;
         smartVaultStrategy.allocation = ZERO_BI;
+        smartVaultStrategy.isRemoved = false;
         smartVaultStrategy.save();
     }
 
