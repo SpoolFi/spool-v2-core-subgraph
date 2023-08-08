@@ -157,6 +157,7 @@ type SmartVaultDepositNFTTransfer @entity {
     from: User!
     to: User!
     timestamp: Int!
+    blockNumber: Int!
 }
 
 type SmartVaultWithdrawalNFTTransfer @entity {
@@ -166,6 +167,7 @@ type SmartVaultWithdrawalNFTTransfer @entity {
     from: User!
     to: User!
     timestamp: Int!
+    blockNumber: Int!
 }
 
 type Token @entity {

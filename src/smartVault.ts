@@ -84,6 +84,7 @@ export function handleTransferSingle(event: TransferSingle): void {
         smartVaultDepositNFTTransfer.from = from;
         smartVaultDepositNFTTransfer.to = to;
         smartVaultDepositNFTTransfer.timestamp = timestamp;
+        smartVaultDepositNFTTransfer.blockNumber = event.block.number.toI32();
         smartVaultDepositNFTTransfer.save();
 
         smartVaultDepositNFT.transferCount = transferCount + 1;
@@ -100,6 +101,7 @@ export function handleTransferSingle(event: TransferSingle): void {
         smartVaultWithdrawalNFTTransfer.from = from;
         smartVaultWithdrawalNFTTransfer.to = to;
         smartVaultWithdrawalNFTTransfer.timestamp = timestamp;
+        smartVaultWithdrawalNFTTransfer.blockNumber = event.block.number.toI32();
         smartVaultWithdrawalNFTTransfer.save();
         
         smartVaultWithdrawalNFT.transferCount = transferCount + 1;
@@ -153,6 +155,7 @@ export function getSmartVaultDepositNFTTransfer(dNFT: SmartVaultDepositNFT, tran
         smartVaultDepositNFTTransfer.from = ZERO_ADDRESS.toHexString();
         smartVaultDepositNFTTransfer.to = ZERO_ADDRESS.toHexString();
         smartVaultDepositNFTTransfer.timestamp = 0;
+        smartVaultDepositNFTTransfer.blockNumber = 0;
 
         smartVaultDepositNFTTransfer.save();
     }
@@ -173,6 +176,7 @@ export function getSmartVaultWithdrawalNFTTransfer(wNFT: SmartVaultWithdrawalNFT
         smartVaultWithdrawalNFTTransfer.from = ZERO_ADDRESS.toHexString();
         smartVaultWithdrawalNFTTransfer.to = ZERO_ADDRESS.toHexString();
         smartVaultWithdrawalNFTTransfer.timestamp = 0;
+        smartVaultWithdrawalNFTTransfer.blockNumber = 0;
 
         smartVaultWithdrawalNFTTransfer.save();
     }
