@@ -21,7 +21,7 @@ export function handleStrategyRegistered(event: StrategyRegistered): void {
     let strategy = getStrategy(event.params.strategy.toHexString());
 
     strategy.lastDoHardWorkTime = event.block.number;
-    strategy.addedOn = event.block.number;
+    strategy.addedOn = event.block.timestamp;
     strategy.save();
 }
 
@@ -56,7 +56,7 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     strategyDhw.save();
 
     let strategy = getStrategy(event.params.strategy.toHexString());
-    strategy.lastDoHardWorkTime = event.block.number;
+    strategy.lastDoHardWorkTime = event.block.timestamp;
     strategy.lastDoHardWorkIndex = event.params.dhwIndex.toI32();
     strategy.save();
 
