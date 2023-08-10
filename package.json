@@ -24,7 +24,11 @@
         "mainnet:codegen": "NETWORK=mainnet npm run mustache && graph codegen",
         "mainnet:build": "npm run mainnet:codegen && graph build",
         "mainnet:deploy-satsuma": "npm run mainnet:build && eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2 --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA",
-        "mainnet:deploy-hosted": "npm run mainnet:build && eval $(grep '^ACCESS_TOKEN_HOSTED' .env) && graph deploy --access-token $ACCESS_TOKEN_HOSTED --product hosted-service spoolfi/spool-v2-subgraph subgraph.yaml --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
+        "mainnet:deploy-hosted": "npm run mainnet:build && eval $(grep '^ACCESS_TOKEN_HOSTED' .env) && graph deploy --access-token $ACCESS_TOKEN_HOSTED --product hosted-service spoolfi/spool-v2-subgraph subgraph.yaml --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+
+        "mainnet-new:codegen": "NETWORK=mainnet-new npm run mustache && graph codegen",
+        "mainnet-new:build": "npm run mainnet-new:codegen && graph build",
+        "mainnet-new:deploy-satsuma": "npm run mainnet-new:build && eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2-new --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA"
     },
     "author": "Spool DAO",
     "license": "MIT",
