@@ -44,6 +44,9 @@ type SmartVaultFees @entity {
     performanceFeePercentage: BigDecimal!
     depositFeePercentage: BigDecimal!
     managementFeePercentage: BigDecimal!
+    performanceFeeMinted: BigInt!
+    depositFeeMinted: BigInt!
+    managementFeeMinted: BigInt!
 }
 
 type StrategyRegistry @entity {

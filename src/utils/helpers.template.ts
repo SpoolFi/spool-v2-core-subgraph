@@ -104,6 +104,9 @@ export function getSmartVaultFees(smartVaultAddress: string): SmartVaultFees {
         smartVaultFees.performanceFeePercentage = ZERO_BD;
         smartVaultFees.depositFeePercentage = ZERO_BD;
         smartVaultFees.managementFeePercentage = ZERO_BD;
+        smartVaultFees.performanceFeeMinted = ZERO_BI;
+        smartVaultFees.depositFeeMinted = ZERO_BI;
+        smartVaultFees.managementFeeMinted = ZERO_BI;
         smartVaultFees.save();
     }
 

@@ -201,6 +201,8 @@ dataSources:
           handler: handleDepositInitiated
         - event: SmartVaultTokensClaimed(indexed address,indexed address,uint256,uint256[],uint256[])
           handler: handleSmartVaultTokensClaimed
+        - event: SmartVaultFeesMinted(indexed address,(uint256,uint256,uint256))
+          handler: handleSmartVaultFeesMinted
   - kind: ethereum/contract
     name: WithdrawalManager
     network: {{ network }}

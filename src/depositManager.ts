@@ -1,7 +1,7 @@
 import {BigInt} from "@graphprotocol/graph-ts";
 
 import {
-    DepositInitiated, SmartVaultTokensClaimed
+    DepositInitiated, SmartVaultFeesMinted, SmartVaultTokensClaimed
 } from "../generated/DepositManager/DepositManagerContract";
 
 import {
@@ -27,6 +27,7 @@ import {
     getTokenDecimalAmountFromAddress,
     NFT_INITIAL_SHARES,
     ZERO_BD,
+    getSmartVaultFees,
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
 import {getAssetGroupToken} from "./assetGroupRegistry";
@@ -82,6 +83,24 @@ export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): v
         dNFT.save();
     }
 }
+
+export function handleSmartVaultFeesMinted(event: SmartVaultFeesMinted): void {
+    logEventName("handleSmartVaultFeesMinted", event);
+
+    let smartVaultFees = getSmartVaultFees(event.params.smartVault.toHexString());
+
+    let feesCollected = event.params.smartVaultFeesCollected;
+
+    smartVaultFees.depositFeeMinted = smartVaultFees.depositFeeMinted.plus(feesCollected.depositFees);
+
+    smartVaultFees.performanceFeeMinted = smartVaultFees.performanceFeeMinted.plus(feesCollected.performanceFees);
+
+    smartVaultFees.managementFeeMinted = smartVaultFees.managementFeeMinted.plus(feesCollected.managementFees);
+
+    smartVaultFees.save();
+}
+
+
 
 export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt): SmartVaultDepositNFT {
     let smartVaultDepositNFTId = getComposedId(smartVaultAddress, nftId.toString());
