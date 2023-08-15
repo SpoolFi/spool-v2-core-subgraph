@@ -16,7 +16,7 @@
         "staging:create": "graph create spool/core-v2 --node http://3.120.126.253:8020",
         "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://3.120.126.253:5001 --node http://3.120.126.253:8020 -l 1.0",
 
-        "testing:codegen": "NETWORK=devnet-11 npm run mustache && graph codegen",
+        "testing:codegen": "NETWORK=devnet-12 npm run mustache && graph codegen",
         "testing:build": "npm run testing:codegen && graph build",
         "testing:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
         "testing:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
