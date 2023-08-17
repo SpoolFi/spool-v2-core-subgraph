@@ -230,6 +230,10 @@ type FastRedeem @entity {
     strategyDHW: StrategyDHW!
     count: Int!
     blockNumber: Int!
+    user: User!
+    smartVault: SmartVault!
+    createdOn: Int!
+    svtWithdrawn: BigInt!
 }
 
 type StrategyDHWAssetDeposit @entity {

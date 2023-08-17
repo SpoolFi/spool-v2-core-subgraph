@@ -11,7 +11,7 @@
         "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
         "local:deploy:fresh": "npm run local:build && npm run local:create && graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
 
-        "staging:codegen": "NETWORK=devnet-10 npm run mustache && graph codegen",
+        "staging:codegen": "NETWORK=devnet-12 npm run mustache && graph codegen",
         "staging:build": "npm run staging:codegen && graph build",
         "staging:create": "graph create spool/core-v2 --node http://3.120.126.253:8020",
         "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://3.120.126.253:5001 --node http://3.120.126.253:8020 -l 1.0",

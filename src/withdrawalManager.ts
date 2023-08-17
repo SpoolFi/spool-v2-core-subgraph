@@ -1,6 +1,7 @@
 import {BigInt} from "@graphprotocol/graph-ts";
 
 import {
+    FastRedeemInitiated,
     RedeemInitiated, WithdrawalClaimed
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
@@ -25,6 +26,7 @@ import {
 } from "./utils/helpers";
 import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
 import {getStrategy, getStrategyDHW} from "./strategyRegistry";
+import {getSmartVaultDepositNFT} from "./depositManager";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
@@ -55,14 +57,17 @@ export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
     logEventName("handleWithdrawalClaimed", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
 
-    burnNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    burnWithdrawalNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
 }
 
-export function handleFastRedeemInitiated(event: WithdrawalClaimed): void {
+export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
     logEventName("handleFastRedeemInitiated", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
+    let timestamp = event.block.timestamp.toI32();
+    let user = event.params.redeemer.toHexString();
+    let shares = event.params.shares;
 
-    burnNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    burnDepositNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
     let smartVault = getSmartVault(smartVaultAddress);
     let smartVaultStrategies = smartVault.smartVaultStrategies;
 
@@ -76,11 +81,14 @@ export function handleFastRedeemInitiated(event: WithdrawalClaimed): void {
 
        let fastRedeem = getFastRedeem(strategyDHW);
        fastRedeem.blockNumber = event.block.number.toI32();
+       fastRedeem.user = getUser(user).id;
+       fastRedeem.smartVault = getSmartVault(smartVaultAddress).id;
+       fastRedeem.svtWithdrawn = shares;
        fastRedeem.save();
     }
 }
 
-function burnNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
+function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
     for (let i = 0; i < nftIds.length; i++) {
         let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, nftIds[i]);
 
@@ -91,6 +99,21 @@ function burnNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigIn
         }
 
         wNFT.save();
+    }
+}
+
+
+function burnDepositNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
+    for (let i = 0; i < nftIds.length; i++) {
+        let dNFT = getSmartVaultDepositNFT(smartVaultAddress, nftIds[i]);
+
+        dNFT.shares = dNFT.shares.minus(nftAmounts[i]);
+
+        if (dNFT.shares.isZero()) {
+            dNFT.isBurned = true;
+        }
+
+        dNFT.save();
     }
 }
 
@@ -144,6 +167,10 @@ function getFastRedeem(strategyDHW: StrategyDHW): FastRedeem {
         fastRedeem.strategyDHW = strategyDHW.id;
         fastRedeem.count = strategyDHW.fastRedeemCount;
         fastRedeem.blockNumber = 0;
+        fastRedeem.user = "";
+        fastRedeem.smartVault = "";
+        fastRedeem.createdOn = 0;
+        fastRedeem.svtWithdrawn = ZERO_BI;
 
         fastRedeem.save();
     }

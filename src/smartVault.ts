@@ -72,7 +72,7 @@ export function handleTransferSingle(event: TransferSingle): void {
     _updateNFT(smartVault, from, to, id);
 
     // add transfer
-    if(id <= MAXIMAL_DEPOSIT_ID){
+    if(id.le(MAXIMAL_DEPOSIT_ID)){
 
         let smartVaultDepositNFT = getSmartVaultDepositNFT(smartVault.id, id);
         let transferCount = smartVaultDepositNFT.transferCount;
@@ -128,7 +128,7 @@ function _updateNFT(smartVault: SmartVault, from: string, to: string, id: BigInt
     let isBurned = (to == ZERO_ADDRESS.toHexString()) ? true : false;
     let fromUser = getUser(from).id;
     let toUser = getUser(to).id;
-    if(id <= MAXIMAL_DEPOSIT_ID){
+    if(id.le(MAXIMAL_DEPOSIT_ID)){
         let smartVaultDepositNFT = getSmartVaultDepositNFT(smartVault.id, id);
         if(isCreated) smartVaultDepositNFT.user = fromUser;
         if(!isBurned) smartVaultDepositNFT.owner = toUser;
