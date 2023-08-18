@@ -5,6 +5,7 @@ type SmartVault @entity {
     assetGroup: AssetGroup!
     lastRebalanceTime: BigInt!
     rebalanceCount: Int!
+    fastRedeemCount: Int!
     smartVaultOwner: String!
     allocationProvider: String
     riskProvider: RiskProvider
@@ -37,6 +38,16 @@ type SmartVaultStrategy @entity {
     strategy: Strategy!
     allocation: BigInt!
     isRemoved: Boolean!
+}
+
+type SmartVaultFastRedeem @entity {
+    id: ID! # set to ${smartVault.id}-count
+    smartVault: SmartVault!
+    count: Int!
+    user: User!
+    blockNumber: Int!
+    createdOn: Int!
+    svtWithdrawn: BigInt!
 }
 
 type SmartVaultFees @entity {
@@ -233,7 +244,6 @@ type FastRedeem @entity {
     user: User!
     smartVault: SmartVault!
     createdOn: Int!
-    svtWithdrawn: BigInt!
 }
 
 type StrategyDHWAssetDeposit @entity {

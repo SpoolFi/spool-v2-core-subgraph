@@ -8,6 +8,7 @@ import {
 import {
     FastRedeem,
     SmartVault,
+    SmartVaultFastRedeem,
     SmartVaultFlush,
     SmartVaultStrategy,
     SmartVaultWithdrawalNFT,
@@ -63,7 +64,6 @@ export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
 export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
     logEventName("handleFastRedeemInitiated", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
-    let timestamp = event.block.timestamp.toI32();
     let user = event.params.redeemer.toHexString();
     let shares = event.params.shares;
 
@@ -76,16 +76,30 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
        let strategy = getStrategy(smartVaultStrategy.strategy);
 
        let strategyDHW = getStrategyDHW(strategy.id, strategy.lastDoHardWorkIndex);
-       strategyDHW.fastRedeemCount = strategyDHW.fastRedeemCount + 1;
-       strategyDHW.save();
 
        let fastRedeem = getFastRedeem(strategyDHW);
        fastRedeem.blockNumber = event.block.number.toI32();
        fastRedeem.user = getUser(user).id;
        fastRedeem.smartVault = getSmartVault(smartVaultAddress).id;
-       fastRedeem.svtWithdrawn = shares;
+       fastRedeem.createdOn = event.block.timestamp.toI32();
        fastRedeem.save();
+
+       strategyDHW.fastRedeemCount = strategyDHW.fastRedeemCount + 1;
+       strategyDHW.save();
+
     }
+    
+    let smartVaultFastRedeem = getSmartVaultFastRedeem(smartVault);
+    smartVaultFastRedeem.blockNumber = event.block.number.toI32();
+    smartVaultFastRedeem.user = getUser(user).id;
+    smartVaultFastRedeem.smartVault = getSmartVault(smartVaultAddress).id;
+    smartVaultFastRedeem.createdOn = event.block.timestamp.toI32();
+    smartVaultFastRedeem.svtWithdrawn = shares;
+    smartVaultFastRedeem.save();
+
+    smartVault.fastRedeemCount = smartVault.fastRedeemCount + 1;
+    smartVault.save();
+
 }
 
 function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
@@ -170,7 +184,6 @@ function getFastRedeem(strategyDHW: StrategyDHW): FastRedeem {
         fastRedeem.user = "";
         fastRedeem.smartVault = "";
         fastRedeem.createdOn = 0;
-        fastRedeem.svtWithdrawn = ZERO_BI;
 
         fastRedeem.save();
     }
@@ -179,6 +192,25 @@ function getFastRedeem(strategyDHW: StrategyDHW): FastRedeem {
 }
 
 
+function getSmartVaultFastRedeem(smartVault: SmartVault): SmartVaultFastRedeem {
+    let smartVaultFastRedeemId = getComposedId(smartVault.id, smartVault.fastRedeemCount.toString());
+    let smartVaultFastRedeem = SmartVaultFastRedeem.load(smartVaultFastRedeemId);
+
+    if (smartVaultFastRedeem == null) {
+        smartVaultFastRedeem = new SmartVaultFastRedeem(smartVaultFastRedeemId);
+        smartVaultFastRedeem.smartVault = smartVault.id;
+        smartVaultFastRedeem.count = smartVault.fastRedeemCount;
+        smartVaultFastRedeem.blockNumber = 0;
+        smartVaultFastRedeem.user = "";
+        smartVaultFastRedeem.smartVault = "";
+        smartVaultFastRedeem.createdOn = 0;
+        smartVaultFastRedeem.svtWithdrawn = ZERO_BI;
+
+        smartVaultFastRedeem.save();
+    }
+
+    return smartVaultFastRedeem;
+}
 
 
 
