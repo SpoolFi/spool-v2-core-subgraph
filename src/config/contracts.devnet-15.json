@@ -1,0 +1,16 @@
+{
+    "network": "mainnet",
+    "startBlock": "18026057",
+    "url": "https://rpc.vnet.tenderly.co/devnet/spool-v2-staging/83ec34c2-c2e1-4ebf-bddc-432e807b4ab1",
+    "strategyRegistry": "0xce79BCB6Ca09C5F9939b22Bd37498781476264CC",
+    "spoolAccessControl": "0x6ad448bF2AdbF3A7Aa9BfE411eD908315566aE24",
+    "assetGroupRegistry": "0x3beb924592A2e4f08DD7C0997563eFd1601c6a33",
+    "riskManager": "0x9dBCF50e357172D490ee5E428d75129A6224a2e9",
+    "smartVaultManager": "0x4060eF0D5a7F0633c5927F7E05041dd7Fcd95f42",
+    "rewardManager": "0x43dFD957bB91b568176E976A8d4e8ab4E94aeBfD",
+    "depositManager": "0x5C15f56Ee55531f011c6025B205c1750EA469f75",
+    "withdrawalManager": "0x8e1f69CfFd8DaD657bF18B91D75BcD26CD6F43AC",
+    "guardManager": "0x43E77eC0D2079A046736969391F0b9e7CE3f4A45",
+    "ghostStrategy": "0x20F43316cf784C821a65aE874c8060f30c30c7C4",
+    "smartVaultFactory": "0x32Ed2BD67238Be274E127096F42f0a4061aC0Bff"
+}
