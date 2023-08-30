@@ -124,21 +124,21 @@ export function handleTransferBatch(event: TransferBatch): void {
 }
 
 function _updateNFT(smartVault: SmartVault, from: string, to: string, id: BigInt): void {
-    let isCreated = (from == ZERO_ADDRESS.toHexString()) ? true : false;
-    let isBurned = (to == ZERO_ADDRESS.toHexString()) ? true : false;
-    let fromUser = getUser(from).id;
-    let toUser = getUser(to).id;
+    // let isCreated = (from == ZERO_ADDRESS.toHexString()) ? true : false;
+    let isBurned = to == ZERO_ADDRESS.toHexString();
+    // let fromUser = getUser(from).id;
+    // let toUser = getUser(to).id;
     if(id.le(MAXIMAL_DEPOSIT_ID)){
         let smartVaultDepositNFT = getSmartVaultDepositNFT(smartVault.id, id);
-        if(isCreated) smartVaultDepositNFT.user = fromUser;
-        if(!isBurned) smartVaultDepositNFT.owner = toUser;
-        smartVaultDepositNFT.isBurned = isBurned;
+        // if(isCreated) smartVaultDepositNFT.user = fromUser;
+        if(!isBurned) smartVaultDepositNFT.owner = getUser(to).id;
+        // smartVaultDepositNFT.isBurned = isBurned;
         smartVaultDepositNFT.save();
     } else {
         let smartVaultWithdrawalNFT = getSmartVaultWithdrawalNFT(smartVault.id, id);
-        if(isCreated) smartVaultWithdrawalNFT.user = fromUser;
-        if(!isBurned) smartVaultWithdrawalNFT.owner = toUser;
-        smartVaultWithdrawalNFT.isBurned = isBurned;
+        // if(isCreated) smartVaultWithdrawalNFT.user = fromUser;
+        if(!isBurned) smartVaultWithdrawalNFT.owner = getUser(to).id;
+        // smartVaultWithdrawalNFT.isBurned = isBurned;
         smartVaultWithdrawalNFT.save();
     }
 }

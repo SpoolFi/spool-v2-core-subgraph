@@ -67,7 +67,7 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
     let user = event.params.redeemer.toHexString();
     let shares = event.params.shares;
 
-    burnDepositNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    // burnDepositNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
     let smartVault = getSmartVault(smartVaultAddress);
     let smartVaultStrategies = smartVault.smartVaultStrategies;
 
