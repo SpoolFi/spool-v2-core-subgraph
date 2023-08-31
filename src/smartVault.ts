@@ -81,8 +81,8 @@ export function handleTransferSingle(event: TransferSingle): void {
             smartVaultDepositNFT, transferCount
         );
 
-        smartVaultDepositNFTTransfer.from = from;
-        smartVaultDepositNFTTransfer.to = to;
+        smartVaultDepositNFTTransfer.from = getUser(from).id;
+        smartVaultDepositNFTTransfer.to = getUser(to).id;
         smartVaultDepositNFTTransfer.timestamp = timestamp;
         smartVaultDepositNFTTransfer.blockNumber = event.block.number.toI32();
         smartVaultDepositNFTTransfer.save();
