@@ -58,7 +58,7 @@ export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
     logEventName("handleWithdrawalClaimed", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
 
-    burnWithdrawalNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    burnWithdrawalNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts, event.block.timestamp.toI32());
 }
 
 export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
@@ -67,7 +67,7 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
     let user = event.params.redeemer.toHexString();
     let shares = event.params.shares;
 
-    // burnDepositNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts);
+    // burnDepositNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts, event.block.timestamp.toI32());
     let smartVault = getSmartVault(smartVaultAddress);
     let smartVaultStrategies = smartVault.smartVaultStrategies;
 
@@ -102,7 +102,7 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
 
 }
 
-function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
+function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[], timestamp: i32): void {
     for (let i = 0; i < nftIds.length; i++) {
         let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, nftIds[i]);
 
@@ -110,6 +110,7 @@ function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmou
 
         if (wNFT.shares.isZero()) {
             wNFT.isBurned = true;
+            wNFT.burnedOn = timestamp;
         }
 
         wNFT.save();
@@ -117,7 +118,7 @@ function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmou
 }
 
 
-function burnDepositNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[]): void {
+function burnDepositNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[], timestamp: i32): void {
     for (let i = 0; i < nftIds.length; i++) {
         let dNFT = getSmartVaultDepositNFT(smartVaultAddress, nftIds[i]);
 
@@ -125,6 +126,7 @@ function burnDepositNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts
 
         if (dNFT.shares.isZero()) {
             dNFT.isBurned = true;
+            dNFT.burnedOn = timestamp;
         }
 
         dNFT.save();
@@ -148,6 +150,7 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
         wNFT.transferCount = 0;
         wNFT.createdOn = ZERO_BI;
         wNFT.blockNumber = 0;
+        wNFT.burnedOn = 0;
 
         wNFT.save();
     }

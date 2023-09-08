@@ -78,6 +78,7 @@ export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): v
 
         if (dNFT.shares.isZero()) {
             dNFT.isBurned = true;
+            dNFT.burnedOn = event.block.timestamp.toI32();
         }
 
         dNFT.save();
@@ -119,6 +120,7 @@ export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt
         dNFT.transferCount = 0;
         dNFT.createdOn = ZERO_BI;
         dNFT.blockNumber = 0;
+        dNFT.burnedOn = 0;
 
         dNFT.save();
     }

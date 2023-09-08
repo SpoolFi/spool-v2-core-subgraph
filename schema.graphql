@@ -112,6 +112,7 @@ type SmartVaultDepositNFT @entity {
     createdOn: BigInt!
     blockNumber: Int!
     transferCount: Int!
+    burnedOn: Int!
     transfers: [SmartVaultDepositNFTTransfer!]! @derivedFrom(field: "dNFT")
 }
 
@@ -128,6 +129,7 @@ type SmartVaultWithdrawalNFT @entity {
     createdOn: BigInt!
     blockNumber: Int!
     transferCount: Int!
+    burnedOn: Int!
     transfers: [SmartVaultWithdrawalNFTTransfer!]! @derivedFrom(field: "wNFT")
 }
 
