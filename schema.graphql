@@ -1,7 +1,7 @@
 type Global @entity {
     id: ID! # set to "Global"
-    ecosystemFee: BigInt!
-    treasuryFee: BigInt!
+    ecosystemFee: BigDecimal!
+    treasuryFee: BigDecimal!
 }
 
 type SmartVault @entity {
@@ -70,8 +70,8 @@ type StrategyRegistry @entity {
     id: ID! # set to strategyRegistry address
     ecosystemFeeReceiver: User!
     treasuryFeeReceiver: User!
-    ecosystemFee: BigInt!
-    treasuryFee: BigInt!
+    ecosystemFee: BigDecimal!
+    treasuryFee: BigDecimal!
 }
 
 type SSTRedemptionAsset @entity {

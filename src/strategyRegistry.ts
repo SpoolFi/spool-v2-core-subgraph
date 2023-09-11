@@ -13,7 +13,7 @@ import {
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
 import {SSTRedemptionAsset, StrategyRegistry, Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token, User, Global} from "../generated/schema";
-import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS, ZERO_ADDRESS, getUser, createTokenEntity} from "./utils/helpers";
+import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS, ZERO_ADDRESS, getUser, createTokenEntity, percenti32ToDecimal, percentToDecimal} from "./utils/helpers";
 
 import {getAssetGroup, getAssetGroupTokenById} from "./assetGroupRegistry";
 
@@ -71,8 +71,10 @@ export function handleEcosystemFeeSet(event: EcosystemFeeSet): void {
     let _global = getGlobal();
     let strategyRegistry = getStrategyRegistry( event.address.toHexString());
 
-    _global.ecosystemFee = event.params.feePct;
-    strategyRegistry.ecosystemFee = event.params.feePct;
+    let fee = percentToDecimal(event.params.feePct);
+
+    _global.ecosystemFee = fee;
+    strategyRegistry.ecosystemFee = fee;
 
     _global.save();
     strategyRegistry.save();
@@ -84,8 +86,10 @@ export function handleTreasuryFeeSet(event: TreasuryFeeSet): void {
     let _global = getGlobal();
     let strategyRegistry = getStrategyRegistry( event.address.toHexString());
 
-    _global.treasuryFee = event.params.feePct;
-    strategyRegistry.treasuryFee = event.params.feePct;
+    let fee = percentToDecimal(event.params.feePct);
+
+    _global.treasuryFee = fee;
+    strategyRegistry.treasuryFee = fee;
 
     _global.save();
     strategyRegistry.save();
@@ -225,8 +229,8 @@ export function getStrategyRegistry(strategyRegistryAddress: string): StrategyRe
         strategyRegistry = new StrategyRegistry(strategyRegistryAddress);
         strategyRegistry.ecosystemFeeReceiver = ZERO_ADDRESS.toHexString();
         strategyRegistry.treasuryFeeReceiver = ZERO_ADDRESS.toHexString();
-        strategyRegistry.ecosystemFee = ZERO_BI;
-        strategyRegistry.treasuryFee = ZERO_BI;
+        strategyRegistry.ecosystemFee = ZERO_BD;
+        strategyRegistry.treasuryFee = ZERO_BD;
         strategyRegistry.save();
     }
 
@@ -255,8 +259,8 @@ export function getGlobal(): Global {
 
     if (_global == null) {
         _global = new Global("Global");
-        _global.ecosystemFee = ZERO_BI;
-        _global.treasuryFee = ZERO_BI;
+        _global.ecosystemFee = ZERO_BD;
+        _global.treasuryFee = ZERO_BD;
         _global.save();
     }
 
