@@ -27,7 +27,9 @@
 
         "mainnet-prod:codegen": "NETWORK=mainnet.production npm run mustache && graph codegen",
         "mainnet-prod:build": "npm run mainnet-prod:codegen && graph build",
-        "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2 --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA"
+        "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2 --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA",
+        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && eval $(grep '^ACCESS_TOKEN_STUDIO' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph auth --studio '${ACCESS_TOKEN_STUDIO: 0:6}-${ACCESS_TOKEN_STUDIO: -6}' && graph deploy --version-label=$VERSION_LABEL --deploy-key=$ACCESS_TOKEN_STUDIO --studio spool-v2_mainnet",
+        "graph-help": "graph deploy --help"
     },
     "author": "Spool DAO",
     "license": "MIT",
