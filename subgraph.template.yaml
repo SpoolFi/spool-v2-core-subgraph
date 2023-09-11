@@ -34,6 +34,10 @@ dataSources:
           handler: handleStrategyApyUpdated
         - event: StrategyDhw(indexed address,uint256,(uint256,uint256[],int256,uint256,uint256))
           handler: handleStrategyDhw
+        - event: EcosystemFeeSet(uint256)
+          handler: handleEcosystemFeeSet
+        - event: TreasuryFeeSet(uint256)
+          handler: handleTreasuryFeeSet
         - event: EcosystemFeeReceiverSet(indexed address)
           handler: handleEcosystemFeeReceiverSet
         - event: TreasuryFeeReceiverSet(indexed address)

@@ -4,13 +4,15 @@ import {
     StrategyRegistered,
     StrategyDhw as StrategyDhwEvent,
     StrategyRemoved,
+    EcosystemFeeSet,
+    TreasuryFeeSet,
     EcosystemFeeReceiverSet,
     TreasuryFeeReceiverSet,
     StrategySharesRedeemed
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
-import {SSTRedemptionAsset, StrategyRegistry, Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token, User} from "../generated/schema";
+import {SSTRedemptionAsset, StrategyRegistry, Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token, User, Global} from "../generated/schema";
 import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS, ZERO_ADDRESS, getUser, createTokenEntity} from "./utils/helpers";
 
 import {getAssetGroup, getAssetGroupTokenById} from "./assetGroupRegistry";
@@ -59,6 +61,34 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     strategy.lastDoHardWorkTime = event.block.timestamp;
     strategy.lastDoHardWorkIndex = event.params.dhwIndex.toI32();
     strategy.save();
+
+}
+
+
+export function handleEcosystemFeeSet(event: EcosystemFeeSet): void {
+    logEventName("handleEcosystemFeeSet", event);
+
+    let _global = getGlobal();
+    let strategyRegistry = getStrategyRegistry( event.address.toHexString());
+
+    _global.ecosystemFee = event.params.feePct;
+    strategyRegistry.ecosystemFee = event.params.feePct;
+
+    _global.save();
+    strategyRegistry.save();
+}
+
+export function handleTreasuryFeeSet(event: TreasuryFeeSet): void {
+    logEventName("handleTreasuryFeeSet", event);
+
+    let _global = getGlobal();
+    let strategyRegistry = getStrategyRegistry( event.address.toHexString());
+
+    _global.treasuryFee = event.params.feePct;
+    strategyRegistry.treasuryFee = event.params.feePct;
+
+    _global.save();
+    strategyRegistry.save();
 
 }
 
@@ -195,6 +225,8 @@ export function getStrategyRegistry(strategyRegistryAddress: string): StrategyRe
         strategyRegistry = new StrategyRegistry(strategyRegistryAddress);
         strategyRegistry.ecosystemFeeReceiver = ZERO_ADDRESS.toHexString();
         strategyRegistry.treasuryFeeReceiver = ZERO_ADDRESS.toHexString();
+        strategyRegistry.ecosystemFee = ZERO_BI;
+        strategyRegistry.treasuryFee = ZERO_BI;
         strategyRegistry.save();
     }
 
@@ -216,4 +248,17 @@ export function getSSTRedemptionAsset(user: User, asset: Token): SSTRedemptionAs
 
     return sstRedemptionAsset;
         
+}
+
+export function getGlobal(): Global {
+    let _global = Global.load("Global");
+
+    if (_global == null) {
+        _global = new Global("Global");
+        _global.ecosystemFee = ZERO_BI;
+        _global.treasuryFee = ZERO_BI;
+        _global.save();
+    }
+
+    return _global;
 }
