@@ -3,7 +3,10 @@
     "version": "1.0.0",
     "description": "Spool V2 Subgraph",
     "scripts": {
-        "mustache": "mustache src/config/contracts.$NETWORK.json subgraph.template.yaml > subgraph.yaml && mustache src/config/contracts.$NETWORK.json src/utils/helpers.template.ts > src/utils/helpers.ts && mustache src/config/contracts.$NETWORK.json docker-compose.template.yml > docker-compose.yml",
+        "mustache": "ts-node scripts/mustache.ts",
+        "deploy-hosted": "ts-node scripts/deploy-hosted.ts",
+        "deploy-satsuma": "ts-node scripts/deploy-satsuma.ts",
+        "deploy-studio": "ts-node scripts/deploy-studio.ts",
 
         "local:codegen": "graph codegen",
         "local:build": "npm run local:codegen && graph build",
@@ -11,25 +14,25 @@
         "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
         "local:deploy:fresh": "npm run local:build && npm run local:create && graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
 
-        "staging:codegen": "NETWORK=devnet-18 npm run mustache && graph codegen",
+        "staging:codegen": "npm run mustache devnet-18 && graph codegen",
         "staging:build": "npm run staging:codegen && graph build",
         "staging:create": "graph create spool/core-v2 --node http://3.120.126.253:8020",
         "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://3.120.126.253:5001 --node http://3.120.126.253:8020 -l 1.0",
 
-        "testing:codegen": "NETWORK=devnet-18 npm run mustache && graph codegen",
+        "testing:codegen": "npm run mustache devnet-18 && graph codegen",
         "testing:build": "npm run testing:codegen && graph build",
         "testing:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
         "testing:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
 
-        "mainnet-staging:codegen": "NETWORK=mainnet.staging npm run mustache && graph codegen",
+        "mainnet-staging:codegen": "npm run mustache mainnet.staging && graph codegen",
         "mainnet-staging:build": "npm run mainnet-staging:codegen && graph build",
-        "mainnet-staging:deploy-satsuma": "npm run mainnet-staging:build && eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2-staging --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA",
+        "mainnet-staging:deploy-satsuma": "npm run mainnet-staging:build && npm run deploy-satsuma spool-v2-staging",
 
-        "mainnet-prod:codegen": "NETWORK=mainnet.production npm run mustache && graph codegen",
+        "mainnet-prod:codegen": "npm run mustache mainnet.production && graph codegen",
         "mainnet-prod:build": "npm run mainnet-prod:codegen && graph build",
-        "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && eval $(grep '^ACCESS_TOKEN_SATSUMA' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph deploy spool-v2 --version-label $VERSION_LABEL --node https://app.satsuma.xyz/api/subgraphs/deploy --deploy-key $ACCESS_TOKEN_SATSUMA",
-        "mainnet-prod:deploy-hosted": "eval $(grep '^ACCESS_TOKEN_HOSTED' .env) && graph deploy --access-token $ACCESS_TOKEN --product hosted-service spoolfi/spool-v2 subgraph.yaml --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && eval $(grep '^ACCESS_TOKEN_STUDIO' .env) && VERSION_LABEL=$(git rev-parse --short HEAD) && graph auth --studio '${ACCESS_TOKEN_STUDIO: 0:6}-${ACCESS_TOKEN_STUDIO: -6}' && graph deploy --version-label=$VERSION_LABEL --deploy-key=$ACCESS_TOKEN_STUDIO --studio spool-v2_mainnet",
+        "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && npm run deploy-satsuma spool-v2",
+        "mainnet-prod:deploy-hosted": "npm run mainnet-prod:build && npm run deploy-hosted spoolfi/spool-v2",
+        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && npm run deploy-studio spool-v2_mainnet",
         "graph-help": "graph deploy --help"
     },
     "author": "Spool DAO",
@@ -39,7 +42,10 @@
         "@graphprotocol/graph-ts": "^0.29.3"
     },
     "devDependencies": {
+        "@types/node": "^20.6.0",
+        "dotenv": "^16.3.1",
         "mustache": "^4.2.0",
-        "prettier": "^2.8.8"
+        "prettier": "^2.8.8",
+        "ts-node": "^10.9.1"
     }
 }
