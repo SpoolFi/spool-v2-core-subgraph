@@ -8,7 +8,7 @@
         "deploy-satsuma": "ts-node scripts/deploy-satsuma.ts",
         "deploy-studio": "ts-node scripts/deploy-studio.ts",
 
-        "local:codegen": "graph codegen",
+        "local:codegen": "npm run mustache local && graph codegen",
         "local:build": "npm run local:codegen && graph build",
         "local:create": "graph create spool/core-v2 --node http://127.0.0.1:8020",
         "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
@@ -32,8 +32,7 @@
         "mainnet-prod:build": "npm run mainnet-prod:codegen && graph build",
         "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && npm run deploy-satsuma spool-v2",
         "mainnet-prod:deploy-hosted": "npm run mainnet-prod:build && npm run deploy-hosted spoolfi/spool-v2",
-        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && npm run deploy-studio spool-v2_mainnet",
-        "graph-help": "graph deploy --help"
+        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && npm run deploy-studio spool-v2_mainnet"
     },
     "author": "Spool DAO",
     "license": "MIT",

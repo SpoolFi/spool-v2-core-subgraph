@@ -2,27 +2,33 @@
 
 # Install
 - Install Docker
+- Install Git
 - clone
 - `npm install`
 
-# Run local
-- `NETWORK={network_id} && npm run mustache`
-
-    - `network_id` is one of `src/config/contracts.{network_id}.json`.
-
+# Deploy Local
+- populate `src/config/contracts.local.json` with addresses to deploy.
+    - if the address list is one of `src/config/contracts.{NETWORK}.json`, you can replace `local` in the script `local:codegen` in `package.json` with `{NETWORK}`. eg. for `src/config/contracts.devnet-10.json`: replace `local` in the `local:codegen` script with `devnet-10` to use the `devnet-10` addresses.
 - `docker-compose down`
-- `sudo rm -rf build/ generated/ data/`
+- delete folders `build/ generated/ data/`
 - `docker-compose up -d`
 - `npm run local:build`
 - `npm run local:create`
 - `npm run local:deploy`
 - `docker logs --follow spool-v2-core-subgraph_graph-node_1`
 
-# Run Remote
-- `REMOTE={staging|testing}`
+# Deploy Remote (Tenderly)
+- `REMOTE` should be one of `{staging|testing}`
+- Update `$REMOTE:codegen` in `package.json` with your chosen devnet (the latest devnet is always set)
 - `npm run $REMOTE:build`
 - `npm run $REMOTE:create`
 - `npm run $REMOTE:deploy`
+
+# Deploy Remote (Mainnet) 
+- Staging to Satsuma: `npm run mainnet-staging:deploy-satsuma`
+- Production to Satsuma: `npm run mainnet-prod:deploy-satsuma`
+- Production to Hosted Service: `npm run mainnet-prod:deploy-hosted`
+- Production to Decentralized Service: `npm run mainnet-prod:deploy-studio`
 
 ## Query Local
 
