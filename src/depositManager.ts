@@ -28,9 +28,11 @@ import {
     NFT_INITIAL_SHARES,
     ZERO_BD,
     getSmartVaultFees,
+    getDepositUserTransactionType, 
+    getUserTransaction, 
+    getUserTransactionTypeToken
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
-import {getAssetGroupToken} from "./assetGroupRegistry";
 
 export function handleDepositInitiated(event: DepositInitiated): void {
     logEventName("handleDepositInitiated", event);
@@ -61,10 +63,48 @@ export function handleDepositInitiated(event: DepositInitiated): void {
         let vaultDeposits = getVaultDeposits(smartVault, smartVaultFlush, token);
         vaultDeposits.amount = vaultDeposits.amount.plus(amount);
         vaultDeposits.save();
+        
     }
     dNFT.assets = assets;
 
     dNFT.save();
+    
+    // set user analytics
+    let userTransaction = getUserTransaction(user.id, user.transactionCount);
+
+    userTransaction.timestamp = event.block.timestamp.toI32();
+    userTransaction.txHash = event.transaction.hash.toHexString();
+    userTransaction.smartVault = smartVault.id;
+    userTransaction.save();
+
+    let depositUserTransactionType = getDepositUserTransactionType(userTransaction);
+    depositUserTransactionType.smartVaultFlush = smartVaultFlush.id;
+    depositUserTransactionType.save();
+
+    let tokenData = depositUserTransactionType.tokenData;
+    for (let i = 0; i < assetGroup.assetGroupTokens.length; i++) {
+        // second part of the id is the token address
+        let token = createTokenEntity(assetGroup.assetGroupTokens[i].split("-")[1]);
+
+        let amount = getTokenDecimalAmountFromAddress(event.params.assets[i], token.id);
+        let userTransactionTypeToken = getUserTransactionTypeToken(depositUserTransactionType.id, token);
+
+        userTransactionTypeToken.amount = amount;
+        userTransactionTypeToken.token = token.id;
+        userTransactionTypeToken.save();
+
+        tokenData.push(userTransactionTypeToken.id);
+    }
+
+    depositUserTransactionType.tokenData = tokenData;
+    depositUserTransactionType.save();
+
+    userTransaction.type = depositUserTransactionType.id;
+    userTransaction.save();
+
+    user.transactionCount = user.transactionCount + 1;
+    user.save();
+
 }
 
 export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): void {

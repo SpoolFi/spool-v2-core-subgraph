@@ -105,6 +105,47 @@ type User @entity {
     redeemedAssets: [SSTRedemptionAsset!]! @derivedFrom(field: "user")
     svtSentTransfers: [SVTTransfer!]! @derivedFrom(field: "from")
     svtReceivedTransfers: [SVTTransfer!]! @derivedFrom(field: "to")
+    transactionCount: Int!
+}
+
+type UserTransaction @entity {
+    id: ID! # set to user.id-transactionCount
+    count: Int!
+    timestamp: Int!
+    txHash: String!
+    smartVault: SmartVault!
+    type: UserTransactionType! # DEPOSIT, REDEEM, CLAIM
+}
+
+interface UserTransactionType @entity {
+    id: ID!
+    type: String!
+}
+
+type DepositUserTransactionType implements UserTransactionType @entity {
+    id: ID! # set to userTransaction.id - type
+    type: String!
+    smartVaultFlush: SmartVaultFlush!
+    tokenData: [UserTransactionTypeToken!]!
+}
+
+type RedeemUserTransactionType implements UserTransactionType @entity {
+    id: ID! # set to userTransaction.id - type
+    type: String!
+    smartVaultFlush: SmartVaultFlush!
+    svts: BigDecimal!
+}
+
+type ClaimUserTransactionType implements UserTransactionType @entity {
+    id: ID! # set to userTransaction.id - type
+    type: String!
+    tokenData: [UserTransactionTypeToken!]!
+}
+
+type UserTransactionTypeToken @entity {
+    id: ID! # set to {type}UserTransactionType.id - token
+    token: Token!
+    amount: BigDecimal!
 }
 
 type SmartVaultDepositNFT @entity {

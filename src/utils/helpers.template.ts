@@ -1,5 +1,5 @@
 import {BigDecimal, Address, BigInt, ethereum, log} from "@graphprotocol/graph-ts";
-import {SmartVault, SmartVaultFees, Token, User} from "../../generated/schema";
+import {ClaimUserTransactionType, DepositUserTransactionType, RedeemUserTransactionType, SmartVault, SmartVaultFees, Token, User, UserTransaction, UserTransactionTypeToken} from "../../generated/schema";
 import {BTokenContract} from "../../generated/AssetGroupRegistry/BTokenContract";
 import {BTokenBytesContract} from "../../generated/AssetGroupRegistry/BTokenBytesContract";
 
@@ -120,11 +120,90 @@ export function getUser(userAddress: string): User {
 
     if (user == null) {
         user = new User(userAddress);
+        user.transactionCount = 0;
         user.save();
     }
 
     return user;
 }
+
+export function getUserTransaction(userAddress: string, transactionCount: i32): UserTransaction {
+    let id = getComposedId(userAddress, transactionCount.toString());
+    let userTransaction = UserTransaction.load(id);
+
+    if (userTransaction == null) {
+        userTransaction = new UserTransaction(id);
+        userTransaction.count = transactionCount;
+        userTransaction.timestamp = 0;
+        userTransaction.txHash = "";
+        userTransaction.smartVault = "";
+        userTransaction.type = "";
+        userTransaction.save();
+    }
+
+    return userTransaction;
+}
+
+export function getDepositUserTransactionType(userTransaction: UserTransaction): DepositUserTransactionType {
+    let id = getComposedId(userTransaction.id, "DEPOSIT");
+    let depositUserTransactionType = DepositUserTransactionType.load(id);
+
+    if (depositUserTransactionType == null) {
+        depositUserTransactionType = new DepositUserTransactionType(id);
+        depositUserTransactionType.type = "DEPOSIT";
+        depositUserTransactionType.tokenData = [];
+        depositUserTransactionType.smartVaultFlush = "";
+        depositUserTransactionType.save();
+    }
+
+    return depositUserTransactionType;
+}
+
+
+export function getRedeemUserTransactionType(userTransaction: UserTransaction): RedeemUserTransactionType {
+    let id = getComposedId(userTransaction.id, "REDEEM");
+    let redeemUserTransactionType = RedeemUserTransactionType.load(id);
+
+    if (redeemUserTransactionType == null) {
+        redeemUserTransactionType = new RedeemUserTransactionType(id);
+        redeemUserTransactionType.type = "REDEEM";
+        redeemUserTransactionType.smartVaultFlush = "";
+        redeemUserTransactionType.svts = ZERO_BD;
+        redeemUserTransactionType.save();
+    }
+
+    return redeemUserTransactionType;
+}
+
+export function getClaimUserTransactionType(userTransaction: UserTransaction): ClaimUserTransactionType {
+    let id = getComposedId(userTransaction.id, "CLAIM");
+    let claimUserTransactionType = ClaimUserTransactionType.load(id);
+
+    if (claimUserTransactionType == null) {
+        claimUserTransactionType = new ClaimUserTransactionType(id);
+        claimUserTransactionType.type = "CLAIM";
+        claimUserTransactionType.tokenData = [];
+        claimUserTransactionType.save();
+    }
+
+    return claimUserTransactionType;
+}
+
+
+export function getUserTransactionTypeToken(userTransactionType: string, token: Token): UserTransactionTypeToken {
+    let id = getComposedId(userTransactionType, token.id);
+    let userTransactionTypeToken = UserTransactionTypeToken.load(id);
+
+    if (userTransactionTypeToken == null) {
+        userTransactionTypeToken = new UserTransactionTypeToken(id);
+        userTransactionTypeToken.token = token.id;
+        userTransactionTypeToken.amount = ZERO_BD;
+        userTransactionTypeToken.save();
+    }
+
+    return userTransactionTypeToken;
+}
+
 
 export function getComposedId(
     firstId: string,

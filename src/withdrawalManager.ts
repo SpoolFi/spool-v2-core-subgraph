@@ -6,6 +6,7 @@ import {
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
 import {
+    AssetGroup,
     FastRedeem,
     SmartVault,
     SmartVaultFastRedeem,
@@ -24,6 +25,12 @@ import {
     getUser,
     NFT_INITIAL_SHARES,
     getSmartVault,
+    getUserTransaction,
+    getRedeemUserTransactionType,
+    getClaimUserTransactionType,
+    createTokenEntity, 
+    getTokenDecimalAmountFromAddress, 
+    getUserTransactionTypeToken
 } from "./utils/helpers";
 import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
 import {getStrategy, getStrategyDHW} from "./strategyRegistry";
@@ -52,13 +59,70 @@ export function handleRedeemInitiated(event: RedeemInitiated): void {
 
     wNFT.save();
     withdrawnVaultShares.save();
+
+    // set user analytics
+    let userTransaction = getUserTransaction(user.id, user.transactionCount);
+
+    userTransaction.timestamp = event.block.timestamp.toI32();
+    userTransaction.txHash = event.transaction.hash.toHexString();
+    userTransaction.smartVault = smartVault.id;
+    userTransaction.save();
+
+    let redeemUserTransactionType = getRedeemUserTransactionType(userTransaction);
+    redeemUserTransactionType.smartVaultFlush = smartVaultFlush.id;
+
+    redeemUserTransactionType.svts = event.params.shares.toBigDecimal();
+    redeemUserTransactionType.save();
+
+    userTransaction.type = redeemUserTransactionType.id;
+    userTransaction.save();
+
+    user.transactionCount = user.transactionCount + 1;
+    user.save();
 }
 
 export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
     logEventName("handleWithdrawalClaimed", event);
-    let smartVaultAddress = event.params.smartVault.toHexString();
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
 
-    burnWithdrawalNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts, event.block.timestamp.toI32());
+    burnWithdrawalNfts(smartVault.id, event.params.nftIds, event.params.nftAmounts, event.block.timestamp.toI32());
+
+    // set user analytics
+    const assetGroup = AssetGroup.load(smartVault.assetGroup)!;
+    let user = getUser(event.params.claimer.toHexString());
+    let userTransaction = getUserTransaction(user.id, user.transactionCount);
+
+    userTransaction.timestamp = event.block.timestamp.toI32();
+    userTransaction.txHash = event.transaction.hash.toHexString();
+    userTransaction.smartVault = smartVault.id;
+    userTransaction.save();
+
+    let claimUserTransactionType = getClaimUserTransactionType(userTransaction);
+    claimUserTransactionType.save();
+
+    let tokenData = claimUserTransactionType.tokenData;
+    for (let i = 0; i < assetGroup.assetGroupTokens.length; i++) {
+        // second part of the id is the token address
+        let token = createTokenEntity(assetGroup.assetGroupTokens[i].split("-")[1]);
+
+        let amount = getTokenDecimalAmountFromAddress(event.params.withdrawnAssets[i], token.id);
+        let userTransactionTypeToken = getUserTransactionTypeToken(claimUserTransactionType.id, token);
+
+        userTransactionTypeToken.amount = amount;
+        userTransactionTypeToken.token = token.id;
+        userTransactionTypeToken.save();
+
+        tokenData.push(userTransactionTypeToken.id);
+    }
+
+    claimUserTransactionType.tokenData = tokenData;
+    claimUserTransactionType.save();
+
+    userTransaction.type = claimUserTransactionType.id;
+    userTransaction.save();
+
+    user.transactionCount = user.transactionCount + 1;
+    user.save();
 }
 
 export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
