@@ -179,7 +179,15 @@ type SmartVaultWithdrawalNFT @entity {
     blockNumber: Int!
     transferCount: Int!
     burnedOn: Int!
+    assetsWithdrawn: [SmartVaultWithdrawalNFTAsset!]! @derivedFrom(field: "smartVaultWithdrawalNFT")
     transfers: [SmartVaultWithdrawalNFTTransfer!]! @derivedFrom(field: "wNFT")
+}
+
+type SmartVaultWithdrawalNFTAsset @entity {
+    id: ID! # set to smartVaultWithdrawalNFT.id-asset.id
+    smartVaultWithdrawalNFT: SmartVaultWithdrawalNFT!
+    asset: Token!
+    amount: BigDecimal!
 }
 
 type WithdrawnVaultShares @entity {

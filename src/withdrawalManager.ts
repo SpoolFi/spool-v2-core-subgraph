@@ -13,7 +13,9 @@ import {
     SmartVaultFlush,
     SmartVaultStrategy,
     SmartVaultWithdrawalNFT,
+    SmartVaultWithdrawalNFTAsset,
     StrategyDHW,
+    Token,
     WithdrawnVaultShares,
 } from "../generated/schema";
 
@@ -30,11 +32,13 @@ import {
     getClaimUserTransactionType,
     createTokenEntity, 
     getTokenDecimalAmountFromAddress, 
-    getUserTransactionTypeToken
+    getUserTransactionTypeToken,
+    ZERO_BD
 } from "./utils/helpers";
 import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
 import {getStrategy, getStrategyDHW} from "./strategyRegistry";
 import {getSmartVaultDepositNFT} from "./depositManager";
+import {getAssetGroup, getAssetGroupToken, getAssetGroupTokenById} from "./assetGroupRegistry";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
@@ -85,7 +89,7 @@ export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
     logEventName("handleWithdrawalClaimed", event);
     let smartVault = getSmartVault( event.params.smartVault.toHexString() );
 
-    burnWithdrawalNfts(smartVault.id, event.params.nftIds, event.params.nftAmounts, event.block.timestamp.toI32());
+    burnWithdrawalNfts(event);
 
     // set user analytics
     const assetGroup = AssetGroup.load(smartVault.assetGroup)!;
@@ -166,7 +170,16 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
 
 }
 
-function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmounts: BigInt[], timestamp: i32): void {
+function burnWithdrawalNfts(event: WithdrawalClaimed): void {
+
+    let smartVaultAddress = event.params.smartVault.toHexString();
+    let nftIds = event.params.nftIds;
+    let nftAmounts = event.params.nftAmounts;
+    let timestamp = event.block.timestamp.toI32();
+    let withdrawnAssets = event.params.withdrawnAssets; 
+    let assetGroup = getAssetGroup(event.params.assetGroupId.toString()); 
+    let assetGroupTokens = assetGroup.assetGroupTokens;
+
     for (let i = 0; i < nftIds.length; i++) {
         let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, nftIds[i]);
 
@@ -178,7 +191,18 @@ function burnWithdrawalNfts(smartVaultAddress: string, nftIds: BigInt[], nftAmou
         }
 
         wNFT.save();
+
+        for(let j = 0; j < assetGroupTokens.length; j++) {
+        // second part of the id is the token address
+            let token = createTokenEntity(assetGroupTokens[j].split("-")[1]);
+            let wNFTAsset = getSmartVaultWithdrawalNFTAsset(wNFT, token);
+
+            let amount = getTokenDecimalAmountFromAddress(withdrawnAssets[j], token.id);
+            wNFTAsset.amount = wNFTAsset.amount.plus(amount);
+            wNFTAsset.save();
+        }
     }
+
 }
 
 
@@ -220,6 +244,22 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
     }
 
     return wNFT;
+}
+
+export function getSmartVaultWithdrawalNFTAsset(smartVaultWithdrawalNFT: SmartVaultWithdrawalNFT, asset: Token): SmartVaultWithdrawalNFTAsset {
+    let id = getComposedId(smartVaultWithdrawalNFT.id, asset.id);
+    let wNFTAsset = SmartVaultWithdrawalNFTAsset.load(id);
+
+    if (wNFTAsset == null) {
+        wNFTAsset = new SmartVaultWithdrawalNFTAsset(id);
+        wNFTAsset.smartVaultWithdrawalNFT = smartVaultWithdrawalNFT.id;
+        wNFTAsset.asset = asset.id;
+        wNFTAsset.amount = ZERO_BD;
+
+        wNFTAsset.save();
+    }
+
+    return wNFTAsset;
 }
 
 
