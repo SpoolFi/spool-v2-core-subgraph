@@ -1,10 +1,10 @@
-import { execPromised } from './_common';
+import * as dotenv from 'dotenv';
+import { execPromised, getEnvVar } from './_common';
+
+dotenv.config();
 
 (async () => {
-    if (process.argv.length !== 3) {
-        throw new Error('Invalid number of parameters.');
-    }
-    const network = process.argv[2];
+    const network = getEnvVar('NETWORK');
 
     const commands = [
         `mustache src/config/contracts.${network}.json subgraph.template.yaml > subgraph.yaml`,
