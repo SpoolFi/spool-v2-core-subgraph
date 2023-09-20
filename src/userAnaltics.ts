@@ -1,8 +1,10 @@
 import {DepositInitiated} from "../generated/DepositManager/DepositManagerContract";
 import {RedeemInitiated, WithdrawalClaimed} from "../generated/WithdrawalManager/WithdrawalManagerContract";
 import {AssetGroup} from "../generated/schema";
+import {getSmartVaultDepositNFT} from "./depositManager";
 import {getSmartVaultFlush} from "./smartVaultManager";
 import {createTokenEntity, getClaimUserTransactionType, getDepositUserTransactionType, getRedeemUserTransactionType, getSmartVault, getTokenDecimalAmountFromAddress, getUser, getUserTransaction, getUserTransactionTypeToken} from "./utils/helpers";
+import {getSmartVaultWithdrawalNFT} from "./withdrawalManager";
 
 export function setUserTransactionDeposit(event: DepositInitiated): void {
     // set user analytics
@@ -11,6 +13,7 @@ export function setUserTransactionDeposit(event: DepositInitiated): void {
     let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
     const assetGroup = AssetGroup.load(smartVault.assetGroup)!;
     let userTransaction = getUserTransaction(user.id, user.transactionCount);
+    let dNFT = getSmartVaultDepositNFT(smartVault.id, event.params.depositId);
 
     userTransaction.timestamp = event.block.timestamp.toI32();
     userTransaction.txHash = event.transaction.hash.toHexString();
@@ -19,6 +22,7 @@ export function setUserTransactionDeposit(event: DepositInitiated): void {
 
     let depositUserTransactionType = getDepositUserTransactionType(userTransaction);
     depositUserTransactionType.smartVaultFlush = smartVaultFlush.id;
+    depositUserTransactionType.dNFT = dNFT.id;
     depositUserTransactionType.save();
 
     let tokenData = depositUserTransactionType.tokenData;
@@ -53,6 +57,7 @@ export function setUserTransactionRedeem(event: RedeemInitiated): void {
     let user = getUser(event.params.receiver.toHexString());
     let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
     let userTransaction = getUserTransaction(user.id, user.transactionCount);
+    let wNFT = getSmartVaultWithdrawalNFT(smartVault.id, event.params.redeemId);
 
     userTransaction.timestamp = event.block.timestamp.toI32();
     userTransaction.txHash = event.transaction.hash.toHexString();
@@ -61,8 +66,8 @@ export function setUserTransactionRedeem(event: RedeemInitiated): void {
 
     let redeemUserTransactionType = getRedeemUserTransactionType(userTransaction);
     redeemUserTransactionType.smartVaultFlush = smartVaultFlush.id;
-
     redeemUserTransactionType.svts = event.params.shares.toBigDecimal();
+    redeemUserTransactionType.wNFT = wNFT.id;
     redeemUserTransactionType.save();
 
     userTransaction.type = redeemUserTransactionType.id;
@@ -78,6 +83,7 @@ export function setUserTransactionClaim(event: WithdrawalClaimed): void {
     const assetGroup = AssetGroup.load(smartVault.assetGroup)!;
     let user = getUser(event.params.claimer.toHexString());
     let userTransaction = getUserTransaction(user.id, user.transactionCount);
+    let wNFTs = event.params.nftIds;
 
     userTransaction.timestamp = event.block.timestamp.toI32();
     userTransaction.txHash = event.transaction.hash.toHexString();
@@ -85,6 +91,10 @@ export function setUserTransactionClaim(event: WithdrawalClaimed): void {
     userTransaction.save();
 
     let claimUserTransactionType = getClaimUserTransactionType(userTransaction);
+    for(let i = 0; i < wNFTs.length; i++) {
+        let wNFT = getSmartVaultWithdrawalNFT(smartVault.id, wNFTs[i]);
+        claimUserTransactionType.wNFTs.push(wNFT.id);
+    }
     claimUserTransactionType.save();
 
     let tokenData = claimUserTransactionType.tokenData;

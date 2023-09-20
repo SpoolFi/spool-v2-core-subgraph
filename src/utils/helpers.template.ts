@@ -153,6 +153,7 @@ export function getDepositUserTransactionType(userTransaction: UserTransaction):
         depositUserTransactionType.type = "DEPOSIT";
         depositUserTransactionType.tokenData = [];
         depositUserTransactionType.smartVaultFlush = "";
+        depositUserTransactionType.dNFT = "";
         depositUserTransactionType.save();
     }
 
@@ -169,6 +170,7 @@ export function getRedeemUserTransactionType(userTransaction: UserTransaction): 
         redeemUserTransactionType.type = "REDEEM";
         redeemUserTransactionType.smartVaultFlush = "";
         redeemUserTransactionType.svts = ZERO_BD;
+        redeemUserTransactionType.wNFT = "";
         redeemUserTransactionType.save();
     }
 
@@ -183,6 +185,7 @@ export function getClaimUserTransactionType(userTransaction: UserTransaction): C
         claimUserTransactionType = new ClaimUserTransactionType(id);
         claimUserTransactionType.type = "CLAIM";
         claimUserTransactionType.tokenData = [];
+        claimUserTransactionType.wNFTs = [];
         claimUserTransactionType.save();
     }
 

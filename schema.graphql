@@ -127,6 +127,7 @@ type DepositUserTransactionType implements UserTransactionType @entity {
     type: String!
     smartVaultFlush: SmartVaultFlush!
     tokenData: [UserTransactionTypeToken!]!
+    dNFT: SmartVaultDepositNFT!
 }
 
 type RedeemUserTransactionType implements UserTransactionType @entity {
@@ -134,12 +135,14 @@ type RedeemUserTransactionType implements UserTransactionType @entity {
     type: String!
     smartVaultFlush: SmartVaultFlush!
     svts: BigDecimal!
+    wNFT: SmartVaultWithdrawalNFT!
 }
 
 type ClaimUserTransactionType implements UserTransactionType @entity {
     id: ID! # set to userTransaction.id - type
     type: String!
     tokenData: [UserTransactionTypeToken!]!
+    wNFTs: [SmartVaultWithdrawalNFT!]!
 }
 
 type UserTransactionTypeToken @entity {
