@@ -8,27 +8,27 @@
         "deploy-satsuma": "ts-node scripts/deploy-satsuma.ts",
         "deploy-studio": "ts-node scripts/deploy-studio.ts",
 
-        "local:codegen": "npm run mustache local && graph codegen",
+        "local:codegen": "cross-env NETWORK=local npm run mustache && graph codegen",
         "local:build": "npm run local:codegen && graph build",
         "local:create": "graph create spool/core-v2 --node http://127.0.0.1:8020",
         "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
         "local:deploy:fresh": "npm run local:build && npm run local:create && graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
 
-        "staging:codegen": "npm run mustache devnet-18 && graph codegen",
+        "staging:codegen": "cross-env NETWORK=devnet-18 npm run mustache && graph codegen",
         "staging:build": "npm run staging:codegen && graph build",
         "staging:create": "graph create spool/core-v2 --node http://3.120.126.253:8020",
         "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://3.120.126.253:5001 --node http://3.120.126.253:8020 -l 1.0",
 
-        "testing:codegen": "npm run mustache devnet-18 && graph codegen",
+        "testing:codegen": "cross-env NETWORK=devnet-18 npm run mustache && graph codegen",
         "testing:build": "npm run testing:codegen && graph build",
         "testing:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
         "testing:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
 
-        "mainnet-staging:codegen": "npm run mustache mainnet.staging && graph codegen",
+        "mainnet-staging:codegen": "cross-env NETWORK=mainnet.staging npm run mustache && graph codegen",
         "mainnet-staging:build": "npm run mainnet-staging:codegen && graph build",
         "mainnet-staging:deploy-satsuma": "npm run mainnet-staging:build && npm run deploy-satsuma spool-v2-staging",
 
-        "mainnet-prod:codegen": "npm run mustache mainnet.production && graph codegen",
+        "mainnet-prod:codegen": "cross-env NETWORK=mainnet.production npm run mustache && graph codegen",
         "mainnet-prod:build": "npm run mainnet-prod:codegen && graph build",
         "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && npm run deploy-satsuma spool-v2",
         "mainnet-prod:deploy-hosted": "npm run mainnet-prod:build && npm run deploy-hosted spoolfi/spool-v2",
@@ -42,6 +42,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.6.0",
+        "cross-env": "^7.0.3",
         "dotenv": "^16.3.1",
         "mustache": "^4.2.0",
         "prettier": "^2.8.8",
