@@ -295,6 +295,7 @@ function getCycle(cycleId: i32): Cycle {
     if (cycle == null) {
         cycle = new Cycle(cycleId.toString());
         cycle.previousRoots = [];
+        cycle.cycleCount = 0;
         cycle.root = "";
 
         cycle.save();
