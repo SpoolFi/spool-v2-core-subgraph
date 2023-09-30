@@ -294,8 +294,10 @@ type StrategyDHW @entity {
     apy: BigDecimal
     sharesRedeemed: BigInt!
     fastRedeemCount: Int!
+    reallocationCount: Int!
     assetsDeposited: [StrategyDHWAssetDeposit!]! @derivedFrom(field: "strategyDHW")
     fastRedeems: [FastRedeem!]! @derivedFrom(field: "strategyDHW")
+    reallocations: [StrategyReallocation!]! @derivedFrom(field: "strategyDHW")
 }
 
 type FastRedeem @entity {
@@ -306,6 +308,15 @@ type FastRedeem @entity {
     user: User!
     smartVault: SmartVault!
     createdOn: Int!
+}
+
+type StrategyReallocation @entity {
+    id: ID! # Set to `${strategyDHW.id}-${count}`
+    strategyDHW: StrategyDHW!
+    count: Int!
+    timestamp: Int!
+    blockNumber: Int!
+    allocation: BigInt!
 }
 
 type StrategyDHWAssetDeposit @entity {

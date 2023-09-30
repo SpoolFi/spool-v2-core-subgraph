@@ -196,6 +196,7 @@ export function getStrategyDHW(
         strategyDhw.isExecuted = false;
         strategyDhw.sharesRedeemed = ZERO_BI;
         strategyDhw.fastRedeemCount = 0;
+        strategyDhw.reallocationCount = 0;
         strategyDhw.save();
     }
 

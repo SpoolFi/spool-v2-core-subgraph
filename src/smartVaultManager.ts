@@ -2,7 +2,7 @@ import {Address, BigInt} from "@graphprotocol/graph-ts";
 import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVault} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
-import {SmartVaultFlush, SmartVaultStrategy} from "../generated/schema";
+import {SmartVaultFlush, SmartVaultStrategy, StrategyDHW, StrategyReallocation} from "../generated/schema";
 import { getGhostStrategy, getStrategy, getStrategyDHW, getStrategyDHWAssetDeposit } from "./strategyRegistry";
 import {SmartVault} from "../generated/templates";
 import {StrategyRegistryContract} from "../generated/StrategyRegistry/StrategyRegistryContract";
@@ -123,6 +123,8 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
     
     let smartVaultAddress = event.params.smartVault.toHexString();
     let newAllocations = event.params.newAllocations;
+    let timestamp = event.block.timestamp.toI32();
+    let blockNumber = event.block.number.toI32();
 
     let smartVault = getSmartVault(smartVaultAddress);
     smartVault.lastRebalanceTime = event.block.timestamp;
@@ -137,8 +139,19 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
         let newAllocation = newAllocations.rightShift(u8(i * 16)).bitAnd(allocationMask);
         smartVaultStrategy.allocation = newAllocation;
         smartVaultStrategy.save();
-    }
 
+        let strategy = getStrategy(smartVaultStrategy.strategy);
+       let strategyDHW = getStrategyDHW(strategy.id, strategy.lastDoHardWorkIndex);
+        let strategyReallocation = getStrategyReallocation(strategyDHW);
+
+        strategyDHW.reallocationCount = strategyDHW.reallocationCount + 1;
+        strategyDHW.save();
+
+        strategyReallocation.timestamp = timestamp;
+        strategyReallocation.blockNumber = blockNumber;
+        strategyReallocation.allocation = newAllocation;
+        strategyReallocation.save();
+    }
 }
 
 export function handleStrategyRemovedFromVault(event: StrategyRemovedFromVault): void {
@@ -198,4 +211,21 @@ export function getSmartVaultStrategy(
     }
 
     return smartVaultStrategy;
+}
+
+export function getStrategyReallocation(strategyDHW: StrategyDHW): StrategyReallocation {
+    let strategyReallocationId = getComposedId(strategyDHW.id, strategyDHW.reallocationCount.toString());
+    let strategyReallocation = StrategyReallocation.load(strategyReallocationId);
+
+    if (strategyReallocation == null) {
+        strategyReallocation = new StrategyReallocation(strategyReallocationId);
+        strategyReallocation.strategyDHW = strategyDHW.id;
+        strategyReallocation.count = strategyDHW.reallocationCount;
+        strategyReallocation.timestamp = 0;
+        strategyReallocation.blockNumber = 0;
+        strategyReallocation.allocation = ZERO_BI;
+        strategyReallocation.save();
+    }
+
+    return strategyReallocation;
 }
