@@ -110,6 +110,7 @@ type User @entity {
 
 type UserTransaction @entity {
     id: ID! # set to user.id-transactionCount
+    user: User!
     count: Int!
     timestamp: Int!
     txHash: String!

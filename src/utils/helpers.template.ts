@@ -133,6 +133,7 @@ export function getUserTransaction(userAddress: string, transactionCount: i32): 
 
     if (userTransaction == null) {
         userTransaction = new UserTransaction(id);
+        userTransaction.user = userAddress;
         userTransaction.count = transactionCount;
         userTransaction.timestamp = 0;
         userTransaction.txHash = "";
