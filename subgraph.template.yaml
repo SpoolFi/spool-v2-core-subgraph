@@ -179,6 +179,8 @@ dataSources:
           handler: handleSmartVaultFlushed
         - event: SmartVaultReallocated(indexed address,uint256)
           handler: handleSmartVaultReallocated
+        - event: SmartVaultSynced(indexed address,uint256)
+          handler: handleSmartVaultSynced
         - event: StrategyRemovedFromVault(indexed address,indexed address)
           handler: handleStrategyRemovedFromVault
   - kind: ethereum/contract

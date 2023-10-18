@@ -1,5 +1,5 @@
 import {Address, BigInt} from "@graphprotocol/graph-ts";
-import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, StrategyRemovedFromVault} from "../generated/SmartVaultManager/SmartVaultManagerContract";
+import {SmartVaultFlushed, SmartVaultManagerContract, SmartVaultReallocated, SmartVaultRegistered, SmartVaultSynced, StrategyRemovedFromVault} from "../generated/SmartVaultManager/SmartVaultManagerContract";
 import {SmartVaultContract} from "../generated/SmartVaultManager/SmartVaultContract";
 
 import {SmartVaultFlush, SmartVaultStrategy, StrategyDHW, StrategyReallocation} from "../generated/schema";
@@ -154,6 +154,18 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
     }
 }
 
+
+export function handleSmartVaultSynced(event: SmartVaultSynced): void {
+    logEventName("handleSmartVaultSynced", event);
+    
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
+    let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
+
+    smartVaultFlush.isSynced = true;
+
+    smartVaultFlush.save();
+}
+
 export function handleStrategyRemovedFromVault(event: StrategyRemovedFromVault): void {
     logEventName("handleStrategyRemovedFromVault", event);
 
@@ -188,6 +200,7 @@ export function getSmartVaultFlush(
         smartVaultFlush.smartVault = smartVaultAddress;
         smartVaultFlush.flushId = flushId;
         smartVaultFlush.isExecuted = false;
+        smartVaultFlush.isSynced = false;
         smartVaultFlush.save();
     }
 

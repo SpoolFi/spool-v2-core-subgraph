@@ -86,6 +86,7 @@ type SmartVaultFlush @entity {
     smartVault: SmartVault!
     flushId: BigInt!
     isExecuted: Boolean!
+    isSynced: Boolean!
     timestamp: BigInt
     blockNumber: BigInt
     strategyDHWs: [StrategyDHW!] # strategy index do hard works
