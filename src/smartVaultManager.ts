@@ -158,7 +158,7 @@ export function handleSmartVaultReallocated(event: SmartVaultReallocated): void 
 export function handleSmartVaultSynced(event: SmartVaultSynced): void {
     logEventName("handleSmartVaultSynced", event);
     
-    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
+    let smartVault = getSmartVault(event.params.smartVault.toHexString());
     let smartVaultFlush = getSmartVaultFlush(smartVault.id, event.params.flushIndex);
 
     smartVaultFlush.isSynced = true;
