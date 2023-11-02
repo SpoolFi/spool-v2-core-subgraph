@@ -1,4 +1,4 @@
-import {ZERO_ADDRESS, ZERO_BI, getSmartVault, logEventName} from "./utils/helpers";
+import {ZERO_ADDRESS, ZERO_BI, getSmartVault, logEventName, logValue} from "./utils/helpers";
 
 import { crypto, ByteArray } from "@graphprotocol/graph-ts";
 
@@ -21,10 +21,12 @@ export function handleGuardsInitialized(event: GuardsInitialized): void {
     smartVault.save();
 
     // set guards
+    logValue("guardDefinitions.length", guardDefinitions.length);
     for (let i = 0; i < guardDefinitions.length; i++) {
         let guards = guardDefinitions[i];
         let requestType = getRequestType(requestTypes[i]);
 
+        logValue("guards.length", guards.length);
         for (let j = 0; j < guards.length; j++) {
             let contractAddress = guards[j].contractAddress.toHexString();
             let methodSignature = guards[j].methodSignature;
@@ -42,15 +44,12 @@ export function handleGuardsInitialized(event: GuardsInitialized): void {
 
             // handle parameters
             let parameterTypes = guards[j].methodParamTypes;
-            let methodParamValues = guards[j].methodParamValues;
+            logValue("parameterTypes.length", parameterTypes.length);
             for(let k = 0; k < parameterTypes.length; k++){
-                let parameterType = parameterTypes[k];
-                let parameterValue = methodParamValues[k].toHexString();
+                let parameterType = getParameterType(parameterTypes[k]);
+                parameterType.save();
 
-                let parameter = getParameter(parameterType, parameterValue);
-                parameter.save();
-
-                hashData.concat(ByteArray.fromHexString(parameter.id));
+                hashData.concat(ByteArray.fromHexString(parameterType.id));
             }
             
             // hash of all data for ID
@@ -67,15 +66,6 @@ export function handleGuardsInitialized(event: GuardsInitialized): void {
 
             // set smart vault to guard
             getSmartVaultToGuard(smartVault, guard);
-            
-            // set guard to parameter entity
-            for(let k = 0; k < parameterTypes.length; k++){
-                let parameterType = parameterTypes[k];
-                let parameterValue = methodParamValues[k].toHexString();
-                let parameter = getParameter(parameterType, parameterValue);
-
-                getGuardToParameter(guard, parameter);
-            }
         }
     }
 }

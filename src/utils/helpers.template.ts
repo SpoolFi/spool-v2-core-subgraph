@@ -26,6 +26,14 @@ export function logEventName(name: string, event: ethereum.Event): void {
     ]);
 }
 
+
+export function logValue(name: string, value: i32): void {
+    log.info("{}: value: {}", [
+        name,
+        value.toString()
+    ]);
+}
+
 export function integerToDecimal(amount: BigInt, decimals: i32): BigDecimal {
     let scale = BigInt.fromI32(10)
         .pow(decimals as u8)
