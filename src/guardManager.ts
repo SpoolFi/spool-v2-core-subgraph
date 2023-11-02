@@ -1,12 +1,11 @@
-import {ZERO_ADDRESS, ZERO_BI, getSmartVault, logEventName, logValue} from "./utils/helpers";
+import {ZERO_ADDRESS, ZERO_BI, getSmartVault, logEventName, logValue, getByteArray} from "./utils/helpers";
 
-import { crypto, ByteArray } from "@graphprotocol/graph-ts";
+import { crypto } from "@graphprotocol/graph-ts";
 
 import {
     GuardsInitialized
 } from "../generated/GuardManager/GuardManagerContract";
 import {Guard, GuardToParameter, Parameter, ParameterType, RequestType, SmartVault, SmartVaultToGuard} from "../generated/schema";
-
 
 export function handleGuardsInitialized(event: GuardsInitialized): void {
     logEventName("handleGuardsInitialized", event);
@@ -32,10 +31,10 @@ export function handleGuardsInitialized(event: GuardsInitialized): void {
             let methodSignature = guards[j].methodSignature;
             let expectedValue = guards[j].expectedValue.toHexString();
             let operator = guards[j].operator.toHexString();
-            
+
             // initialize hash data
-            let hashData = ByteArray.fromHexString(
-                        contractAddress
+            let hashData = getByteArray(
+                 contractAddress
                 .concat(methodSignature)
                 .concat(expectedValue)
                 .concat(operator)
@@ -49,7 +48,7 @@ export function handleGuardsInitialized(event: GuardsInitialized): void {
                 let parameterType = getParameterType(parameterTypes[k]);
                 parameterType.save();
 
-                hashData.concat(ByteArray.fromHexString(parameterType.id));
+                hashData.concat(getByteArray(parameterType.id));
             }
             
             // hash of all data for ID

@@ -1,4 +1,4 @@
-import {BigDecimal, Address, BigInt, ethereum, log} from "@graphprotocol/graph-ts";
+import {BigDecimal, Address, BigInt, ethereum, log, ByteArray} from "@graphprotocol/graph-ts";
 import {ClaimUserTransactionType, DepositUserTransactionType, RedeemUserTransactionType, SmartVault, SmartVaultFees, Token, User, UserTransaction, UserTransactionTypeToken} from "../../generated/schema";
 import {BTokenContract} from "../../generated/AssetGroupRegistry/BTokenContract";
 import {BTokenBytesContract} from "../../generated/AssetGroupRegistry/BTokenBytesContract";
@@ -269,3 +269,13 @@ export function getArrayFromUint16a16(uint16a16: BigInt, arrayLength: i32): i32[
 
     return values;
 }
+
+export function getByteArray(value: string): ByteArray {
+
+    if(value.length % 2 != 0){
+        value = value + "0";
+    }
+    let byteArray = ByteArray.fromHexString(value);
+    return byteArray;
+}
+
