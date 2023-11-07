@@ -27,19 +27,19 @@ import {
     getUser,
     NFT_INITIAL_SHARES,
     getSmartVault,
-    getUserTransaction,
-    getRedeemUserTransactionType,
-    getClaimUserTransactionType,
+    getAnalyticsUser,
+    getRedeemAnalyticsUserType,
+    getClaimAnalyticsUserType,
     createTokenEntity, 
     getTokenDecimalAmountFromAddress, 
-    getUserTransactionTypeToken,
+    getAnalyticsUserTypeToken,
     ZERO_BD
 } from "./utils/helpers";
 import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
 import {getStrategy, getStrategyDHW} from "./strategyRegistry";
 import {getSmartVaultDepositNFT} from "./depositManager";
 import {getAssetGroup, getAssetGroupToken, getAssetGroupTokenById} from "./assetGroupRegistry";
-import {setUserTransactionClaim, setUserTransactionRedeem} from "./userAnaltics";
+import {setAnalyticsUserClaim, setAnalyticsUserFastRedeem, setAnalyticsUserRedeem, setAnalyticsUserWithdrawalNFTBurn} from "./userAnalytics";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
@@ -65,13 +65,13 @@ export function handleRedeemInitiated(event: RedeemInitiated): void {
     wNFT.save();
     withdrawnVaultShares.save();
 
-    setUserTransactionRedeem(event);
+    setAnalyticsUserRedeem(event);
 }
 
 export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
     logEventName("handleWithdrawalClaimed", event);
     burnWithdrawalNfts(event);
-    setUserTransactionClaim(event);
+    setAnalyticsUserClaim(event);
 
 }
 
@@ -114,6 +114,8 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
     smartVault.fastRedeemCount = smartVault.fastRedeemCount + 1;
     smartVault.save();
 
+    setAnalyticsUserFastRedeem(event);
+
 }
 
 function burnWithdrawalNfts(event: WithdrawalClaimed): void {
@@ -134,6 +136,7 @@ function burnWithdrawalNfts(event: WithdrawalClaimed): void {
         if (wNFT.shares.isZero()) {
             wNFT.isBurned = true;
             wNFT.burnedOn = timestamp;
+            setAnalyticsUserWithdrawalNFTBurn(event, wNFT);
         }
 
         wNFT.save();

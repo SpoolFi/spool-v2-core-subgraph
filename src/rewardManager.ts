@@ -16,6 +16,7 @@ import {
     UserSmartVaultRewardToken,
     UserSmartVaultRewardTokenCycle,
 } from "../generated/schema";
+import {setAnalyticsUserRewardClaim} from "./userAnalytics";
 
 import {
     createTokenEntity,
@@ -167,6 +168,8 @@ export function handleRewardsClaimed(event: RewardsClaimed): void {
     smartVaultRewardToken.save();
     userSmartVaultRewardToken.save();
     userSmartVaultRewardTokenCycle.save();
+
+    setAnalyticsUserRewardClaim(event);
 }
 
 export function handlePoolRootAdded(event: PoolRootAdded): void {

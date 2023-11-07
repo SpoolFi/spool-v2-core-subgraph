@@ -1,5 +1,22 @@
 import {BigDecimal, Address, BigInt, ethereum, log, ByteArray} from "@graphprotocol/graph-ts";
-import {ClaimUserTransactionType, DepositUserTransactionType, RedeemUserTransactionType, SmartVault, SmartVaultFees, Token, User, UserTransaction, UserTransactionTypeToken} from "../../generated/schema";
+import {
+    ClaimAnalyticsUserType, 
+    DepositNFTBurnAnalyticsUserType, 
+    DepositNFTTransferAnalyticsUserType, 
+    DepositAnalyticsUserType, 
+    FastRedeemAnalyticsUserType, 
+    RedeemAnalyticsUserType, 
+    SVTTransferAnalyticsUserType, 
+    SmartVault, 
+    SmartVaultFees, 
+    Token, 
+    User, 
+    AnalyticsUser, 
+    AnalyticsUserTypeToken, 
+    WithdrawalNFTBurnAnalyticsUserType, 
+    WithdrawalNFTTransferAnalyticsUserType, 
+    RewardClaimAnalyticsUserType
+} from "../../generated/schema";
 import {BTokenContract} from "../../generated/AssetGroupRegistry/BTokenContract";
 import {BTokenBytesContract} from "../../generated/AssetGroupRegistry/BTokenBytesContract";
 
@@ -135,15 +152,16 @@ export function getUser(userAddress: string): User {
     return user;
 }
 
-export function getUserTransaction(userAddress: string, transactionCount: i32): UserTransaction {
+export function getAnalyticsUser(userAddress: string, transactionCount: i32): AnalyticsUser {
     let id = getComposedId(userAddress, transactionCount.toString());
-    let userTransaction = UserTransaction.load(id);
+    let userTransaction = AnalyticsUser.load(id);
 
     if (userTransaction == null) {
-        userTransaction = new UserTransaction(id);
+        userTransaction = new AnalyticsUser(id);
         userTransaction.user = userAddress;
         userTransaction.count = transactionCount;
         userTransaction.timestamp = 0;
+        userTransaction.blockNumber = 0;
         userTransaction.txHash = "";
         userTransaction.smartVault = "";
         userTransaction.type = "";
@@ -153,61 +171,160 @@ export function getUserTransaction(userAddress: string, transactionCount: i32): 
     return userTransaction;
 }
 
-export function getDepositUserTransactionType(userTransaction: UserTransaction): DepositUserTransactionType {
+export function getDepositAnalyticsUserType(userTransaction: AnalyticsUser): DepositAnalyticsUserType {
     let id = getComposedId(userTransaction.id, "DEPOSIT");
-    let depositUserTransactionType = DepositUserTransactionType.load(id);
+    let depositAnalyticsUserType = DepositAnalyticsUserType.load(id);
 
-    if (depositUserTransactionType == null) {
-        depositUserTransactionType = new DepositUserTransactionType(id);
-        depositUserTransactionType.type = "DEPOSIT";
-        depositUserTransactionType.tokenData = [];
-        depositUserTransactionType.smartVaultFlush = "";
-        depositUserTransactionType.dNFT = "";
-        depositUserTransactionType.save();
+    if (depositAnalyticsUserType == null) {
+        depositAnalyticsUserType = new DepositAnalyticsUserType(id);
+        depositAnalyticsUserType.type = "DEPOSIT";
+        depositAnalyticsUserType.tokenData = [];
+        depositAnalyticsUserType.smartVaultFlush = "";
+        depositAnalyticsUserType.dNFT = "";
+        depositAnalyticsUserType.save();
     }
 
-    return depositUserTransactionType;
+    return depositAnalyticsUserType;
 }
 
 
-export function getRedeemUserTransactionType(userTransaction: UserTransaction): RedeemUserTransactionType {
+export function getRedeemAnalyticsUserType(userTransaction: AnalyticsUser): RedeemAnalyticsUserType {
     let id = getComposedId(userTransaction.id, "REDEEM");
-    let redeemUserTransactionType = RedeemUserTransactionType.load(id);
+    let redeemAnalyticsUserType = RedeemAnalyticsUserType.load(id);
 
-    if (redeemUserTransactionType == null) {
-        redeemUserTransactionType = new RedeemUserTransactionType(id);
-        redeemUserTransactionType.type = "REDEEM";
-        redeemUserTransactionType.smartVaultFlush = "";
-        redeemUserTransactionType.svts = ZERO_BD;
-        redeemUserTransactionType.wNFT = "";
-        redeemUserTransactionType.save();
+    if (redeemAnalyticsUserType == null) {
+        redeemAnalyticsUserType = new RedeemAnalyticsUserType(id);
+        redeemAnalyticsUserType.type = "REDEEM";
+        redeemAnalyticsUserType.smartVaultFlush = "";
+        redeemAnalyticsUserType.svts = ZERO_BD;
+        redeemAnalyticsUserType.wNFT = "";
+        redeemAnalyticsUserType.save();
     }
 
-    return redeemUserTransactionType;
+    return redeemAnalyticsUserType;
 }
 
-export function getClaimUserTransactionType(userTransaction: UserTransaction): ClaimUserTransactionType {
+export function getClaimAnalyticsUserType(userTransaction: AnalyticsUser): ClaimAnalyticsUserType {
     let id = getComposedId(userTransaction.id, "CLAIM");
-    let claimUserTransactionType = ClaimUserTransactionType.load(id);
+    let claimAnalyticsUserType = ClaimAnalyticsUserType.load(id);
 
-    if (claimUserTransactionType == null) {
-        claimUserTransactionType = new ClaimUserTransactionType(id);
-        claimUserTransactionType.type = "CLAIM";
-        claimUserTransactionType.tokenData = [];
-        claimUserTransactionType.wNFTs = [];
-        claimUserTransactionType.save();
+    if (claimAnalyticsUserType == null) {
+        claimAnalyticsUserType = new ClaimAnalyticsUserType(id);
+        claimAnalyticsUserType.type = "CLAIM";
+        claimAnalyticsUserType.tokenData = [];
+        claimAnalyticsUserType.wNFTs = [];
+        claimAnalyticsUserType.save();
     }
 
-    return claimUserTransactionType;
+    return claimAnalyticsUserType;
+}
+
+export function getFastRedeemAnalyticsUserType(userTransaction: AnalyticsUser): FastRedeemAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "FAST_REDEEM");
+    let fastRedeemAnalyticsUserType = FastRedeemAnalyticsUserType.load(id);
+
+    if (fastRedeemAnalyticsUserType == null) {
+        fastRedeemAnalyticsUserType = new FastRedeemAnalyticsUserType(id);
+        fastRedeemAnalyticsUserType.type = "FAST_REDEEM";
+        fastRedeemAnalyticsUserType.tokenData = [];
+        fastRedeemAnalyticsUserType.save();
+    }
+
+    return fastRedeemAnalyticsUserType;
+}
+
+export function getSVTTransferAnalyticsUserType(userTransaction: AnalyticsUser): SVTTransferAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "SVT_TRANSFER");
+    let svtTransferAnalyticsUserType = SVTTransferAnalyticsUserType.load(id);
+
+    if (svtTransferAnalyticsUserType == null) {
+        svtTransferAnalyticsUserType = new SVTTransferAnalyticsUserType(id);
+        svtTransferAnalyticsUserType.type = "SVT_TRANSFER";
+        svtTransferAnalyticsUserType.to = "";
+        svtTransferAnalyticsUserType.amount = ZERO_BD;
+        svtTransferAnalyticsUserType.save();
+    }
+
+    return svtTransferAnalyticsUserType;
+}
+
+export function getDepositNFTTransferAnalyticsUserType(userTransaction: AnalyticsUser): DepositNFTTransferAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "DEPOSIT_NFT_TRANSFER");
+    let depositNFTTransferAnalyticsUserType = DepositNFTTransferAnalyticsUserType.load(id);
+
+    if (depositNFTTransferAnalyticsUserType == null) {
+        depositNFTTransferAnalyticsUserType = new DepositNFTTransferAnalyticsUserType(id);
+        depositNFTTransferAnalyticsUserType.type = "DEPOSIT_NFT_TRANSFER";
+        depositNFTTransferAnalyticsUserType.smartVaultDepositNFTTransfer = "";
+        depositNFTTransferAnalyticsUserType.save();
+    }
+
+    return depositNFTTransferAnalyticsUserType;
+}
+
+export function getWithdrawalNFTTransferAnalyticsUserType(userTransaction: AnalyticsUser): WithdrawalNFTTransferAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "WITHDRAWAL_NFT_TRANSFER");
+    let withdrawalNFTTransferAnalyticsUserType = WithdrawalNFTTransferAnalyticsUserType.load(id);
+
+    if (withdrawalNFTTransferAnalyticsUserType == null) {
+        withdrawalNFTTransferAnalyticsUserType = new WithdrawalNFTTransferAnalyticsUserType(id);
+        withdrawalNFTTransferAnalyticsUserType.type = "WITHDRAWAL_NFT_TRANSFER";
+        withdrawalNFTTransferAnalyticsUserType.smartVaultWithdrawalNFTTransfer = "";
+        withdrawalNFTTransferAnalyticsUserType.save();
+    }
+
+    return withdrawalNFTTransferAnalyticsUserType;
+}
+
+export function getDepositNFTBurnAnalyticsUserType(userTransaction: AnalyticsUser): DepositNFTBurnAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "DEPOSIT_NFT_BURN");
+    let depositNFTBurnAnalyticsUserType = DepositNFTBurnAnalyticsUserType.load(id);
+
+    if (depositNFTBurnAnalyticsUserType == null) {
+        depositNFTBurnAnalyticsUserType = new DepositNFTBurnAnalyticsUserType(id);
+        depositNFTBurnAnalyticsUserType.type = "DEPOSIT_NFT_BURN";
+        depositNFTBurnAnalyticsUserType.dNFTBurned = "";
+        depositNFTBurnAnalyticsUserType.save();
+    }
+
+    return depositNFTBurnAnalyticsUserType;
+}
+
+export function getWithdrawalNFTBurnAnalyticsUserType(userTransaction: AnalyticsUser): WithdrawalNFTBurnAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "WITHDRAWAL_NFT_BURN");
+    let withdrawalNFTBurnAnalyticsUserType = WithdrawalNFTBurnAnalyticsUserType.load(id);
+
+    if (withdrawalNFTBurnAnalyticsUserType == null) {
+        withdrawalNFTBurnAnalyticsUserType = new WithdrawalNFTBurnAnalyticsUserType(id);
+        withdrawalNFTBurnAnalyticsUserType.type = "WITHDRAWAL_NFT_BURN";
+        withdrawalNFTBurnAnalyticsUserType.wNFTBurned = "";
+        withdrawalNFTBurnAnalyticsUserType.save();
+    }
+
+    return withdrawalNFTBurnAnalyticsUserType;
+}
+
+export function getRewardClaimAnalyticsUserType(userTransaction: AnalyticsUser): RewardClaimAnalyticsUserType {
+    let id = getComposedId(userTransaction.id, "REWARD_CLAIM");
+    let rewardClaimAnalyticsUserType = RewardClaimAnalyticsUserType.load(id);
+
+    if (rewardClaimAnalyticsUserType == null) {
+        rewardClaimAnalyticsUserType = new RewardClaimAnalyticsUserType(id);
+        rewardClaimAnalyticsUserType.type = "REWARD_CLAIM";
+        rewardClaimAnalyticsUserType.rewardData = "";
+        rewardClaimAnalyticsUserType.save();
+    }
+
+    return rewardClaimAnalyticsUserType;
 }
 
 
-export function getUserTransactionTypeToken(userTransactionType: string, token: Token): UserTransactionTypeToken {
+export function getAnalyticsUserTypeToken(userTransactionType: string, token: Token): AnalyticsUserTypeToken {
     let id = getComposedId(userTransactionType, token.id);
-    let userTransactionTypeToken = UserTransactionTypeToken.load(id);
+    let userTransactionTypeToken = AnalyticsUserTypeToken.load(id);
 
     if (userTransactionTypeToken == null) {
-        userTransactionTypeToken = new UserTransactionTypeToken(id);
+        userTransactionTypeToken = new AnalyticsUserTypeToken(id);
         userTransactionTypeToken.token = token.id;
         userTransactionTypeToken.amount = ZERO_BD;
         userTransactionTypeToken.save();

@@ -28,12 +28,12 @@ import {
     NFT_INITIAL_SHARES,
     ZERO_BD,
     getSmartVaultFees,
-    getDepositUserTransactionType, 
-    getUserTransaction, 
-    getUserTransactionTypeToken
+    getDepositAnalyticsUserType, 
+    getAnalyticsUser, 
+    getAnalyticsUserTypeToken
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
-import {setUserTransactionDeposit} from "./userAnaltics";
+import {setAnalyticsUserDeposit, setAnalyticsUserDepositNFTBurn} from "./userAnalytics";
 
 export function handleDepositInitiated(event: DepositInitiated): void {
     logEventName("handleDepositInitiated", event);
@@ -70,7 +70,7 @@ export function handleDepositInitiated(event: DepositInitiated): void {
 
     dNFT.save();
     
-    setUserTransactionDeposit(event);
+    setAnalyticsUserDeposit(event);
 
 }
 
@@ -86,6 +86,7 @@ export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): v
         if (dNFT.shares.isZero()) {
             dNFT.isBurned = true;
             dNFT.burnedOn = event.block.timestamp.toI32();
+            setAnalyticsUserDepositNFTBurn(event, dNFT);
         }
 
         dNFT.save();
