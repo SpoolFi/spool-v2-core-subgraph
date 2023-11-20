@@ -6,14 +6,11 @@ import {
 
 import {
     AssetGroup,
-    AssetGroupToken,
     SmartVault,
     SmartVaultDepositNFT,
     SmartVaultFlush,
-    Strategy,
     Token,
-    VaultDeposits,
-    WithdrawnVaultShares,
+    VaultDeposits
 } from "../generated/schema";
 
 import {
@@ -27,13 +24,11 @@ import {
     getTokenDecimalAmountFromAddress,
     NFT_INITIAL_SHARES,
     ZERO_BD,
-    getSmartVaultFees,
-    getDepositUserTransactionType, 
-    getUserTransaction, 
-    getUserTransactionTypeToken
+    getSmartVaultFees
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
 import {setUserTransactionDeposit} from "./userAnaltics";
+import {getUserSmartVault} from "./rewardManager";
 
 export function handleDepositInitiated(event: DepositInitiated): void {
     logEventName("handleDepositInitiated", event);
@@ -72,6 +67,7 @@ export function handleDepositInitiated(event: DepositInitiated): void {
     
     setUserTransactionDeposit(event);
 
+    getUserSmartVault(user.id, smartVault.id);
 }
 
 export function handleSmartVaultTokensClaimed(event: SmartVaultTokensClaimed): void {
