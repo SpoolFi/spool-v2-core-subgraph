@@ -11,8 +11,8 @@
     - if the address list is one of `src/config/contracts.{NETWORK}.json`, you can replace `local` in the script `local:codegen` in `package.json` with `{NETWORK}`. eg. for `src/config/contracts.devnet-10.json`: replace `local` in the `local:codegen` script with `devnet-10` to use the `devnet-10` addresses.
 - `docker-compose down`
 - delete folders `build/ generated/ data/`
-- `docker-compose up -d`
 - `npm run local:build`
+- `docker-compose up -d`
 - `npm run local:create`
 - `npm run local:deploy`
 - `docker logs --follow spool-v2-core-subgraph_graph-node_1`

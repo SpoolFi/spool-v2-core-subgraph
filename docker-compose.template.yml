@@ -21,7 +21,7 @@ services:
       ipfs: 'ipfs:5001'
       ethereum: 'mainnet:{{{ url }}}'
       GRAPH_LOG: trace
-      ETHEREUM_POLLING_INTERVAL: 3000
+      ETHEREUM_POLLING_INTERVAL: 6000
   ipfs:
     image: ipfs/go-ipfs:v0.10.0
     ports:

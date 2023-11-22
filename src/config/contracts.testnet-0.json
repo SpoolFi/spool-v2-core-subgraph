@@ -1,7 +1,7 @@
 {
     "network": "mainnet",
-    "startBlock": "18584057",
-    "url": "https://mainnet.rpc.tenderly.co/9bfbe87f-dcce-434a-af50-42b2276bace2",
+    "startBlock": "18620415",
+    "url": "https://mainnet.rpc.tenderly.co/3749b159-0977-485b-8a31-7632fc2a6a8e",
     "strategyRegistry": "0x8e1f69CfFd8DaD657bF18B91D75BcD26CD6F43AC",
     "spoolAccessControl": "0xD641747EbDbfD170DBc31a74bB7E825Da27C0472",
     "assetGroupRegistry": "0x1D1aEE6D5dC35F3c15E2D11083D0e59C026b64c4",
