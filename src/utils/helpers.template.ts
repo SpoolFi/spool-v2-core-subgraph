@@ -90,6 +90,7 @@ export function getSmartVault(smartVaultAddress: string): SmartVault {
 
         smartVault = new SmartVault(smartVaultAddress);
         smartVault.name = "";
+        smartVault.symbol = "";
         smartVault.assetGroup = "0";
         smartVault.lastRebalanceTime = ZERO_BI;
         smartVault.rebalanceCount = 0;

@@ -18,6 +18,8 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
 
     smartVault.name = smartVaultContract.vaultName();
 
+    smartVault.symbol = smartVaultContract.symbol();
+
     smartVault.assetGroup = event.params.registrationForm.assetGroupId.toString();
     smartVault.createdOn = event.block.timestamp;
 
