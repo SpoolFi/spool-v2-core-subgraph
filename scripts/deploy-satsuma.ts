@@ -12,7 +12,7 @@ dotenv.config();
     const accessTokenSatsuma = getEnvVar('ACCESS_TOKEN_SATSUMA');
     const versionLabel = await getVersionLabel();
 
-    const command = `graph deploy ${subgraphName} --version-label ${versionLabel} --node https://subgraphs.alchemy.com/api/subgraphs/deploy --deploy-key ${accessTokenSatsuma}`;
+    const command = `graph deploy ${subgraphName} --version-label ${versionLabel} --node https://subgraphs.alchemy.com/api/subgraphs/deploy --deploy-key ${accessTokenSatsuma} --ipfs https://ipfs.satsuma.xyz`;
     console.log(command);
     await execPromised(command);
 })();

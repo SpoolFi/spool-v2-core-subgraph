@@ -110,50 +110,6 @@ type User @entity {
     transactionCount: Int!
 }
 
-type UserTransaction @entity {
-    id: ID! # set to user.id-transactionCount
-    user: User!
-    count: Int!
-    timestamp: Int!
-    txHash: String!
-    smartVault: SmartVault!
-    type: UserTransactionType! # DEPOSIT, REDEEM, CLAIM
-}
-
-interface UserTransactionType @entity {
-    id: ID!
-    type: String!
-}
-
-type DepositUserTransactionType implements UserTransactionType @entity {
-    id: ID! # set to userTransaction.id - type
-    type: String!
-    smartVaultFlush: SmartVaultFlush!
-    tokenData: [UserTransactionTypeToken!]!
-    dNFT: SmartVaultDepositNFT!
-}
-
-type RedeemUserTransactionType implements UserTransactionType @entity {
-    id: ID! # set to userTransaction.id - type
-    type: String!
-    smartVaultFlush: SmartVaultFlush!
-    svts: BigDecimal!
-    wNFT: SmartVaultWithdrawalNFT!
-}
-
-type ClaimUserTransactionType implements UserTransactionType @entity {
-    id: ID! # set to userTransaction.id - type
-    type: String!
-    tokenData: [UserTransactionTypeToken!]!
-    wNFTs: [SmartVaultWithdrawalNFT!]!
-}
-
-type UserTransactionTypeToken @entity {
-    id: ID! # set to {type}UserTransactionType.id - token
-    token: Token!
-    amount: BigDecimal!
-}
-
 type SmartVaultDepositNFT @entity {
     id: ID! # Set to `{smartVault.id}-${nftId}`
     smartVault: SmartVault!
@@ -445,5 +401,96 @@ type SmartVaultToGuard @entity {
     id: ID! # Set to ${smartVault.id}-${guard.id}
     smartVault: SmartVault!
     guard: Guard!
+}
+
+
+################# Analytics
+
+type AnalyticsUser @entity {
+    id: ID! # set to user.id-count
+    user: User!
+    count: Int!
+    timestamp: Int!
+    blockNumber: Int!
+    txHash: String!
+    smartVault: SmartVault!
+    type: AnalyticsUserType!
+}
+
+interface AnalyticsUserType @entity {
+    id: ID!
+    type: String!
+}
+
+type DepositAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    smartVaultFlush: SmartVaultFlush!
+    tokenData: [AnalyticsUserTypeToken!]!
+    dNFT: SmartVaultDepositNFT!
+}
+
+type RedeemAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    smartVaultFlush: SmartVaultFlush!
+    svts: BigDecimal!
+    wNFT: SmartVaultWithdrawalNFT!
+}
+
+type ClaimAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    tokenData: [AnalyticsUserTypeToken!]!
+    wNFTs: [SmartVaultWithdrawalNFT!]!
+}
+
+type FastRedeemAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    tokenData: [AnalyticsUserTypeToken!]!
+}
+
+type SVTTransferAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    to: User!
+    amount: BigDecimal!
+}
+
+type DepositNFTTransferAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    smartVaultDepositNFTTransfer: SmartVaultDepositNFTTransfer!
+}
+
+type WithdrawalNFTTransferAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    smartVaultWithdrawalNFTTransfer: SmartVaultWithdrawalNFTTransfer!
+}
+
+type DepositNFTBurnAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    dNFTBurned: SmartVaultDepositNFT!
+}
+
+type WithdrawalNFTBurnAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    type: String!
+    wNFTBurned: SmartVaultDepositNFT!
+}
+
+type RewardClaimAnalyticsUserType implements AnalyticsUserType @entity {
+    id: ID! # set to analyticsUser.id - type
+    rewardData: AnalyticsUserTypeToken!
+    type: String!
+}
+
+type AnalyticsUserTypeToken @entity {
+    id: ID! # set to {type}UserTransactionType.id - token
+    token: Token!
+    amount: BigDecimal!
 }
 

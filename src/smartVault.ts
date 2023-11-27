@@ -13,6 +13,7 @@ import {
 import {getSmartVaultDepositNFT} from "./depositManager";
 import {getSmartVaultWithdrawalNFT} from "./withdrawalManager";
 import {getUserSmartVault} from "./rewardManager";
+import {setAnalyticsUserDepositNFTTransfer, setAnalyticsUserSVTTransfer, setAnalyticsUserWithdrawalNFTTransfer} from "./userAnalytics";
 
 
 export function handleTransfer(event: Transfer): void {
@@ -58,6 +59,8 @@ export function handleTransfer(event: Transfer): void {
     
     transaction.save();
     svtTransfer.save();
+
+    setAnalyticsUserSVTTransfer(event, svtTransfer);
 }
 
 export function handleTransferSingle(event: TransferSingle): void {
@@ -89,6 +92,8 @@ export function handleTransferSingle(event: TransferSingle): void {
 
         smartVaultDepositNFT.transferCount = transferCount + 1;
         smartVaultDepositNFT.save();
+
+        setAnalyticsUserDepositNFTTransfer(event, smartVaultDepositNFTTransfer);
     }else {
 
         let smartVaultWithdrawalNFT = getSmartVaultWithdrawalNFT(smartVault.id, id);
@@ -106,6 +111,8 @@ export function handleTransferSingle(event: TransferSingle): void {
         
         smartVaultWithdrawalNFT.transferCount = transferCount + 1;
         smartVaultWithdrawalNFT.save();
+
+        setAnalyticsUserWithdrawalNFTTransfer(event, smartVaultWithdrawalNFTTransfer);
     }
 
 }
