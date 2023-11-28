@@ -245,6 +245,7 @@ type Strategy @entity {
 type StrategyDHW @entity {
     id: ID! # Set to `${strategy.id}-${strategy.index}`
     strategy: Strategy!
+    txHash: String
     strategyDHWIndex: Int!
     isExecuted: Boolean!
     timestamp: BigInt

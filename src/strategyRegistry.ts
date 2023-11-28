@@ -53,6 +53,7 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     strategyDhw.isExecuted = true;
     strategyDhw.timestamp = event.block.timestamp;
     strategyDhw.blockNumber = event.block.number;
+    strategyDhw.txHash = event.block.hash.toHexString();
     strategyDhw.apy = strategyApyToDecimal(event.params.dhwInfo.yieldPercentage);
     strategyDhw.ssts = event.params.dhwInfo.totalSstsAtDhw;
     strategyDhw.save();
