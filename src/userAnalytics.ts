@@ -209,7 +209,7 @@ export function setAnalyticsUserWithdrawalNFTTransfer(event: TransferSingle, sma
 
 export function setAnalyticsUserDepositNFTBurn(event: SmartVaultTokensClaimed, smartVaultDepositNFT: SmartVaultDepositNFT): void {
     // set user analytics
-    let smartVault = getSmartVault( event.address.toHexString() );
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
     let user = getUser(event.params.claimer.toHexString());
 
     let analyticsUser = getAnalyticsUserDefault(user, event, smartVault);
@@ -228,7 +228,7 @@ export function setAnalyticsUserDepositNFTBurn(event: SmartVaultTokensClaimed, s
 
 export function setAnalyticsUserWithdrawalNFTBurn(event: WithdrawalClaimed, smartVaultWithdrawalNFT: SmartVaultWithdrawalNFT): void {
     // set user analytics
-    let smartVault = getSmartVault( event.address.toHexString() );
+    let smartVault = getSmartVault( event.params.smartVault.toHexString() );
     let user = getUser(event.params.claimer.toHexString());
 
     let analyticsUser = getAnalyticsUserDefault(user, event, smartVault);
