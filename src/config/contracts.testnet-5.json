@@ -1,0 +1,16 @@
+{
+    "network": "mainnet",
+    "startBlock": "18876323",
+    "url": "https://mainnet.rpc.tenderly.co/c2b44bdb-468c-4666-aeb0-e0c7586fd92b",
+    "strategyRegistry": "0x49820C1bC5e07416Cb986d89c3fe1a4e1D12faD4",
+    "spoolAccessControl": "0xE336E6dD21563Ed7785fa66562aE14194a720FBc",
+    "assetGroupRegistry": "0x6c22dfAD4414cfb786A4173A7E4547A94E56e263",
+    "riskManager": "0x0271704B01A276e2334e1eC50c9512276fee9FA1",
+    "smartVaultManager": "0x6c1708833Cf8Bc1c7be6389dF1721B29d76090DA",
+    "rewardManager": "0x51a7fA4af8cd0C03fFc1B8AE47d7F534Fd4e2944",
+    "depositManager": "0xDc962D69F5fFa5e0e61826196119E34E908a320d",
+    "withdrawalManager": "0x919D5CC1C1dCa1f6EaB7207f56218815CC85f4c7",
+    "guardManager": "0x32c0F2C34496e74875D826AF16f1fdbD6e224617",
+    "ghostStrategy": "0xAFa7d1097D39ab3369e850Cf72ac8A0D7Fb5C2EF",
+    "smartVaultFactory": "0x075B70C2b0931eC82ceb91Ad20e0FC44f88bA99D"
+}
