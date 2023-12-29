@@ -24,6 +24,7 @@ export function handleStrategyRegistered(event: StrategyRegistered): void {
 
     strategy.lastDoHardWorkTime = event.block.timestamp;
     strategy.addedOn = event.block.timestamp;
+    strategy.addedOnBlock = event.block.number;
     strategy.save();
 }
 
@@ -154,6 +155,7 @@ export function getStrategy(strategyAddress: string): Strategy {
         strategy.isRemoved = false;
         strategy.isGhost = false;
         strategy.addedOn = ZERO_BI;
+        strategy.addedOnBlock = ZERO_BI;
         strategy.save();
     }
 
@@ -178,6 +180,7 @@ export function getGhostStrategy(): Strategy {
         strategy.isRemoved = false;
         strategy.isGhost = true;
         strategy.addedOn = ZERO_BI;
+        strategy.addedOnBlock = ZERO_BI;
         strategy.save();
     }
 

@@ -238,6 +238,7 @@ type Strategy @entity {
     isRemoved: Boolean!
     isGhost: Boolean!
     addedOn: BigInt!
+    addedOnBlock: BigInt!
     riskScores: [StrategyRiskScore!]! @derivedFrom(field: "strategy")
     strategyDHWs: [StrategyDHW!]! @derivedFrom(field: "strategy")
 }
