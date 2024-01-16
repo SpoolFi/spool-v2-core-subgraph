@@ -13,6 +13,7 @@ import {
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
 import {SSTRedemptionAsset, StrategyRegistry, Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token, User, Global} from "../generated/schema";
+import {Strategy as StrategyTemplate} from "../generated/templates";
 import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS, ZERO_ADDRESS, getUser, createTokenEntity, percenti32ToDecimal, percentToDecimal} from "./utils/helpers";
 
 import {getAssetGroup, getAssetGroupTokenById} from "./assetGroupRegistry";
@@ -26,6 +27,9 @@ export function handleStrategyRegistered(event: StrategyRegistered): void {
     strategy.addedOn = event.block.timestamp;
     strategy.addedOnBlock = event.block.number;
     strategy.save();
+
+    // create strategy template
+    StrategyTemplate.create(event.params.strategy);
 }
 
 export function handleStrategyRemoved(event: StrategyRemoved): void {
@@ -156,6 +160,7 @@ export function getStrategy(strategyAddress: string): Strategy {
         strategy.isGhost = false;
         strategy.addedOn = ZERO_BI;
         strategy.addedOnBlock = ZERO_BI;
+        strategy.sstTotalSupply = ZERO_BI;
         strategy.save();
     }
 
@@ -257,7 +262,6 @@ export function getSSTRedemptionAsset(user: User, asset: Token): SSTRedemptionAs
     }
 
     return sstRedemptionAsset;
-        
 }
 
 export function getGlobal(): Global {
