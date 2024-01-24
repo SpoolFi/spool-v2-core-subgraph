@@ -8,6 +8,7 @@
         "deploy-satsuma": "ts-node scripts/deploy-satsuma.ts",
         "deploy-studio": "ts-node scripts/deploy-studio.ts",
 
+        "local:clean": "rimraf docker-compose.yml subgraph.yaml src/utils/helpers.ts build/ generated/ data/",
         "local:codegen": "cross-env NETWORK=local npm run mustache && graph codegen",
         "local:build": "npm run local:codegen && graph build",
         "local:create": "graph create spool/core-v2 --node http://127.0.0.1:8020",
@@ -49,6 +50,7 @@
         "dotenv": "^16.3.1",
         "mustache": "^4.2.0",
         "prettier": "^2.8.8",
+        "rimraf": "^5.0.5",
         "ts-node": "^10.9.1"
     }
 }

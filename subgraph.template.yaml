@@ -1,6 +1,6 @@
 specVersion: 0.0.4
 description: Spool V2 Core Subgraph
-repository: 
+repository:
 schema:
   file: ./schema.graphql
 dataSources:
@@ -317,5 +317,24 @@ templates:
           handler: handleTransferSingle
         - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
           handler: handleTransferBatch
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - name: Strategy
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: StrategyContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/strategy.ts
+      entities:
+        - StrategyUser
+        - StrategyUserStrategy
+      abis:
+        - name: StrategyContract
+          file: ./abis/IStrategy.json
+      eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer

@@ -97,7 +97,7 @@ type SmartVaultFlush @entity {
     vaultDeposits: [VaultDeposits!]! @derivedFrom(field: "smartVaultFlush")
 }
 
-type User @entity { 
+type User @entity {
     id: ID!
     smartVaultDepositNFTs: [SmartVaultDepositNFT!]! @derivedFrom(field: "user")
     SmartVaultDepositNFTsOwned: [SmartVaultDepositNFT!]! @derivedFrom(field: "owner")
@@ -108,6 +108,11 @@ type User @entity {
     svtSentTransfers: [SVTTransfer!]! @derivedFrom(field: "from")
     svtReceivedTransfers: [SVTTransfer!]! @derivedFrom(field: "to")
     transactionCount: Int!
+}
+
+type StrategyUser @entity {
+    id: ID!
+    strategyUserStrategies: [StrategyUserStrategy!]! @derivedFrom(field: "strategyUser")
 }
 
 type SmartVaultDepositNFT @entity {
@@ -239,6 +244,7 @@ type Strategy @entity {
     isGhost: Boolean!
     addedOn: BigInt!
     addedOnBlock: BigInt!
+    sstTotalSupply: BigInt!
     riskScores: [StrategyRiskScore!]! @derivedFrom(field: "strategy")
     strategyDHWs: [StrategyDHW!]! @derivedFrom(field: "strategy")
 }
@@ -361,6 +367,12 @@ type Cycle @entity {
     userTokens: [UserSmartVaultRewardTokenCycle!]! @derivedFrom(field: "cycle")
 }
 
+type StrategyUserStrategy @entity {
+    id: ID! # set to `${strategyUser.id}-${strategy.id}`
+    strategyUser: StrategyUser!
+    strategy: Strategy!
+    sstBalance: BigInt!
+}
 
 ################# Guards
 
@@ -495,4 +507,3 @@ type AnalyticsUserTypeToken @entity {
     token: Token!
     amount: BigDecimal!
 }
-
