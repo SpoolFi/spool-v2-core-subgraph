@@ -15,17 +15,11 @@
         "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
         "local:deploy:fresh": "npm run local:build && npm run local:create && graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
 
-        "staging:codegen": "cross-env NETWORK=testnet-5 npm run mustache && graph codegen",
-        "staging:build": "npm run staging:codegen && graph build",
-        "staging:create": "graph create spool/core-v2 --node http://3.120.126.253:8020",
-        "staging:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://3.120.126.253:5001 --node http://3.120.126.253:8020 -l 1.0",
-        "staging:deploy-all": "npm run staging:build && npm run staging:create && npm run staging:deploy",
-
-        "testing:codegen": "cross-env NETWORK=testnet-5 npm run mustache && graph codegen",
-        "testing:build": "npm run testing:codegen && graph build",
-        "testing:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
-        "testing:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
-        "testing:deploy-all": "npm run testing:build && npm run testing:create && npm run testing:deploy",
+        "testnet:codegen": "cross-env NETWORK=testnet-5 npm run mustache && graph codegen",
+        "testnet:build": "npm run testnet:codegen && graph build",
+        "testnet:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
+        "testnet:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
+        "testnet:deploy-all": "npm run testing:build && npm run testing:create && npm run testing:deploy",
 
         "mainnet-staging:codegen": "cross-env NETWORK=mainnet.staging npm run mustache && graph codegen",
         "mainnet-staging:build": "npm run mainnet-staging:codegen && graph build",
