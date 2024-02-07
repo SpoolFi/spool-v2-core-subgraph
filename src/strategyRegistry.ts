@@ -186,6 +186,7 @@ export function getGhostStrategy(): Strategy {
         strategy.isGhost = true;
         strategy.addedOn = ZERO_BI;
         strategy.addedOnBlock = ZERO_BI;
+        strategy.sstTotalSupply = ZERO_BI;
         strategy.save();
     }
 
