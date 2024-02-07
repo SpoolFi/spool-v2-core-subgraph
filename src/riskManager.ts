@@ -14,6 +14,7 @@ import {
     logEventName,
     strategyRiskScoreToDecimal,
 } from "./utils/helpers";
+import {getStrategy} from "./strategyRegistry";
 
 export function handleRiskScoresUpdated(event: RiskScoresUpdated): void {
     logEventName("handleRiskScoresUpdated", event);
@@ -22,8 +23,9 @@ export function handleRiskScoresUpdated(event: RiskScoresUpdated): void {
     let riskScores = event.params.riskScores;
 
     for (let i = 0; i < riskScores.length; i++) {
+        let strategy = getStrategy(strategies[i].toHexString());
         let strategyRiskScore = getStrategyRiskScore(
-            strategies[i].toHexString(),
+            strategy.id,
             event.params.riskProvider.toHexString()
         );
         strategyRiskScore.riskScore = strategyRiskScoreToDecimal(BigInt.fromI32(riskScores[i]));

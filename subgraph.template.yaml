@@ -64,6 +64,8 @@ dataSources:
       abis:
         - name: RiskManagerContract
           file: ./abis/RiskManager.json
+        - name: StrategyContract
+          file: ./abis/IStrategy.json
       eventHandlers:
         - event: RiskScoresUpdated(indexed address,address[],uint8[])
           handler: handleRiskScoresUpdated

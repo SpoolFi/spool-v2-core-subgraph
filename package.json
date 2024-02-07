@@ -19,7 +19,7 @@
         "testnet:build": "npm run testnet:codegen && graph build",
         "testnet:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
         "testnet:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
-        "testnet:deploy-all": "npm run testing:build && npm run testing:create && npm run testing:deploy",
+        "testnet:deploy-all": "npm run testnet:build && npm run testnet:create && npm run testnet:deploy",
 
         "mainnet-staging:codegen": "cross-env NETWORK=mainnet.staging npm run mustache && graph codegen",
         "mainnet-staging:build": "npm run mainnet-staging:codegen && graph build",
@@ -30,7 +30,7 @@
         "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && npm run deploy-satsuma spool-v2",
         "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && npm run deploy-studio spool-v2_mainnet",
 
-        "full-deployment": "npm run staging:deploy-all && npm run testing:deploy-all && npm run mainnet-staging:deploy-satsuma && npm run mainnet-prod:deploy-satsuma && npm run mainnet-prod:deploy-studio"
+        "full-deployment": "npm run testnet:deploy-all && npm run mainnet-staging:deploy-satsuma && npm run mainnet-prod:deploy-satsuma && npm run mainnet-prod:deploy-studio"
     },
     "author": "Spool DAO",
     "license": "MIT",
