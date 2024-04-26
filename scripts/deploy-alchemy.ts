@@ -9,15 +9,11 @@ dotenv.config();
     }
     const subgraphName = process.argv[2];
 
-    const accessTokenStudio = getEnvVar('ACCESS_TOKEN_STUDIO');
+    const accessTokenAlchemy = getEnvVar('ACCESS_TOKEN_ALCHEMY');
     const versionLabel = await getVersionLabel();
 
-    const studioKey = `${accessTokenStudio.slice(0, 6)}-${accessTokenStudio.slice(-6)}`;
-
-    const authCommand = `graph auth --studio '${studioKey}'`;
-    const deployCommand = `graph deploy ${subgraphName} --version-label ${versionLabel} --deploy-key ${accessTokenStudio} --studio`;
     const commands = [ 
-        `${authCommand} && ${deployCommand}` 
+        `graph deploy ${subgraphName} --version-label ${versionLabel} --node https://subgraphs.alchemy.com/api/subgraphs/deploy --deploy-key ${accessTokenAlchemy} --ipfs https://ipfs.satsuma.xyz` 
     ];
     await executeCommands(commands);
 })();

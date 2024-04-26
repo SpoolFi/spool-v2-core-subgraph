@@ -1,0 +1,17 @@
+{
+    "network": "arbitrum-one",
+    "startBlock": "202580919",
+    "url": "{{{ rpc }}}",
+    "strategyRegistry": "0x2Db7088637Db8709307a1e606AA5081521388CF6",
+    "spoolAccessControl": "0xFE3a45d8d3A5aB30AbAe36bC098783d08301ecd7",
+    "assetGroupRegistry": "0x68258d69b666dd947D7dDa797b112113615E02f6",
+    "riskManager": "0xac824D90d631452538dA8810BFe1Dd9BfbA77788",
+    "smartVaultManager": "0xfcc6132d10FcfB2568299b23E6dfB4aed30aFafa",
+    "rewardManager": "0x6316e9D4501B34FFFb231Cc9d1c7499ABEbbbE92",
+    "depositManager": "0xed39BF314cF89dE2eDFaeefe4eA2B9Ce178b0C91",
+    "withdrawalManager": "0x1F31d1DC2951b5EeB2Ec1f1e3afAbb5a830e68B0",
+    "guardManager": "0x85682645410e510E87f62c91f224DA5b476eC98E",
+    "ghostStrategy": "0xFB9B9EA590985A9286a0C6fb49641F0106608f03",
+    "smartVaultFactory": "0xA21E327d739601FCD3e0Aa4B864E7E1aF93b531A",
+    "smartVaultFactoryHpf": "0x8e1F2177AdcA17b96822D132279B17083dCd67d9"
+}

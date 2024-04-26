@@ -20,6 +20,14 @@ import {
 import {BTokenContract} from "../../generated/AssetGroupRegistry/BTokenContract";
 import {BTokenBytesContract} from "../../generated/AssetGroupRegistry/BTokenBytesContract";
 
+
+export let SECONDS_IN_HOUR = 3600;
+export let WEEKS_IN_YEAR = 52;
+export let SECONDS_IN_DAY = SECONDS_IN_HOUR * 24;
+export let SECONDS_IN_WEEK = SECONDS_IN_DAY * 7;
+export let SECONDS_IN_YEAR = SECONDS_IN_WEEK * WEEKS_IN_YEAR;
+export let SECONDS_IN_MONTH = SECONDS_IN_YEAR / 12;
+
 export const ZERO_BD = BigDecimal.fromString("0");
 export const ZERO_BI = BigInt.fromI32(0);
 export const ONE_BI = BigInt.fromI32(1);

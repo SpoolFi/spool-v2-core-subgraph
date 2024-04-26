@@ -7,3 +7,5 @@ subgraph.yaml
 docker-compose.yml
 src/utils/helpers.ts
 .env
+src/config/*.json
+!src/config/*.template.json

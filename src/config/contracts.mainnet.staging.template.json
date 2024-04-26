@@ -1,7 +1,7 @@
 {
     "network": "mainnet",
     "startBlock": "17837406",
-    "url": "",
+    "url": "{{{ rpc }}}",
     "strategyRegistry": "0x2d66DFf7205A743c4c1Ea1058998F87D19234058",
     "spoolAccessControl": "0x3E95575c3D6D91eF2f7DD139B1A799eDf6A8d88b",
     "assetGroupRegistry": "0xa70C97c4BE25B8fEDaD6C328492e9334dEa8dbE3",

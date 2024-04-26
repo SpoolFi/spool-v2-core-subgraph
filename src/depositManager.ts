@@ -28,7 +28,8 @@ import {
 } from "./utils/helpers";
 import { getSmartVaultFlush } from "./smartVaultManager";
 import {getUserSmartVault} from "./rewardManager";
-import {setAnalyticsUserDeposit, setAnalyticsUserDepositNFTBurn} from "./userAnalytics";
+import {setAnalyticsUserDeposit, setAnalyticsUserDepositNFTBurn} from "./analyticsUser";
+import {updateVaultAnalytics} from "./analyticsVault";
 
 export function handleDepositInitiated(event: DepositInitiated): void {
     logEventName("handleDepositInitiated", event);
@@ -43,6 +44,7 @@ export function handleDepositInitiated(event: DepositInitiated): void {
     dNFT.smartVaultFlush = smartVaultFlush.id;
     dNFT.createdOn = event.block.timestamp;
     dNFT.blockNumber = event.block.number.toI32();
+    dNFT.txHash = event.transaction.hash.toHexString();
 
     const assetGroup = AssetGroup.load(smartVault.assetGroup)!;
 
@@ -95,12 +97,17 @@ export function handleSmartVaultFeesMinted(event: SmartVaultFeesMinted): void {
     let smartVaultFees = getSmartVaultFees(event.params.smartVault.toHexString());
 
     let feesCollected = event.params.smartVaultFeesCollected;
+    let timestamp = event.block.timestamp.toI32();
+    let smartVault = getSmartVault(event.params.smartVault.toHexString());
 
     smartVaultFees.depositFeeMinted = smartVaultFees.depositFeeMinted.plus(feesCollected.depositFees);
+    updateVaultAnalytics(smartVault, timestamp, "depositFees", feesCollected.depositFees);
 
     smartVaultFees.performanceFeeMinted = smartVaultFees.performanceFeeMinted.plus(feesCollected.performanceFees);
+    updateVaultAnalytics(smartVault, timestamp, "performanceFees", feesCollected.performanceFees);
 
     smartVaultFees.managementFeeMinted = smartVaultFees.managementFeeMinted.plus(feesCollected.managementFees);
+    updateVaultAnalytics(smartVault, timestamp, "managementFees", feesCollected.managementFees);
 
     smartVaultFees.save();
 }
@@ -124,6 +131,7 @@ export function getSmartVaultDepositNFT(smartVaultAddress: string, nftId: BigInt
         dNFT.transferCount = 0;
         dNFT.createdOn = ZERO_BI;
         dNFT.blockNumber = 0;
+        dNFT.txHash = "";
         dNFT.burnedOn = 0;
 
         dNFT.save();

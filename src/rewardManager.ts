@@ -16,7 +16,7 @@ import {
     UserSmartVaultRewardToken,
     UserSmartVaultRewardTokenCycle,
 } from "../generated/schema";
-import {setAnalyticsUserRewardClaim} from "./userAnalytics";
+import {setAnalyticsUserRewardClaim} from "./analyticsUser";
 
 import {
     createTokenEntity,

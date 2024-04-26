@@ -1,11 +1,12 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, ethereum } from "@graphprotocol/graph-ts";
 import {Transfer, TransferBatch, TransferSingle} from "../generated/SmartVaultManager/SmartVaultContract";
 
-import { SmartVault, SmartVaultDepositNFTTransfer, SmartVaultDepositNFT, SmartVaultWithdrawalNFT, SmartVaultWithdrawalNFTTransfer, SVTTransfer, Transaction } from "../generated/schema";
+import { SmartVaultDepositNFTTransfer, SmartVaultDepositNFT, SmartVaultWithdrawalNFT, SmartVaultWithdrawalNFTTransfer, SVTTransfer, Transaction, User } from "../generated/schema";
 import {
     MAXIMAL_DEPOSIT_ID,
     ZERO_ADDRESS,
     ZERO_BD,
+    ZERO_BI,
     getSmartVault,
     getUser,
     logEventName,
@@ -13,7 +14,7 @@ import {
 import {getSmartVaultDepositNFT} from "./depositManager";
 import {getSmartVaultWithdrawalNFT} from "./withdrawalManager";
 import {getUserSmartVault} from "./rewardManager";
-import {setAnalyticsUserDepositNFTTransfer, setAnalyticsUserSVTTransfer, setAnalyticsUserWithdrawalNFTTransfer} from "./userAnalytics";
+import {setAnalyticsUserDepositNFTTransfer, setAnalyticsUserSVTTransfer, setAnalyticsUserWithdrawalNFTTransfer} from "./analyticsUser";
 
 
 export function handleTransfer(event: Transfer): void {
@@ -66,28 +67,45 @@ export function handleTransfer(event: Transfer): void {
 export function handleTransferSingle(event: TransferSingle): void {
     logEventName("handleTransferSingle", event);
 
-    let smartVault = getSmartVault( event.address.toHexString() );
-    let from = event.params.from.toHexString();
-    let to = event.params.to.toHexString();
-    let timestamp = event.block.timestamp.toI32();
     let id = event.params.id;
+    let from = getUser( event.params.from.toHexString() );
+    let to = getUser( event.params.to.toHexString() );
+    _updateNFT(event, from, to, id);
+}
 
-    _updateNFT(smartVault, from, to, id);
+export function handleTransferBatch(event: TransferBatch): void {
+    logEventName("handleTransferBatch", event);
+
+    for (let i = 0; i < event.params.ids.length; i++) {
+        let id = event.params.ids[i];
+        let from = getUser( event.params.from.toHexString() );
+        let to = getUser( event.params.to.toHexString() );
+        _updateNFT(event, from, to, id);
+    }
+}
+
+function _updateNFT(event: ethereum.Event, from: User, to: User, id: BigInt): void {
+
+    let smartVault = getSmartVault( event.address.toHexString() );
+    let timestamp = event.block.timestamp.toI32();
+    let isBurned = to.id == ZERO_ADDRESS.toHexString();
 
     // add transfer
     if(id.le(MAXIMAL_DEPOSIT_ID)){
 
         let smartVaultDepositNFT = getSmartVaultDepositNFT(smartVault.id, id);
+        if(!isBurned) smartVaultDepositNFT.owner = to.id;
         let transferCount = smartVaultDepositNFT.transferCount;
 
         let smartVaultDepositNFTTransfer = getSmartVaultDepositNFTTransfer(
             smartVaultDepositNFT, transferCount
         );
 
-        smartVaultDepositNFTTransfer.from = getUser(from).id;
-        smartVaultDepositNFTTransfer.to = getUser(to).id;
+        smartVaultDepositNFTTransfer.from = from.id;
+        smartVaultDepositNFTTransfer.to = to.id;
         smartVaultDepositNFTTransfer.timestamp = timestamp;
         smartVaultDepositNFTTransfer.blockNumber = event.block.number.toI32();
+        smartVaultDepositNFTTransfer.amount = smartVaultDepositNFT.shares;
         smartVaultDepositNFTTransfer.save();
 
         smartVaultDepositNFT.transferCount = transferCount + 1;
@@ -97,56 +115,24 @@ export function handleTransferSingle(event: TransferSingle): void {
     }else {
 
         let smartVaultWithdrawalNFT = getSmartVaultWithdrawalNFT(smartVault.id, id);
+        if(!isBurned) smartVaultWithdrawalNFT.owner = to.id;
         let transferCount = smartVaultWithdrawalNFT.transferCount;
 
         let smartVaultWithdrawalNFTTransfer = getSmartVaultWithdrawalNFTTransfer(
             smartVaultWithdrawalNFT, transferCount
         );
 
-        smartVaultWithdrawalNFTTransfer.from = from;
-        smartVaultWithdrawalNFTTransfer.to = to;
+        smartVaultWithdrawalNFTTransfer.from = from.id;
+        smartVaultWithdrawalNFTTransfer.to = to.id;
         smartVaultWithdrawalNFTTransfer.timestamp = timestamp;
         smartVaultWithdrawalNFTTransfer.blockNumber = event.block.number.toI32();
+        smartVaultWithdrawalNFTTransfer.amount = smartVaultWithdrawalNFT.shares;
         smartVaultWithdrawalNFTTransfer.save();
         
         smartVaultWithdrawalNFT.transferCount = transferCount + 1;
         smartVaultWithdrawalNFT.save();
 
         setAnalyticsUserWithdrawalNFTTransfer(event, smartVaultWithdrawalNFTTransfer);
-    }
-
-}
-
-export function handleTransferBatch(event: TransferBatch): void {
-    logEventName("handleTransferBatch", event);
-
-    let smartVault = getSmartVault( event.address.toHexString() );
-    let from = event.params.from.toHexString();
-    let to = event.params.to.toHexString();
-
-    for (let i = 0; i < event.params.ids.length; i++) {
-        let id = event.params.ids[i];
-        _updateNFT(smartVault, from, to, id);
-    }
-}
-
-function _updateNFT(smartVault: SmartVault, from: string, to: string, id: BigInt): void {
-    // let isCreated = (from == ZERO_ADDRESS.toHexString()) ? true : false;
-    let isBurned = to == ZERO_ADDRESS.toHexString();
-    // let fromUser = getUser(from).id;
-    // let toUser = getUser(to).id;
-    if(id.le(MAXIMAL_DEPOSIT_ID)){
-        let smartVaultDepositNFT = getSmartVaultDepositNFT(smartVault.id, id);
-        // if(isCreated) smartVaultDepositNFT.user = fromUser;
-        if(!isBurned) smartVaultDepositNFT.owner = getUser(to).id;
-        // smartVaultDepositNFT.isBurned = isBurned;
-        smartVaultDepositNFT.save();
-    } else {
-        let smartVaultWithdrawalNFT = getSmartVaultWithdrawalNFT(smartVault.id, id);
-        // if(isCreated) smartVaultWithdrawalNFT.user = fromUser;
-        if(!isBurned) smartVaultWithdrawalNFT.owner = getUser(to).id;
-        // smartVaultWithdrawalNFT.isBurned = isBurned;
-        smartVaultWithdrawalNFT.save();
     }
 }
 
@@ -163,6 +149,7 @@ export function getSmartVaultDepositNFTTransfer(dNFT: SmartVaultDepositNFT, tran
         smartVaultDepositNFTTransfer.to = ZERO_ADDRESS.toHexString();
         smartVaultDepositNFTTransfer.timestamp = 0;
         smartVaultDepositNFTTransfer.blockNumber = 0;
+        smartVaultDepositNFTTransfer.amount = ZERO_BI;
 
         smartVaultDepositNFTTransfer.save();
     }
@@ -184,6 +171,7 @@ export function getSmartVaultWithdrawalNFTTransfer(wNFT: SmartVaultWithdrawalNFT
         smartVaultWithdrawalNFTTransfer.to = ZERO_ADDRESS.toHexString();
         smartVaultWithdrawalNFTTransfer.timestamp = 0;
         smartVaultWithdrawalNFTTransfer.blockNumber = 0;
+        smartVaultWithdrawalNFTTransfer.amount = ZERO_BI;
 
         smartVaultWithdrawalNFTTransfer.save();
     }

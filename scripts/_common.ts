@@ -22,3 +22,19 @@ export async function getVersionLabel(): Promise<string> {
 
     return versionLabel;
 }
+
+export async function executeCommands(commands: string[]): Promise<void> {
+    for(let command of commands) {
+        const stdout = await run(command);
+        console.log(stdout);
+    }
+}
+
+function run(command : string) {
+  return new Promise((resolve, reject) => {
+    exec(command, (err, stdout, _) => {
+      if (err) return reject(err) 
+      resolve(stdout)
+    })
+  })
+}

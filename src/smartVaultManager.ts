@@ -6,7 +6,7 @@ import {SmartVaultFlush, SmartVaultStrategy, StrategyDHW, StrategyReallocation} 
 import { getGhostStrategy, getStrategy, getStrategyDHW, getStrategyDHWAssetDeposit } from "./strategyRegistry";
 import {SmartVault} from "../generated/templates";
 import {StrategyRegistryContract} from "../generated/StrategyRegistry/StrategyRegistryContract";
-import {getAssetGroup, getAssetGroupToken, getAssetGroupTokenById} from "./assetGroupRegistry";
+import {getAssetGroup, getAssetGroupTokenById} from "./assetGroupRegistry";
 import {STRATEGY_REGISTRY_ADDRESS, ZERO_BI, createTokenEntity, getArrayFromUint16a16, getComposedId, getSmartVault, getSmartVaultFees, logEventName, percenti32ToDecimal} from "./utils/helpers";
 
 export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
@@ -29,11 +29,13 @@ export function handleSmartVaultRegistered(event: SmartVaultRegistered): void {
     let strategyAllocation = event.params.registrationForm.strategyAllocation;
 
     let allocationMask = BigInt.fromI32(2 ** 16 - 1);
+    let index = 0;
     for (let i = 0; i < strategies.length; i++) {
         let smartVaultStrategy = getSmartVaultStrategy(smartVault.id, strategies[i].toHexString());
 
         let allocation = strategyAllocation.rightShift(u8(i * 16)).bitAnd(allocationMask);
         smartVaultStrategy.allocation = allocation;
+        smartVaultStrategy.index = index++;
 
         smartVaultStrategy.save();
 
@@ -222,6 +224,7 @@ export function getSmartVaultStrategy(
         smartVaultStrategy.strategy = strategyAddress;
         smartVaultStrategy.allocation = ZERO_BI;
         smartVaultStrategy.isRemoved = false;
+        smartVaultStrategy.index = 0;
         smartVaultStrategy.save();
     }
 

@@ -1,6 +1,6 @@
-import { Transfer } from "../generated/StrategyRegistry/StrategyContract";
+import { PlatformFeesCollected, Transfer } from "../generated/StrategyRegistry/StrategyContract";
 import { StrategyUser, StrategyUserStrategy } from "../generated/schema";
-import { getStrategy } from "./strategyRegistry";
+import { getStrategy, getStrategyDHW } from "./strategyRegistry";
 import { ZERO_ADDRESS, ZERO_BI, getComposedId, logEventName } from "./utils/helpers";
 
 export function getStrategyUser(strategyUserAddress: string): StrategyUser {
@@ -65,3 +65,22 @@ export function handleTransfer(event: Transfer): void {
 
     strategy.save();
 }
+
+export function handlePlatformFeesCollected(event: PlatformFeesCollected): void {
+    logEventName("handlePlatformFeesCollected", event);
+
+    let strategy = getStrategy(event.address.toHexString());
+    let strategyDHW = getStrategyDHW(strategy.id, strategy.index);
+
+    let sharesMinted = event.params.sharesMinted;
+    
+    strategy.totalPlatformFeesCollected = strategy.totalPlatformFeesCollected.plus(sharesMinted);
+    strategyDHW.platformFeesCollected = sharesMinted;
+    
+    strategy.save();
+    strategyDHW.save();
+}
+
+
+
+

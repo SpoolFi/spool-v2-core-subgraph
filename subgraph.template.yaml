@@ -44,6 +44,8 @@ dataSources:
           handler: handleTreasuryFeeReceiverSet
         - event: StrategySharesRedeemed(indexed address,indexed address,indexed address,uint256,uint256[])
           handler: handleStrategySharesRedeemed
+        - event: StrategySharesFastRedeemed(indexed address,uint256,uint256[])
+          handler: handleStrategySharesFastRedeemed
   - kind: ethereum/contract
     name: RiskManager
     network: {{ network }}
@@ -146,6 +148,26 @@ dataSources:
         - event: SmartVaultDeployed(indexed address,indexed address)
           handler: handleSmartVaultDeployed
   - kind: ethereum/contract
+    name: SmartVaultFactoryHpf
+    network: {{ network }}
+    source:
+      address: '{{ smartVaultFactoryHpf }}'
+      abi: SmartVaultFactoryHpfContract
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/smartVaultFactoryHpf.ts
+      entities:
+        - SmartVault
+      abis:
+        - name: SmartVaultFactoryHpfContract
+          file: ./abis/SmartVaultFactoryHpf.json
+      eventHandlers:
+        - event: SmartVaultDeployed(indexed address,indexed address)
+          handler: handleSmartVaultDeployed
+  - kind: ethereum/contract
     name: SmartVaultManager
     network: {{ network }}
     source:
@@ -230,6 +252,8 @@ dataSources:
       abis:
         - name: WithdrawalManagerContract
           file: ./abis/WithdrawalManager.json
+        - name: StrategyRegistryContract
+          file: ./abis/StrategyRegistry.json
       eventHandlers:
         - event: RedeemInitiated(indexed address,indexed address,indexed uint256,uint256,uint256,address)
           handler: handleRedeemInitiated
@@ -337,6 +361,10 @@ templates:
       abis:
         - name: StrategyContract
           file: ./abis/IStrategy.json
+        - name: StrategyRegistryContract
+          file: ./abis/StrategyRegistry.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
+        - event: PlatformFeesCollected(indexed address,uint256)
+          handler: handlePlatformFeesCollected

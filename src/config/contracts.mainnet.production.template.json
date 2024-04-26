@@ -1,7 +1,7 @@
 {
     "network": "mainnet",
     "startBlock": "17882726",
-    "url": "",
+    "url": "{{{ rpc }}}",
     "strategyRegistry": "0x554c6bCB54656390aca0a0af38CA954dbE653F15",
     "spoolAccessControl": "0x7b533e72E0cDC63AacD8cDB926AC402b846Fbd13",
     "assetGroupRegistry": "0x1Aa2a802BA25669531Ffd2b1fF8ae94f3D87f41A",
@@ -12,5 +12,6 @@
     "withdrawalManager": "0xC62AD2C374D6537E286a06F4d6301DA6cd9C6D0a",
     "guardManager": "0xB8c204e858AA420eb5a57599dA86fFD6375da6a8",
     "ghostStrategy": "0xc65c1df280AC96535e56B0e7ac12fE0860b19411",
-    "smartVaultFactory": "0x8049Fc710D4a1Deea6a6bCeF772C166CEd7A82F5"
+    "smartVaultFactory": "0x8049Fc710D4a1Deea6a6bCeF772C166CEd7A82F5",
+    "smartVaultFactoryHpf": "0x362599Cdc123e3FFEB7c0812d769128D180667E8"
 }

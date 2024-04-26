@@ -4,8 +4,9 @@
     "description": "Spool V2 Subgraph",
     "scripts": {
         "mustache": "ts-node scripts/mustache.ts",
-        "deploy-hosted": "ts-node scripts/deploy-hosted.ts",
-        "deploy-satsuma": "ts-node scripts/deploy-satsuma.ts",
+        "create-deploy-arbitrum-testing": "ts-node scripts/create-deploy-arbitrum-testing.ts",
+        "create-deploy-mainnet-testing": "ts-node scripts/create-deploy-mainnet-testing.ts",
+        "deploy-alchemy": "ts-node scripts/deploy-alchemy.ts",
         "deploy-studio": "ts-node scripts/deploy-studio.ts",
 
         "local:clean": "rimraf docker-compose.yml subgraph.yaml src/utils/helpers.ts build/ generated/ data/",
@@ -15,22 +16,24 @@
         "local:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
         "local:deploy:fresh": "npm run local:build && npm run local:create && graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://localhost:5001 --node http://127.0.0.1:8020 -l 1.0",
 
-        "testnet:codegen": "cross-env NETWORK=testnet-5 npm run mustache && graph codegen",
-        "testnet:build": "npm run testnet:codegen && graph build",
-        "testnet:create": "graph create spool/core-v2 --node http://35.159.49.24:8020",
-        "testnet:deploy": "graph deploy --product hosted-service spool/core-v2 subgraph.yaml --ipfs http://35.159.49.24:5001 --node http://35.159.49.24:8020 -l 1.0",
-        "testnet:deploy-all": "npm run testnet:build && npm run testnet:create && npm run testnet:deploy",
+        "arbitrum-testing:codegen": "cross-env NETWORK=arbitrum.testing npm run mustache && graph codegen",
+        "arbitrum-testing:build": "npm run arbitrum-testing:codegen && graph build",
+        "arbitrum-testing:create": "npm run create-deploy-arbitrum-testing",
+        "arbitrum-testing:deploy-all": "npm run arbitrum-testing:build && npm run create-deploy-arbitrum-testing",
+
+        "mainnet-testing:codegen": "cross-env NETWORK=mainnet.testing npm run mustache && graph codegen",
+        "mainnet-testing:build": "npm run mainnet-testing:codegen && graph build",
+        "mainnet-testing:create": "npm run create-deploy-mainnet-testing",
+        "mainnet-testing:deploy-all": "npm run mainnet-testing:build && npm run create-deploy-mainnet-testing",
 
         "mainnet-staging:codegen": "cross-env NETWORK=mainnet.staging npm run mustache && graph codegen",
         "mainnet-staging:build": "npm run mainnet-staging:codegen && graph build",
-        "mainnet-staging:deploy-satsuma": "npm run mainnet-staging:build && npm run deploy-satsuma spool-v2-staging",
+        "mainnet-staging:deploy-alchemy": "npm run mainnet-staging:build && npm run deploy-alchemy spool-v2-staging",
 
         "mainnet-prod:codegen": "cross-env NETWORK=mainnet.production npm run mustache && graph codegen",
         "mainnet-prod:build": "npm run mainnet-prod:codegen && graph build",
-        "mainnet-prod:deploy-satsuma": "npm run mainnet-prod:build && npm run deploy-satsuma spool-v2",
-        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && npm run deploy-studio spool-v2_mainnet",
-
-        "full-deployment": "npm run testnet:deploy-all && npm run mainnet-staging:deploy-satsuma && npm run mainnet-prod:deploy-satsuma && npm run mainnet-prod:deploy-studio"
+        "mainnet-prod:deploy-alchemy": "npm run mainnet-prod:build && npm run deploy-alchemy spool-v2",
+        "mainnet-prod:deploy-studio": "npm run mainnet-prod:build && npm run deploy-studio spool-v2"
     },
     "author": "Spool DAO",
     "license": "MIT",

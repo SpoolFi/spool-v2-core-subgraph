@@ -14,7 +14,7 @@ import {
     logEventName,
     strategyRiskScoreToDecimal,
 } from "./utils/helpers";
-import {getStrategy} from "./strategyRegistry";
+import {getStrategy, strategyContractExists} from "./strategyRegistry";
 
 export function handleRiskScoresUpdated(event: RiskScoresUpdated): void {
     logEventName("handleRiskScoresUpdated", event);
@@ -23,7 +23,12 @@ export function handleRiskScoresUpdated(event: RiskScoresUpdated): void {
     let riskScores = event.params.riskScores;
 
     for (let i = 0; i < riskScores.length; i++) {
-        let strategy = getStrategy(strategies[i].toHexString());
+        let strategyAddress = strategies[i].toHexString();
+        // prevent accidental risk score addition for non-strategy contracts
+        if(!strategyContractExists(strategyAddress)) {
+            continue;
+        }
+        let strategy = getStrategy(strategyAddress);
         let strategyRiskScore = getStrategyRiskScore(
             strategy.id,
             event.params.riskProvider.toHexString()

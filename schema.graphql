@@ -45,6 +45,7 @@ type SmartVaultStrategy @entity {
     strategy: Strategy!
     allocation: BigInt!
     isRemoved: Boolean!
+    index: Int!
 }
 
 type SmartVaultFastRedeem @entity {
@@ -55,6 +56,32 @@ type SmartVaultFastRedeem @entity {
     blockNumber: Int!
     createdOn: Int!
     svtWithdrawn: BigInt!
+    assetsWithdrawn: [SmartVaultFastRedeemAsset!]! @derivedFrom(field: "smartVaultFastRedeem")
+}
+
+type SmartVaultFastRedeemAsset @entity {
+    id: ID! # set to ${smartVaultFastRedeem.id}-${token.id}
+    smartVaultFastRedeem: SmartVaultFastRedeem!
+    asset: Token!
+    claimed: BigDecimal!
+}
+
+type StrategyFastRedeem @entity {
+    id: ID! # set to ${strategy.id}-count
+    strategy: Strategy!
+    count: Int!
+    user: User
+    blockNumber: BigInt!
+    createdOn: BigInt!
+    sstWithdrawn: BigInt!
+    withdrawnAssets: [StrategyFastRedeemAsset!]! @derivedFrom(field: "strategyFastRedeem")
+}
+
+type StrategyFastRedeemAsset @entity {
+    id: ID! # set to ${strategyFastRedeem.id}-${token.id}
+    strategyFastRedeem: StrategyFastRedeem!
+    asset: Token!
+    claimed: BigDecimal!
 }
 
 type SmartVaultFees @entity {
@@ -127,6 +154,7 @@ type SmartVaultDepositNFT @entity {
     isBurned: Boolean!
     createdOn: BigInt!
     blockNumber: Int!
+    txHash: String!
     transferCount: Int!
     burnedOn: Int!
     transfers: [SmartVaultDepositNFTTransfer!]! @derivedFrom(field: "dNFT")
@@ -144,6 +172,7 @@ type SmartVaultWithdrawalNFT @entity {
     isBurned: Boolean!
     createdOn: BigInt!
     blockNumber: Int!
+    txHash: String!
     transferCount: Int!
     burnedOn: Int!
     assetsWithdrawn: [SmartVaultWithdrawalNFTAsset!]! @derivedFrom(field: "smartVaultWithdrawalNFT")
@@ -198,6 +227,7 @@ type SmartVaultDepositNFTTransfer @entity {
     to: User!
     timestamp: Int!
     blockNumber: Int!
+    amount: BigInt!
 }
 
 type SmartVaultWithdrawalNFTTransfer @entity {
@@ -208,6 +238,7 @@ type SmartVaultWithdrawalNFTTransfer @entity {
     to: User!
     timestamp: Int!
     blockNumber: Int!
+    amount: BigInt!
 }
 
 type Token @entity {
@@ -240,11 +271,15 @@ type Strategy @entity {
     index: Int!
     lastDoHardWorkTime: BigInt!
     lastDoHardWorkIndex: Int!
+    lastDoHardWorkBlock: Int!
     isRemoved: Boolean!
     isGhost: Boolean!
     addedOn: BigInt!
     addedOnBlock: BigInt!
     sstTotalSupply: BigInt!
+    totalPlatformFeesCollected: BigInt!
+    fastRedeemCount: Int!
+    fastRedeems: [StrategyFastRedeem!]! @derivedFrom(field: "strategy")
     riskScores: [StrategyRiskScore!]! @derivedFrom(field: "strategy")
     strategyDHWs: [StrategyDHW!]! @derivedFrom(field: "strategy")
 }
@@ -262,6 +297,7 @@ type StrategyDHW @entity {
     sharesRedeemed: BigInt!
     fastRedeemCount: Int!
     reallocationCount: Int!
+    platformFeesCollected: BigInt!
     assetsDeposited: [StrategyDHWAssetDeposit!]! @derivedFrom(field: "strategyDHW")
     fastRedeems: [FastRedeem!]! @derivedFrom(field: "strategyDHW")
     reallocations: [StrategyReallocation!]! @derivedFrom(field: "strategyDHW")
@@ -418,8 +454,7 @@ type SmartVaultToGuard @entity {
 }
 
 
-################# Analytics
-
+################# Start User Analytics #################
 type AnalyticsUser @entity {
     id: ID! # set to user.id-count
     user: User!
@@ -507,3 +542,28 @@ type AnalyticsUserTypeToken @entity {
     token: Token!
     amount: BigDecimal!
 }
+################# End User Analytics #################
+
+################# Start Vault Analytics #################
+enum PeriodType {
+    HOURLY
+    DAILY
+    WEEKLY
+    MONTHLY
+    YEARLY
+    TOTAL
+}
+
+type AnalyticsVault @entity {
+    id: ID! # set to `${smartVault}-(${periodType}-${startTimestamp}` || "TOTAL)"
+    smartVault: SmartVault!
+    periodType: PeriodType!
+    startTimestamp: Int!
+    performanceFees: BigInt!
+    performanceFeesTotal: BigInt!
+    depositFees: BigInt!
+    depositFeesTotal: BigInt!
+    managementFees: BigInt!
+    managementFeesTotal: BigInt!
+}
+################# End Vault Analytics #################

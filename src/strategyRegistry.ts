@@ -8,11 +8,12 @@ import {
     TreasuryFeeSet,
     EcosystemFeeReceiverSet,
     TreasuryFeeReceiverSet,
-    StrategySharesRedeemed
+    StrategySharesRedeemed,
+    StrategySharesFastRedeemed
 } from "../generated/StrategyRegistry/StrategyRegistryContract";
 import {StrategyContract} from "../generated/StrategyRegistry/StrategyContract";
 
-import {SSTRedemptionAsset, StrategyRegistry, Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token, User, Global} from "../generated/schema";
+import {SSTRedemptionAsset, StrategyRegistry, Strategy, StrategyDHW, StrategyDHWAssetDeposit, Token, User, Global, StrategyFastRedeem, StrategyFastRedeemAsset} from "../generated/schema";
 import {Strategy as StrategyTemplate} from "../generated/templates";
 import {ZERO_BD, ZERO_BI, strategyApyToDecimal, logEventName, getComposedId, GHOST_STRATEGY_ADDRESS, ZERO_ADDRESS, getUser, createTokenEntity, percenti32ToDecimal, percentToDecimal} from "./utils/helpers";
 
@@ -66,6 +67,7 @@ export function handleStrategyDhw(event: StrategyDhwEvent): void {
     let strategy = getStrategy(event.params.strategy.toHexString());
     strategy.lastDoHardWorkTime = event.block.timestamp;
     strategy.lastDoHardWorkIndex = event.params.dhwIndex.toI32();
+    strategy.lastDoHardWorkBlock = event.block.number.toI32();
     strategy.index = strategy.index + 1;
     strategy.save();
 
@@ -138,9 +140,50 @@ export function handleStrategySharesRedeemed(event: StrategySharesRedeemed): voi
 
         let sstRedemptionAsset = getSSTRedemptionAsset(owner, asset);
 
-        sstRedemptionAsset.claimed = assetAmounts[i].toBigDecimal();
+        sstRedemptionAsset.claimed = sstRedemptionAsset.claimed.plus(assetAmounts[i].toBigDecimal());
         sstRedemptionAsset.save();
     }
+}
+
+export function handleStrategySharesFastRedeemed(event: StrategySharesFastRedeemed): void {
+    logEventName("handleStrategySharesFastRedeemed", event);
+
+    let strategy = getStrategy(event.params.strategy.toHexString());
+    let strategyFastRedeem = getStrategyFastRedeem(strategy, strategy.fastRedeemCount);
+
+    strategyFastRedeem.blockNumber = event.block.number;
+    strategyFastRedeem.createdOn = event.block.timestamp;
+    strategyFastRedeem.sstWithdrawn = event.params.shares;
+    strategyFastRedeem.save();
+
+    let assetGroup = getAssetGroup(strategy.assetGroup);
+    let assetAmounts = event.params.assetsWithdrawn;
+    let assetGroupTokens = assetGroup.assetGroupTokens;
+
+    for(let i = 0; i < assetGroupTokens.length; i++) {
+        let assetGroupToken = getAssetGroupTokenById(assetGroupTokens[i]);
+        let asset = createTokenEntity(assetGroupToken.token);
+        let strategyFastRedeemAsset = getStrategyFastRedeemAsset(strategyFastRedeem, asset);
+        strategyFastRedeemAsset.claimed = assetAmounts[i].toBigDecimal();
+        strategyFastRedeemAsset.save();
+    }
+
+    strategy.fastRedeemCount = strategy.fastRedeemCount + 1;
+    strategy.save();
+}
+
+export function strategyContractExists(strategyAddress: string): boolean {
+    let strategy = Strategy.load(strategyAddress);
+
+    if (strategy == null) {
+        let strategyContract = StrategyContract.bind(Address.fromString(strategyAddress));
+
+        strategy = new Strategy(strategyAddress);
+        let nameCall = strategyContract.try_strategyName();
+        return !nameCall.reverted;
+    }
+
+    return true;
 }
 
 export function getStrategy(strategyAddress: string): Strategy {
@@ -156,11 +199,14 @@ export function getStrategy(strategyAddress: string): Strategy {
         strategy.index = 1;
         strategy.lastDoHardWorkTime = ZERO_BI;
         strategy.lastDoHardWorkIndex = 0;
+        strategy.lastDoHardWorkBlock = 0;
         strategy.isRemoved = false;
         strategy.isGhost = false;
         strategy.addedOn = ZERO_BI;
         strategy.addedOnBlock = ZERO_BI;
         strategy.sstTotalSupply = ZERO_BI;
+        strategy.totalPlatformFeesCollected = ZERO_BI;
+        strategy.fastRedeemCount = 0;
         strategy.save();
     }
 
@@ -173,20 +219,21 @@ export function getGhostStrategy(): Strategy {
     let strategy = Strategy.load(strategyAddress);
 
     if (strategy == null) {
-        let strategyContract = StrategyContract.bind(Address.fromString(strategyAddress));
-
         strategy = new Strategy(strategyAddress);
-        strategy.name = strategyContract.strategyName();
-        strategy.assetGroup = strategyContract.assetGroupId().toString();
+        strategy.name = "Ghost strategy";
+        strategy.assetGroup = getAssetGroup("0").id;
         strategy.apy = ZERO_BD;
         strategy.index = 1;
         strategy.lastDoHardWorkTime = ZERO_BI;
         strategy.lastDoHardWorkIndex = 0;
+        strategy.lastDoHardWorkBlock = 0;
         strategy.isRemoved = false;
         strategy.isGhost = true;
         strategy.addedOn = ZERO_BI;
         strategy.addedOnBlock = ZERO_BI;
         strategy.sstTotalSupply = ZERO_BI;
+        strategy.totalPlatformFeesCollected = ZERO_BI;
+        strategy.fastRedeemCount = 0;
         strategy.save();
     }
 
@@ -208,6 +255,7 @@ export function getStrategyDHW(
         strategyDhw.sharesRedeemed = ZERO_BI;
         strategyDhw.fastRedeemCount = 0;
         strategyDhw.reallocationCount = 0;
+        strategyDhw.platformFeesCollected = ZERO_BI;
         strategyDhw.save();
     }
 
@@ -248,6 +296,42 @@ export function getStrategyRegistry(strategyRegistryAddress: string): StrategyRe
 
     return strategyRegistry;
 
+}
+
+export function getStrategyFastRedeem(strategy: Strategy, fastRedeemCount: i32): StrategyFastRedeem {
+
+    let strategyFastRedeemId = getComposedId(strategy.id, fastRedeemCount.toString());
+
+    let strategyFastRedeem = StrategyFastRedeem.load(strategyFastRedeemId);
+
+    if (strategyFastRedeem == null) {
+        strategyFastRedeem = new StrategyFastRedeem(strategyFastRedeemId);
+        strategyFastRedeem.strategy = strategy.id;
+        strategyFastRedeem.count = strategy.fastRedeemCount;
+        strategyFastRedeem.blockNumber = ZERO_BI;
+        strategyFastRedeem.createdOn = ZERO_BI;
+        strategyFastRedeem.sstWithdrawn = ZERO_BI;
+        strategyFastRedeem.save();
+    }
+
+    return strategyFastRedeem;
+}
+
+export function getStrategyFastRedeemAsset(strategyFastRedeem: StrategyFastRedeem, asset: Token): StrategyFastRedeemAsset {
+
+    let strategyFastRedeemAssetId = getComposedId(strategyFastRedeem.id, asset.id);
+
+    let strategyFastRedeemAsset = StrategyFastRedeemAsset.load(strategyFastRedeemAssetId);
+
+    if (strategyFastRedeemAsset == null) {
+        strategyFastRedeemAsset = new StrategyFastRedeemAsset(strategyFastRedeemAssetId);
+        strategyFastRedeemAsset.strategyFastRedeem = strategyFastRedeem.id;
+        strategyFastRedeemAsset.asset = asset.id;
+        strategyFastRedeemAsset.claimed = ZERO_BD;
+        strategyFastRedeemAsset.save();
+    }
+
+    return strategyFastRedeemAsset;
 }
 
 export function getSSTRedemptionAsset(user: User, asset: Token): SSTRedemptionAsset {

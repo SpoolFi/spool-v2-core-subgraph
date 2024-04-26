@@ -1,4 +1,4 @@
-import {BigInt} from "@graphprotocol/graph-ts";
+import {BigDecimal, BigInt} from "@graphprotocol/graph-ts";
 
 import {
     FastRedeemInitiated,
@@ -6,10 +6,10 @@ import {
 } from "../generated/WithdrawalManager/WithdrawalManagerContract";
 
 import {
-    AssetGroup,
     FastRedeem,
     SmartVault,
     SmartVaultFastRedeem,
+    SmartVaultFastRedeemAsset,
     SmartVaultFlush,
     SmartVaultStrategy,
     SmartVaultWithdrawalNFT,
@@ -27,19 +27,15 @@ import {
     getUser,
     NFT_INITIAL_SHARES,
     getSmartVault,
-    getAnalyticsUser,
-    getRedeemAnalyticsUserType,
-    getClaimAnalyticsUserType,
     createTokenEntity, 
     getTokenDecimalAmountFromAddress, 
-    getAnalyticsUserTypeToken,
     ZERO_BD
 } from "./utils/helpers";
-import { getSmartVaultFlush, getSmartVaultStrategy } from "./smartVaultManager";
-import {getStrategy, getStrategyDHW} from "./strategyRegistry";
+import { getSmartVaultFlush } from "./smartVaultManager";
+import {getSSTRedemptionAsset, getStrategy, getStrategyDHW, getStrategyFastRedeem, getStrategyFastRedeemAsset} from "./strategyRegistry";
 import {getSmartVaultDepositNFT} from "./depositManager";
-import {getAssetGroup, getAssetGroupToken, getAssetGroupTokenById} from "./assetGroupRegistry";
-import {setAnalyticsUserClaim, setAnalyticsUserFastRedeem, setAnalyticsUserRedeem, setAnalyticsUserWithdrawalNFTBurn} from "./userAnalytics";
+import {getAssetGroup, getAssetGroupTokenById} from "./assetGroupRegistry";
+import {setAnalyticsUserClaim, setAnalyticsUserFastRedeem, setAnalyticsUserRedeem, setAnalyticsUserWithdrawalNFTBurn} from "./analyticsUser";
 
 // newly added or endTime was reached and new rewards were added
 export function handleRedeemInitiated(event: RedeemInitiated): void {
@@ -59,6 +55,7 @@ export function handleRedeemInitiated(event: RedeemInitiated): void {
     wNFT.createdOn = event.block.timestamp;
     wNFT.svtWithdrawn = shares;
     wNFT.blockNumber = event.block.number.toI32();
+    wNFT.txHash = event.transaction.hash.toHexString();
 
     withdrawnVaultShares.shares = withdrawnVaultShares.shares.plus(shares);
 
@@ -78,8 +75,10 @@ export function handleWithdrawalClaimed(event: WithdrawalClaimed): void {
 export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
     logEventName("handleFastRedeemInitiated", event);
     let smartVaultAddress = event.params.smartVault.toHexString();
-    let user = event.params.redeemer.toHexString();
+    let user = getUser( event.params.redeemer.toHexString() );
     let shares = event.params.shares;
+
+    let assetsWithdrawn = event.params.assetsWithdrawn;
 
     // burnDepositNfts(smartVaultAddress, event.params.nftIds, event.params.nftAmounts, event.block.timestamp.toI32());
     let smartVault = getSmartVault(smartVaultAddress);
@@ -93,7 +92,7 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
 
        let fastRedeem = getFastRedeem(strategyDHW);
        fastRedeem.blockNumber = event.block.number.toI32();
-       fastRedeem.user = getUser(user).id;
+       fastRedeem.user = user.id;
        fastRedeem.smartVault = getSmartVault(smartVaultAddress).id;
        fastRedeem.createdOn = event.block.timestamp.toI32();
        fastRedeem.save();
@@ -101,15 +100,43 @@ export function handleFastRedeemInitiated(event: FastRedeemInitiated): void {
        strategyDHW.fastRedeemCount = strategyDHW.fastRedeemCount + 1;
        strategyDHW.save();
 
+       // add  user to strategyFastRedeem (StrategySharesRedeemed does not emit user, but this event follows it, and it does emit user).
+        let strategyFastRedeem = getStrategyFastRedeem(strategy, strategy.fastRedeemCount - 1);
+        strategyFastRedeem.user = user.id;
+        strategyFastRedeem.save();
+        
+        // add fast redeemed assets to total sst redemption assets
+        let assetGroup = getAssetGroup(strategy.assetGroup);
+        let assetGroupTokens = assetGroup.assetGroupTokens;
+        for(let i = 0; i < assetGroupTokens.length; i++) {
+            let assetGroupToken = getAssetGroupTokenById(assetGroupTokens[i]);
+            let asset = createTokenEntity(assetGroupToken.token);
+            let sstRedemptionAsset = getSSTRedemptionAsset(user, asset);
+            let strategyFastRedeemAsset = getStrategyFastRedeemAsset(strategyFastRedeem, asset);
+
+            sstRedemptionAsset.claimed = sstRedemptionAsset.claimed.plus(strategyFastRedeemAsset.claimed);
+            sstRedemptionAsset.save();
+        }
     }
     
     let smartVaultFastRedeem = getSmartVaultFastRedeem(smartVault);
     smartVaultFastRedeem.blockNumber = event.block.number.toI32();
-    smartVaultFastRedeem.user = getUser(user).id;
+    smartVaultFastRedeem.user = user.id;
     smartVaultFastRedeem.smartVault = getSmartVault(smartVaultAddress).id;
     smartVaultFastRedeem.createdOn = event.block.timestamp.toI32();
     smartVaultFastRedeem.svtWithdrawn = shares;
     smartVaultFastRedeem.save();
+
+    let assetGroup = getAssetGroup(smartVault.assetGroup);
+    let assetGroupTokens = assetGroup.assetGroupTokens;
+    for(let i = 0; i < assetGroupTokens.length; i++) {
+        let assetGroupToken = getAssetGroupTokenById(assetGroupTokens[i]);
+        let asset = createTokenEntity(assetGroupToken.token);
+        let smartVaultFastRedeemAsset = getSmartVaultFastRedeemAsset(smartVaultFastRedeem, asset);
+
+        smartVaultFastRedeemAsset.claimed = smartVaultFastRedeemAsset.claimed.plus(assetsWithdrawn[i].toBigDecimal());
+        smartVaultFastRedeemAsset.save();
+    }
 
     smartVault.fastRedeemCount = smartVault.fastRedeemCount + 1;
     smartVault.save();
@@ -127,6 +154,21 @@ function burnWithdrawalNfts(event: WithdrawalClaimed): void {
     let withdrawnAssets = event.params.withdrawnAssets; 
     let assetGroup = getAssetGroup(event.params.assetGroupId.toString()); 
     let assetGroupTokens = assetGroup.assetGroupTokens;
+    
+    let totalSvts = ZERO_BD;
+    let cumulativeAmounts = new Array<BigDecimal>();
+
+    // count total nft amounts
+    for (let i = 0; i < nftIds.length; i++) {
+        let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, nftIds[i]);
+        totalSvts = totalSvts.plus(wNFT.svtWithdrawn.toBigDecimal());
+    }
+
+    for(let i = 0; i < assetGroupTokens.length; i++) {
+        let token = createTokenEntity(assetGroupTokens[i].split("-")[1]);
+        let amount = getTokenDecimalAmountFromAddress(withdrawnAssets[i], token.id);
+        cumulativeAmounts.push(amount);
+    }
 
     for (let i = 0; i < nftIds.length; i++) {
         let wNFT = getSmartVaultWithdrawalNFT(smartVaultAddress, nftIds[i]);
@@ -142,16 +184,26 @@ function burnWithdrawalNfts(event: WithdrawalClaimed): void {
         wNFT.save();
 
         for(let j = 0; j < assetGroupTokens.length; j++) {
-        // second part of the id is the token address
+            // second part of the id is the token address
             let token = createTokenEntity(assetGroupTokens[j].split("-")[1]);
             let wNFTAsset = getSmartVaultWithdrawalNFTAsset(wNFT, token);
 
             let amount = getTokenDecimalAmountFromAddress(withdrawnAssets[j], token.id);
-            wNFTAsset.amount = wNFTAsset.amount.plus(amount);
+
+            if(amount.equals(ZERO_BD)) continue;
+
+            // calculate proportional asset amount based on svtWithdrawn and totalSvts
+            let proportionalAmount = amount.times(wNFT.svtWithdrawn.toBigDecimal()).div(totalSvts);
+            if(i == (nftIds.length - 1)) {
+                proportionalAmount = cumulativeAmounts[j];
+            }
+
+            cumulativeAmounts[j] = cumulativeAmounts[j].minus(proportionalAmount);
+
+            wNFTAsset.amount = wNFTAsset.amount.plus(proportionalAmount);
             wNFTAsset.save();
         }
     }
-
 }
 
 
@@ -187,6 +239,7 @@ export function getSmartVaultWithdrawalNFT(smartVaultAddress: string, nftId: Big
         wNFT.transferCount = 0;
         wNFT.createdOn = ZERO_BI;
         wNFT.blockNumber = 0;
+        wNFT.txHash = "";
         wNFT.burnedOn = 0;
 
         wNFT.save();
@@ -268,7 +321,19 @@ function getSmartVaultFastRedeem(smartVault: SmartVault): SmartVaultFastRedeem {
     return smartVaultFastRedeem;
 }
 
+function getSmartVaultFastRedeemAsset(smartVaultFastRedeem: SmartVaultFastRedeem, asset: Token): SmartVaultFastRedeemAsset {
+    let id = getComposedId(smartVaultFastRedeem.id, asset.id);
+    let smartVaultFastRedeemAsset = SmartVaultFastRedeemAsset.load(id);
 
+    if (smartVaultFastRedeemAsset == null) {
+        smartVaultFastRedeemAsset = new SmartVaultFastRedeemAsset(id);
+        smartVaultFastRedeemAsset.smartVaultFastRedeem = smartVaultFastRedeem.id;
+        smartVaultFastRedeemAsset.asset = asset.id;
+        smartVaultFastRedeemAsset.claimed = ZERO_BD;
 
+        smartVaultFastRedeemAsset.save();
+    }
 
+    return smartVaultFastRedeemAsset;
+}
 

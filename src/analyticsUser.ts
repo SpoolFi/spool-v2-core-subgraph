@@ -1,6 +1,6 @@
 import {DepositInitiated, SmartVaultTokensClaimed} from "../generated/DepositManager/DepositManagerContract";
 import {RewardsClaimed} from "../generated/RewardManager/RewardManagerContract";
-import {Transfer, TransferSingle} from "../generated/SmartVaultManager/SmartVaultContract";
+import {Transfer, TransferBatch, TransferSingle} from "../generated/SmartVaultManager/SmartVaultContract";
 import {FastRedeemInitiated, RedeemInitiated, WithdrawalClaimed} from "../generated/WithdrawalManager/WithdrawalManagerContract";
 import {AssetGroup, SVTTransfer, SmartVault, SmartVaultDepositNFT, SmartVaultDepositNFTTransfer, SmartVaultWithdrawalNFT, SmartVaultWithdrawalNFTTransfer, User, AnalyticsUser} from "../generated/schema";
 import {getSmartVaultDepositNFT} from "./depositManager";
@@ -169,10 +169,10 @@ export function setAnalyticsUserSVTTransfer(event: Transfer, svtTransfer: SVTTra
     user.save();
 }
 
-export function setAnalyticsUserDepositNFTTransfer(event: TransferSingle, smartVaultDepositNFTTransfer: SmartVaultDepositNFTTransfer): void {
+export function setAnalyticsUserDepositNFTTransfer(event: ethereum.Event,  smartVaultDepositNFTTransfer: SmartVaultDepositNFTTransfer): void {
     // set user analytics
     let smartVault = getSmartVault( event.address.toHexString() );
-    let user = getUser(event.params.from.toHexString());
+    let user = getUser(smartVaultDepositNFTTransfer.from);
 
     let analyticsUser = getAnalyticsUserDefault(user, event, smartVault);
 
@@ -188,10 +188,10 @@ export function setAnalyticsUserDepositNFTTransfer(event: TransferSingle, smartV
     user.save();
 }
 
-export function setAnalyticsUserWithdrawalNFTTransfer(event: TransferSingle, smartVaultWithdrawalNFTTransfer: SmartVaultWithdrawalNFTTransfer): void {
+export function setAnalyticsUserWithdrawalNFTTransfer(event: ethereum.Event, smartVaultWithdrawalNFTTransfer: SmartVaultWithdrawalNFTTransfer): void {
     // set user analytics
     let smartVault = getSmartVault( event.address.toHexString() );
-    let user = getUser(event.params.from.toHexString());
+    let user = getUser(smartVaultWithdrawalNFTTransfer.from);
 
     let analyticsUser = getAnalyticsUserDefault(user, event, smartVault);
 
